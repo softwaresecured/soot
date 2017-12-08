@@ -12,4 +12,5 @@
 /testclasses
 # Eclipse settings directory
 /.settings
-
+/target
+soot.iml
