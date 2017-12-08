@@ -523,14 +523,6 @@ app's manifest file. When combined with the 'force-android-jar' option, the JAR 
 			</long_desc>
 		</intopt>
 
-		<boolopt>
-			<name>Compute AST Metrics</name>
-			<alias>ast-metrics</alias>
-			<short_desc>Compute AST Metrics if performing java to jimple</short_desc>
-			<long_desc>
-			If this flag is set and soot converts java to jimple then AST metrics will be computed.
-	</long_desc>
-		</boolopt>
 		<multiopt>
 			<name>Input Source Precedence</name>
 			<alias>src-prec</alias>
@@ -667,15 +659,7 @@ overrides this default.
 </p>
 </long_desc>
 		</stropt>
-		<boolopt>
-			<name>Use Polyglot frontend</name>
-			<alias>polyglot</alias>
-			<default>false</default>
-			<short_desc>Use Java 1.4 Polyglot frontend instead of JastAdd</short_desc>
-			<long_desc>
-Use Java 1.4 Polyglot frontend instead of JastAdd, which supports Java 5 syntax.
-</long_desc>
-		</boolopt>
+
 		<boolopt>
 			<name>Use permissive resolving strategy</name>
 			<alias>permissive-resolving</alias>

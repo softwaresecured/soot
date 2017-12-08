@@ -18,7 +18,7 @@
  */
 
 /*
- * Modified by the Sable Research Group and others 1997-1999.  
+ * Modified by the Sable Research Group and others 1997-1999.
  * See the 'credits' file distributed with Soot for the complete list of
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
@@ -45,25 +45,24 @@ import soot.jimple.toolkits.annotation.arraycheck.Array2ndDimensionSymbol;
 import soot.jimple.toolkits.pointer.UnionFactory;
 import soot.jimple.toolkits.pointer.util.NativeHelper;
 import soot.jimple.toolkits.typing.ClassHierarchy;
-import soot.toolkits.astmetrics.ClassData;
 import soot.toolkits.scalar.Pair;
 
 /** A class to group together all the global variables in Soot. */
-public class G extends Singletons 
+public class G extends Singletons
 {
-    
+
     public static interface GlobalObjectGetter {
     	public G getG();
     	public void reset();
     }
-    
+
     public static G v() { return objectGetter.getG(); }
     public static void reset() { objectGetter.reset(); }
-    
+
     private static GlobalObjectGetter objectGetter = new GlobalObjectGetter() {
 
         private G instance = new G();
-        
+
 		@Override
 		public G getG() {
 			return instance;
@@ -74,7 +73,7 @@ public class G extends Singletons
 			instance = new G();
 		}
 	};
-	
+
 	public static void setGlobalObjectGetter(GlobalObjectGetter newGetter) {
 		objectGetter = newGetter;
 	}
@@ -109,16 +108,16 @@ public class G extends Singletons
     public int Timer_count;
     public final Map<Scene, ClassHierarchy> ClassHierarchy_classHierarchyMap = new HashMap<Scene, ClassHierarchy>();
     public final Map<MethodContext, MethodContext> MethodContext_map = new HashMap<MethodContext, MethodContext>();
-    
+
     public DalvikThrowAnalysis interproceduralDalvikThrowAnalysis = null;
     public DalvikThrowAnalysis interproceduralDalvikThrowAnalysis() {
     	if (this.interproceduralDalvikThrowAnalysis == null)
     		this.interproceduralDalvikThrowAnalysis = new DalvikThrowAnalysis(g, true);
     	return this.interproceduralDalvikThrowAnalysis;
     }
-    
+
     public boolean ASTTransformations_modified;
-    
+
     /*
      * 16th Feb 2006 Nomair
      * The AST transformations are unfortunately non-monotonic.
@@ -127,9 +126,9 @@ public class G extends Singletons
      * a separate flag...clumsy but works
      */
     public boolean ASTIfElseFlipped;
-    
-    
-    
+
+
+
     /*
      * Nomair A. Naeem January 15th 2006
      * Added For Dava.toolkits.AST.transformations.SuperFirstStmtHandler
@@ -139,9 +138,9 @@ public class G extends Singletons
      * were added by the decompiler (refer to filer SuperFirstStmtHandler)
      * SootMethodsAdded ArrayList contains these method. These
      * methods are then added to the SootClass
-     * 
-     * Some of these newly added methods make use of an object of 
-     * a static inner class DavaSuperHandler which is to be output 
+     *
+     * Some of these newly added methods make use of an object of
+     * a static inner class DavaSuperHandler which is to be output
      * in the decompilers
      * output. The class is marked to need a DavaSuperHandlerClass
      * by adding it into the SootClassNeedsDavaSuperHandlerClass list.
@@ -152,10 +151,7 @@ public class G extends Singletons
     public boolean SootMethodAddedByDava;
     public ArrayList<SootClass> SootClassNeedsDavaSuperHandlerClass = new ArrayList<SootClass>();
     public ArrayList<SootMethod> SootMethodsAdded = new ArrayList<SootMethod>();
-    
-    //ASTMetrics Data
-    public ArrayList<ClassData> ASTMetricsData = new ArrayList<ClassData>();
-    
+
     public void resetSpark() {
     	// We reset SPARK the hard way.
     	for (Method m : getClass().getSuperclass().getDeclaredMethods()) {
@@ -170,7 +166,7 @@ public class G extends Singletons
 					throw new RuntimeException(e);
 				}
     	}
-    	
+
     	// Reset some other stuff directly in this class
     	MethodPAG_methodToPag.clear();
     	MethodRWSet_allFields.clear();
@@ -178,10 +174,10 @@ public class G extends Singletons
     	newSetFactory = null;
     	oldSetFactory = null;
     	Parm_pairToElement.clear();
-    	
+
     	// We need to reset the virtual call resolution table
     	release_soot_jimple_toolkits_callgraph_VirtualCalls();
     }
-    
+
 }
 

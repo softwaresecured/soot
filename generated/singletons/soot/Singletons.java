@@ -1933,20 +1933,6 @@ public class Singletons {
     	instance_soot_SootResolver = null;
     }
 
-    private soot.javaToJimple.InitialResolver instance_soot_javaToJimple_InitialResolver;
-    public soot.javaToJimple.InitialResolver soot_javaToJimple_InitialResolver() {
-        if( instance_soot_javaToJimple_InitialResolver == null ) {
-	       	synchronized (this) {
-		        if( instance_soot_javaToJimple_InitialResolver == null )
-	        		instance_soot_javaToJimple_InitialResolver = new soot.javaToJimple.InitialResolver( g );
-	       	}
-       	}
-        return instance_soot_javaToJimple_InitialResolver;
-    }
-    protected void release_soot_javaToJimple_InitialResolver() {
-    	instance_soot_javaToJimple_InitialResolver = null;
-    }
-
     private soot.jimple.paddle.PaddleHook instance_soot_jimple_paddle_PaddleHook;
     public soot.jimple.paddle.PaddleHook soot_jimple_paddle_PaddleHook() {
         if( instance_soot_jimple_paddle_PaddleHook == null ) {
@@ -2101,18 +2087,18 @@ public class Singletons {
     	instance_soot_jimple_toolkits_thread_mhp_MhpTransformer = null;
     }
 
-    private soot.JastAddInitialResolver instance_soot_JastAddInitialResolver;
-    public soot.JastAddInitialResolver soot_JastAddInitialResolver() {
-        if( instance_soot_JastAddInitialResolver == null ) {
+    private soot.javaToJimple.ExtendJInitialResolver instance_soot_javaToJimple_ExtendJInitialResolver;
+    public soot.javaToJimple.ExtendJInitialResolver soot_javaToJimple_ExtendJInitialResolver() {
+        if( instance_soot_javaToJimple_ExtendJInitialResolver == null ) {
 	       	synchronized (this) {
-		        if( instance_soot_JastAddInitialResolver == null )
-	        		instance_soot_JastAddInitialResolver = new soot.JastAddInitialResolver( g );
+		        if( instance_soot_javaToJimple_ExtendJInitialResolver == null )
+	        		instance_soot_javaToJimple_ExtendJInitialResolver = new soot.javaToJimple.ExtendJInitialResolver( g );
 	       	}
        	}
-        return instance_soot_JastAddInitialResolver;
+        return instance_soot_javaToJimple_ExtendJInitialResolver;
     }
-    protected void release_soot_JastAddInitialResolver() {
-    	instance_soot_JastAddInitialResolver = null;
+    protected void release_soot_javaToJimple_ExtendJInitialResolver() {
+    	instance_soot_javaToJimple_ExtendJInitialResolver = null;
     }
 
     private soot.jimple.toolkits.annotation.j5anno.AnnotationGenerator instance_soot_jimple_toolkits_annotation_j5anno_AnnotationGenerator;

@@ -26,17 +26,22 @@ import soot.SootClass;
 import soot.Type;
 
 public interface IInitialResolver {
-	
-	public void formAst(String fullPath, List<String> locations, String className);
-	
-	public Dependencies resolveFromJavaFile(SootClass sc);
-	
-	public class Dependencies {
-		public final Set<Type> typesToHierarchy, typesToSignature;
-		public Dependencies() {
-			typesToHierarchy = new HashSet<Type>();
-			typesToSignature = new HashSet<Type>();
-		}
-	}
+    public class Dependencies {
+        public Set<Type> typesToHierarchy = new HashSet<>(), typesToSignature = new HashSet<>();
+    }
 
+    /**
+     * "Resolve the class into the SootClass sc."
+     * In practice:
+     *  1) Attempts to parse/load the java source.[1][2]
+     *  2) Assigns a method-source for all the methods in `sc` (possibly indirectly, in the case of member classes).
+     *  3) Returns all the dependencies of the requested class.[3]
+     *
+     * [1]  Partial lie: Depending on `Options.v().src_prec()` settings, it might load the byte-code instead (if avail)
+     * [2]  As is, `ExtendJInitialResolver` caches it and this is effectively a mem-leak since the cache is never
+     *      cleared.
+     * [3]  Possibly partially transitive. e.g. requesting to load an inner class could include dependencies of the
+     *      top-level class.
+     */
+    public Dependencies resolveFromJavaFile(List<String> locations, String fullPath, String className, SootClass sc);
 }

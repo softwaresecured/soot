@@ -19,7 +19,7 @@
  */
 
 /*
- * Modified by the Sable Research Group and others 1997-1999.  
+ * Modified by the Sable Research Group and others 1997-1999.
  * See the 'credits' file distributed with Soot for the complete list of
  * contributors.  (Soot is distributed at http://www.sable.mcgill.ca/soot)
  */
@@ -33,11 +33,11 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
 
-import soot.JastAddJ.BytecodeParser;
-import soot.JastAddJ.CompilationUnit;
-import soot.JastAddJ.JastAddJavaParser;
-import soot.JastAddJ.JavaParser;
-import soot.JastAddJ.Program;
+import soot.javaToJimple.extendj.ast.BytecodeParser;
+import soot.javaToJimple.extendj.ast.ClassPath;
+import soot.javaToJimple.extendj.ast.CompilationUnit;
+import soot.javaToJimple.extendj.parser.JavaParser;
+import soot.javaToJimple.extendj.ast.Program;
 import soot.javaToJimple.IInitialResolver.Dependencies;
 import soot.options.Options;
 import soot.util.ConcurrentHashMultiMap;
@@ -55,38 +55,10 @@ public class SootResolver {
 	@SuppressWarnings("unchecked")
 	private final Deque<SootClass>[] worklist = new Deque[4];
 
-	private Program program = null;
-
 	public SootResolver(Singletons.Global g) {
 		worklist[SootClass.HIERARCHY] = new ArrayDeque<SootClass>();
 		worklist[SootClass.SIGNATURES] = new ArrayDeque<SootClass>();
 		worklist[SootClass.BODIES] = new ArrayDeque<SootClass>();
-	}
-
-	protected void initializeProgram() {
-		if (Options.v().src_prec() != Options.src_prec_apk_c_j) {
-			program = new Program();
-			program.state().reset();
-
-			program.initBytecodeReader(new BytecodeParser());
-			program.initJavaParser(new JavaParser() {
-				public CompilationUnit parse(InputStream is, String fileName)
-						throws IOException, beaver.Parser.Exception {
-					return new JastAddJavaParser().parse(is, fileName);
-				}
-			});
-
-			program.options().initOptions();
-			program.options().addKeyValueOption("-classpath");
-			program.options().setValueForOption(Scene.v().getSootClassPath(), "-classpath");
-			if (Options.v().src_prec() == Options.src_prec_java)
-				program.setSrcPrec(Program.SRC_PREC_JAVA);
-			else if (Options.v().src_prec() == Options.src_prec_class)
-				program.setSrcPrec(Program.SRC_PREC_CLASS);
-			else if (Options.v().src_prec() == Options.src_prec_only_class)
-				program.setSrcPrec(Program.SRC_PREC_CLASS);
-			program.initPaths();
-		}
 	}
 
 	public static SootResolver v() {
@@ -146,6 +118,7 @@ public class SootResolver {
 	/** Resolve all classes on toResolveWorklist. */
 	protected void processResolveWorklist() {
 		for (int i = SootClass.BODIES; i >= SootClass.HIERARCHY; i--) {
+			// TODO: Can we do this concurrently?
 			while (!worklist[i].isEmpty()) {
 				SootClass sc = worklist[i].pop();
 				if (resolveEverything()) { // Whole program mode
@@ -356,15 +329,9 @@ public class SootResolver {
 		reResolve(cl, SootClass.HIERARCHY);
 	}
 
-	public Program getProgram() {
-		if (program == null)
-			initializeProgram();
-		return program;
-	}
-
 	private class SootClassNotFoundException extends RuntimeException {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 1563461446590293827L;
 
