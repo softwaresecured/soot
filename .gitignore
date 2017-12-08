@@ -5,6 +5,7 @@
 /sootOutput
 # IntelliJ IDEA project directory
 .idea
+*.iml
 # Directory with .jars required to build Soot with IntelliJ IDEA
 /libs_intellij
 /javadoc
@@ -12,5 +13,5 @@
 /testclasses
 # Eclipse settings directory
 /.settings
+
 /target
-soot.iml
