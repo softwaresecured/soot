@@ -174,11 +174,14 @@ public class CFGViewer extends BodyTransformer {
 				return new String[0]; // This is a cheesy method to inveigle
 				// our caller into printing the help
 				// and exiting.
+			} else if (args[i].equals("--prepend-classpath") || args[i].equals("-pp")) {
+				sootArgs.add(args[i]);
 			} else if (args[i].equals("--soot-class-path") || args[i].equals("-soot-class-path")
 					|| args[i].equals("--soot-classpath") || args[i].equals("-soot-classpath")
 					|| args[i].equals("--process-dir") || args[i].equals("-process-dir")
 					|| args[i].equals("--android-jars") || args[i].equals("-android-jars")
-					|| args[i].equals("--force-android-jar") || args[i].equals("-force-android-jar")) {
+					|| args[i].equals("--force-android-jar") || args[i].equals("-force-android-jar")
+					|| args[i].equals("-cp")) {
 				// Pass classpaths without treating ":" as a method specifier.
 				sootArgs.add(args[i]);
 				sootArgs.add(args[++i]);
