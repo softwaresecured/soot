@@ -27,19 +27,14 @@ package soot;
 
 import static java.net.URLEncoder.encode;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Date;
+import java.util.concurrent.*;
+import java.util.stream.Stream;
 
-import soot.options.CGOptions;
-import soot.options.Options;
-import soot.toolkits.astmetrics.ClassData;
+import fj.data.Option;
+import heros.solver.CountingThreadPoolExecutor;
+import soot.options.*;
 
 import com.google.common.base.Joiner;
 
@@ -296,6 +291,38 @@ public class Main {
 		if(Options.v().allow_phantom_refs()) {
 			Options.v().set_wrong_staticness(Options.wrong_staticness_fix);
 		}
+	}
+
+	public static int maxConcurrency = 10000;
+	public static void runConcurrent(Stream<Runnable> tasks)
+	{ runConcurrent(Option.none(), tasks); }
+	public static void runConcurrent(boolean allowConcurrent, Stream<Runnable> tasks)
+	{ runConcurrent(Option.iif(!allowConcurrent, 1), tasks); }
+	public static void runConcurrent(Option<Integer> maxConcurrency, Stream<Runnable> tasks) {
+		final int threadNumRequested = maxConcurrency.orSome(Runtime.getRuntime().availableProcessors());
+		final int threadNum          = Math.min(Main.maxConcurrency, threadNumRequested);
+		assert 0 < threadNum;
+
+		if (threadNum <= 1) {
+			tasks.forEach(Runnable::run);
+			return;
+		}
+
+		final CountingThreadPoolExecutor executor = new CountingThreadPoolExecutor(threadNum, threadNum,
+				30, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+		tasks.forEach(executor::execute);
+
+		try {
+			executor.awaitCompletion();
+			executor.shutdown();
+		} catch (InterruptedException e) {
+			// Something went horribly wrong
+			throw new RuntimeException("failed to join concurrent tasks: " + e.getMessage(), e);
+		}
+
+		// If something went wrong, we tell the world
+		final Throwable e = executor.getException();
+		if (e != null) throw (e instanceof RuntimeException) ? (RuntimeException)e : new RuntimeException(e);
 	}
 }
 

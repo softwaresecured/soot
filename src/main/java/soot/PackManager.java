@@ -103,6 +103,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 // [AM]
@@ -606,39 +608,8 @@ public class PackManager {
 		}
 	}
 
-	private void runBodyPacks(final Iterator<SootClass> classes) {
-		int threadNum = Runtime.getRuntime().availableProcessors();
-		CountingThreadPoolExecutor executor = new CountingThreadPoolExecutor(threadNum, threadNum, 30, TimeUnit.SECONDS,
-				new LinkedBlockingQueue<Runnable>());
-
-		while (classes.hasNext()) {
-			final SootClass c = classes.next();
-			executor.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					runBodyPacks(c);
-				}
-
-			});
-		}
-
-		// Wait till all packs have been executed
-		try {
-			executor.awaitCompletion();
-			executor.shutdown();
-		} catch (InterruptedException e) {
-			// Something went horribly wrong
-			throw new RuntimeException("Could not wait for pack threads to " + "finish: " + e.getMessage(), e);
-		}
-
-		// If something went wrong, we tell the world
-		if (executor.getException() != null) {
-			if (executor.getException() instanceof RuntimeException)
-				throw (RuntimeException) executor.getException();
-			else
-				throw new RuntimeException(executor.getException());
-		}
+	private void runBodyPacks(Stream<SootClass> classes) {
+		Main.runConcurrent(classes.map(c -> () -> runBodyPacks(c)));
 	}
 
 	private void handleInnerClasses() {
@@ -646,43 +617,12 @@ public class PackManager {
 		agg.internalTransform("", null);
 	}
 
-	private void writeOutput(Iterator<SootClass> classes) {
+	private void writeOutput(Stream<SootClass> classes) {
 		// If we're writing individual class files, we can write them
 		// concurrently. Otherwise, we need to synchronize for not destroying
 		// the shared output stream.
-		int threadNum = Options.v().output_format() == Options.output_format_class && jarFile == null
-				? Runtime.getRuntime().availableProcessors() : 1;
-		CountingThreadPoolExecutor executor = new CountingThreadPoolExecutor(threadNum, threadNum, 30, TimeUnit.SECONDS,
-				new LinkedBlockingQueue<Runnable>());
-
-		while (classes.hasNext()) {
-			final SootClass c = classes.next();
-			executor.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					writeClass(c);
-				}
-
-			});
-		}
-
-		// Wait till all classes have been written
-		try {
-			executor.awaitCompletion();
-			executor.shutdown();
-		} catch (InterruptedException e) {
-			// Something went horribly wrong
-			throw new RuntimeException("Could not wait for writer threads to " + "finish: " + e.getMessage(), e);
-		}
-
-		// If something went wrong, we tell the world
-		if (executor.getException() != null) {
-			if (executor.getException() instanceof RuntimeException)
-				throw (RuntimeException) executor.getException();
-			else
-				throw new RuntimeException(executor.getException());
-		}
+		boolean canConcurrent = Options.v().output_format() == Options.output_format_class && jarFile == null;
+		Main.runConcurrent(canConcurrent, classes.map(c -> () -> writeClass(c)));
 	}
 
 	private void tearDownJAR() {
@@ -694,14 +634,12 @@ public class PackManager {
 		}
 	}
 
-	private void releaseBodies(Iterator<SootClass> classes) {
-		while (classes.hasNext()) {
-			releaseBodies(classes.next());
-		}
+	private void releaseBodies(Stream<SootClass> classes) {
+		classes.forEach(this::releaseBodies);
 	}
 
-	private Iterator<SootClass> reachableClasses() {
-		return Scene.v().getApplicationClasses().snapshotIterator();
+	private Stream<SootClass> reachableClasses() {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(Scene.v().getApplicationClasses().snapshotIterator(), 0), false);
 	}
 
 	/* post process for DAVA */
@@ -1153,15 +1091,12 @@ public class PackManager {
 		}
 	}
 
-	private void postProcessXML(Iterator<SootClass> classes) {
+	private void postProcessXML(Stream<SootClass> classes) {
 		if (!Options.v().xml_attributes())
 			return;
 		if (Options.v().output_format() != Options.output_format_jimple)
 			return;
-		while (classes.hasNext()) {
-            SootClass c = classes.next();
-            processXMLForClass(c);
-		}
+		classes.forEach(this::processXMLForClass);
 	}
 
 	private void processXMLForClass(SootClass c, TagCollector tc) {
@@ -1195,48 +1130,13 @@ public class PackManager {
 
 	private void retrieveAllBodies() {
 		// The old coffi front-end is not thread-safe
-		int threadNum = Options.v().coffi() ? 1 : Runtime.getRuntime().availableProcessors();
-		CountingThreadPoolExecutor executor = new CountingThreadPoolExecutor(threadNum, threadNum, 30, TimeUnit.SECONDS,
-				new LinkedBlockingQueue<Runnable>());
-
-		Iterator<SootClass> clIt = reachableClasses();
-		while (clIt.hasNext()) {
-            SootClass cl = clIt.next();
-            // note: the following is a snapshot iterator;
-			// this is necessary because it can happen that phantom methods
-			// are added during resolution
-			Iterator<SootMethod> methodIt = cl.getMethods().iterator();
-			while (methodIt.hasNext()) {
-				final SootMethod m = methodIt.next();
-				if (m.isConcrete()) {
-					executor.execute(new Runnable() {
-
-						@Override
-						public void run() {
-							m.retrieveActiveBody();
-						}
-
-					});
-				}
-			}
-		}
-
-		// Wait till all method bodies have been loaded
-		try {
-			executor.awaitCompletion();
-			executor.shutdown();
-		} catch (InterruptedException e) {
-			// Something went horribly wrong
-			throw new RuntimeException("Could not wait for loader threads to " + "finish: " + e.getMessage(), e);
-		}
-	
-		// If something went wrong, we tell the world
-		if (executor.getException() != null) {
-			if (executor.getException() instanceof RuntimeException)
-				throw (RuntimeException) executor.getException();
-			else
-				throw new RuntimeException(executor.getException());
-		}
+		boolean canConcurrent = !Options.v().coffi();
+		// HACK: Explicitly provide return type for flatMap.
+		//       Workaround broken type-inference for lambdas in current extendj.
+		Main.runConcurrent(canConcurrent, reachableClasses()
+			.<SootMethod>flatMap(c -> c.getMethods().stream())
+			.filter(SootMethod::isConcrete)
+			.map(m -> m::retrieveActiveBody));
 	}
 
 }

@@ -43,37 +43,34 @@ public class ShimpleTransformer extends SceneTransformer
         // *** FIXME: Add debug output to indicate which class/method is being shimplified.
         // *** FIXME: Is ShimpleTransformer the right solution?  The call graph may deem
         //            some classes unreachable.
-        
-        Iterator classesIt = Scene.v().getClasses().iterator();
-        while(classesIt.hasNext()){
-            SootClass sClass = (SootClass) classesIt.next();
-            if(sClass.isPhantom()) continue;
-            
-            Iterator methodsIt = sClass.getMethods().iterator();
-            while(methodsIt.hasNext()){
-                SootMethod method = (SootMethod) methodsIt.next();
-                if(!method.isConcrete()) continue;
 
-                if(method.hasActiveBody()){
-                    Body body = method.getActiveBody();
-                    ShimpleBody sBody = null;
-
-                    if(body instanceof ShimpleBody){
-                        sBody = (ShimpleBody) body;
-                        if(!sBody.isSSA())
-                            sBody.rebuild();
-                    }
-                    else{
-                        sBody = Shimple.v().newBody(body);
-                    }
-
-                    method.setActiveBody(sBody);
+        // HACK: Workaround inference bug in extendj. If you put the whole thing in one expression w/o an explicit type
+		//       it'll infer `.flatMap(c -> c.getMethods().stream())` to yield `Stream<Object>` instead of
+		//       `Stream<SootMethod>`. And it'll explode later in NTA generation.
+        Main.runConcurrent(
+            Scene.v().getClasses().stream()
+            .filter (c -> !c.isPhantom())
+            .<SootMethod>flatMap(c ->  c.getMethods().stream())
+            .filter(SootMethod::isConcrete)
+            .map(m -> () -> {
+                if (!m.hasActiveBody()) {
+                    m.setSource(new ShimpleMethodSource(m.getSource()));
+                    return;
                 }
-                else{
-                    MethodSource ms = new ShimpleMethodSource(method.getSource());
-                    method.setSource(ms);
+
+                final Body body = m.getActiveBody();
+                ShimpleBody sBody;
+
+                if (body instanceof ShimpleBody) {
+                    sBody = (ShimpleBody) body;
+                    if (!sBody.isSSA())
+                        sBody.rebuild();
+                } else {
+                    sBody = Shimple.v().newBody(body);
                 }
-            }
-        }
+
+                m.setActiveBody(sBody);
+            })
+        );
     }
 }
