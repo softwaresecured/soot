@@ -88,6 +88,7 @@ public class JDynamicInvokeExpr extends AbstractInvokeExpr implements DynamicInv
 	public Value getBootstrapArg(int index) {
 		return bsmArgBoxes[index].getValue();
 	}
+	public ValueBox getBootstrapArgBox(int i) { return bsmArgBoxes[i]; }
 
 	public Object clone() {
 		List<Value> clonedBsmArgs = new ArrayList<Value>(getBootstrapArgCount());

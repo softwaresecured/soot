@@ -33,11 +33,13 @@ import java.util.List;
 
 import soot.SootMethodRef;
 import soot.Value;
+import soot.ValueBox;
 
 public interface DynamicInvokeExpr extends InvokeExpr
 {
 	public SootMethodRef getBootstrapMethodRef();
 	public List<Value> getBootstrapArgs();
+    public ValueBox getBootstrapArgBox(int index);
     public Value getBootstrapArg(int index);
     public int getBootstrapArgCount();
     
