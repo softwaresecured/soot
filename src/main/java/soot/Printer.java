@@ -263,7 +263,7 @@ public class Printer {
 
         boolean isPrecise = !useAbbreviations();
 
-        String decl = b.getMethod().getDeclaration();
+        String decl = (b.method == null) ? "<body not associated with method>" : b.getMethod().getDeclaration();
 
         out.println("    " + decl);
         //incJimpleLnNum();
@@ -278,7 +278,7 @@ public class Printer {
         }
        
         if (addJimpleLn()) {
-            setJimpleLnNum(addJimpleLnTags(getJimpleLnNum(), b.getMethod()));		
+            setJimpleLnNum(addJimpleLnTags(getJimpleLnNum(), b.method));
             //G.v().out.println("added jimple ln tag for method: "+b.getMethod().toString()+" "+b.getMethod().getDeclaringClass().getName());
         }
 

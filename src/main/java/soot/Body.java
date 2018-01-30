@@ -130,12 +130,14 @@ public abstract class Body extends AbstractHost implements Serializable
      * Returns the method associated with this Body.
      * @return the method that owns this body.
      */
-    public SootMethod getMethod()
-    {
-        if(method == null)
-            throw new RuntimeException("no method associated w/ body");
+    public SootMethod getMethod() {
+        if (!hasMethod()) throw new RuntimeException("no method associated w/ body");
         return method;
     }
+    /**
+     * @return true if this body has an associated method
+     */
+    public boolean hasMethod() { return method != null; }
 
 
     /**

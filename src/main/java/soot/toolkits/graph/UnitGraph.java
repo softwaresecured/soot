@@ -59,7 +59,6 @@ public abstract class UnitGraph implements DirectedGraph<Unit> {
 
 	protected Map<Unit, List<Unit>> unitToSuccs;
 	protected Map<Unit, List<Unit>> unitToPreds;
-	protected SootMethod method;
 	protected Body body;
 	protected Chain<Unit> unitChain;
 
@@ -74,11 +73,11 @@ public abstract class UnitGraph implements DirectedGraph<Unit> {
 	protected UnitGraph(Body body) {
 		this.body = body;
 		unitChain = body.getUnits();
-		method = body.getMethod();
-		if (Options.v().verbose())
-			G.v().out.println("[" + method.getName() + "]     Constructing "
+		if (Options.v().verbose()) {
+			String methodName = body.hasMethod() ? "<annonymous: no associated method>" : body.getMethod().getName();
+			G.v().out.println("[" + methodName + "]     Constructing "
 					+ this.getClass().getName() + "...");
-
+		}
 	}
 
 	/**
