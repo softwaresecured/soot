@@ -18,6 +18,7 @@
  */
 package soot.javaToJimple;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,5 +44,5 @@ public interface IInitialResolver {
      * [3]  Possibly partially transitive. e.g. requesting to load an inner class could include dependencies of the
      *      top-level class.
      */
-    public Dependencies resolveFromJavaFile(List<String> locations, String fullPath, String className, SootClass sc);
+    public Dependencies resolveFromJavaFile(List<String> locations, File src, String className, SootClass sc);
 }

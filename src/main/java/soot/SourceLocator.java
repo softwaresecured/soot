@@ -22,14 +22,11 @@ package soot;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -286,97 +283,26 @@ public class SourceLocator {
         }
     }
 
-    public List<String> getClassesUnder(String aPath) {
-        return getClassesUnder(aPath, "");
-    }
+    // Listing is ordered to list classes exist as `.java` files first.
+    // This hacky trick handles the case where we give precedence to `.java` for class sources,
+    // and the java file contains a top-level class who's name does not match the file's name.
+    // This allows `JavaClassProvider` to record the actual origin of that class for later request.
+    // If we didn't do this, we might try to load that non-name-matching class first because we
+    // saw the `.class` file before the `.java` which defined it. We'd then fail to use the `.java`
+    // file and either use the `.class` file or fail entirely, depending on how the class-source
+    // setting is configured.
+    public Collection<String> getClassesUnder(String aPath) {
+        HashSet<String> classes         = new HashSet<>();
+        HashSet<String> classesWithJava = new HashSet<>();
+        getClassesUnder(aPath, "", classes, classesWithJava);
 
-    private List<String> getClassesUnder(String aPath, String prefix) {
-        List<String> classes = new ArrayList<String>();
-        ClassSourceType cst = getClassSourceType(aPath);
-
-        // Get the dex file from an apk
-        if (cst == ClassSourceType.apk || cst == ClassSourceType.dex) {
-            try {
-                for (DexFileProvider.DexContainer dex : DexFileProvider.v().getDexFromSource(new File(aPath))) {
-                    classes.addAll(DexClassProvider.classesOfDex(dex.getBase()));
-                }
-            } catch (IOException e) {
-                throw new CompilationDeathException("Error reading dex source", e);
-            }
-        }
-        // load Java class files from ZIP and JAR
-        else if (cst == ClassSourceType.jar || cst == ClassSourceType.zip) {
-            ZipFile archive = null;
-            try {
-                archive = new ZipFile(aPath);
-                for (Enumeration<? extends ZipEntry> entries = archive.entries(); entries.hasMoreElements(); ) {
-                    ZipEntry entry = entries.nextElement();
-                    String entryName = entry.getName();
-                    if (entryName.endsWith(".class") || entryName.endsWith(".jimple")) {
-                        int extensionIndex = entryName.lastIndexOf('.');
-                        entryName = entryName.substring(0, extensionIndex);
-                        entryName = entryName.replace('/', '.');
-                        classes.add(prefix + entryName);
-                    }
-                }
-            } catch (Throwable e) {
-                throw new CompilationDeathException("Error reading archive '" + aPath + "'", e);
-            } finally {
-                try {
-                    if (archive != null)
-                        archive.close();
-                } catch (Throwable t) {
-                }
-            }
-
-            // we might have dex files inside the archive
-            try {
-                for (DexFileProvider.DexContainer container : DexFileProvider.v().getDexFromSource(new File(aPath))) {
-                    classes.addAll(DexClassProvider.classesOfDex(container.getBase()));
-                }
-            } catch (CompilationDeathException e) 
-            { //There might be cases where there is no dex file within a JAR or ZIP file...
-            } catch (IOException e) {
-                /* Ignore unreadable files */
-            }
-        } else if (cst == ClassSourceType.directory) {
-            File file = new File(aPath);
-
-            File[] files = file.listFiles();
-            if (files == null) {
-                files = new File[1];
-                files[0] = file;
-            }
-
-            for (File element : files) {
-                if (element.isDirectory()) {
-                    classes.addAll(getClassesUnder(aPath + File.separatorChar + element.getName(),
-                            prefix + element.getName() + "."));
-                } else {
-                    String fileName = element.getName();
-
-                    if (fileName.endsWith(".class")) {
-                        int index = fileName.lastIndexOf(".class");
-                        classes.add(prefix + fileName.substring(0, index));
-                    } else if (fileName.endsWith(".jimple")) {
-                        int index = fileName.lastIndexOf(".jimple");
-                        classes.add(prefix + fileName.substring(0, index));
-                    } else if (fileName.endsWith(".java")) {
-                        int index = fileName.lastIndexOf(".java");
-                        classes.add(prefix + fileName.substring(0, index));
-                    } else if (fileName.endsWith(".dex")) {
-                        try {
-                            for (DexFileProvider.DexContainer container : DexFileProvider.v().getDexFromSource(element)) {
-                                classes.addAll(DexClassProvider.classesOfDex(container.getBase()));
-                            }
-                        } catch (IOException e) { /* Ignore unreadable files */
-                        }
-                    }
-                }
-            }
-        } else
-            throw new RuntimeException("Invalid class source type");
-        return classes;
+        ArrayList<String> lst = new ArrayList<>(classes);
+        lst.sort((a, b) -> {
+            Boolean a_ = classesWithJava.contains(a);
+            Boolean b_ = classesWithJava.contains(b);
+            return a_.compareTo(b_);
+        });
+        return lst;
     }
 
     public String getFileNameFor(SootClass c, int rep) {
@@ -407,6 +333,91 @@ public class SourceLocator {
         }
 
         return getDavaFilenameFor(c, b);
+    }
+
+    @FunctionalInterface
+    private interface ThrowsConsumerLike<T, E extends Throwable> { void accept(T t) throws E; }
+    private void getClassesUnder(String aPath, String pkgPrefix
+                                ,Set<String> out_classes, Set<String> out_classesWithJava) {
+        ClassSourceType cst = getClassSourceType(aPath);
+
+        String   javaFileExt    = ".java";
+        // don't attempt to load a `.java` unless there's a `.jimple` or `.class`
+        // this is a semi-hack/workaround the fact that there may be some `.java` files in a jar
+        // that have no class declarations. (e.g. `soot/rtlib/tamiflex/package-info.java`)
+        String[] jarSrcFileExts = new String[] { ".class", ".jimple" };
+        String[] dirSrcFileExts = new String[] { ".class", ".jimple", javaFileExt };
+
+        ThrowsConsumerLike<File, IOException> recordDex   = f -> {
+            for (DexFileProvider.DexContainer dex : DexFileProvider.v().getDexFromSource(f))
+                out_classes.addAll(DexClassProvider.classesOfDex(dex.getBase()));
+        };
+        BiFunction<String[], String, Boolean> recordFile  = (exts, fileName) -> {
+            int extIdx  = fileName.lastIndexOf(".");
+            if (extIdx == -1) return false;
+
+            boolean foundExt = false;
+            for (String ext : exts) {
+                foundExt = fileName.endsWith(ext);
+                if (foundExt) break;
+            }
+
+            String  klass = pkgPrefix + fileName.substring(0, extIdx);
+                    klass = klass.replace('/', '.');
+
+            if (fileName.endsWith(javaFileExt)) out_classesWithJava.add(klass);
+            if (foundExt                      ) out_classes        .add(klass);
+            return false;
+        };
+
+        // Get the dex file from an apk
+        if (cst == ClassSourceType.apk || cst == ClassSourceType.dex) {
+            try {
+                recordDex.accept(new File(aPath));
+            } catch (IOException e) {
+                throw new CompilationDeathException("Error reading dex source", e);
+            }
+        }
+        // load Java class files from ZIP and JAR
+        else if (cst == ClassSourceType.jar || cst == ClassSourceType.zip) {
+            try (ZipFile archive = new ZipFile(aPath)) {
+                for (Enumeration<? extends ZipEntry> entries = archive.entries(); entries.hasMoreElements(); )
+                    recordFile.apply(jarSrcFileExts, entries.nextElement().getName());
+            } catch (Throwable e) {
+                throw new CompilationDeathException("Error reading archive '" + aPath + "'", e);
+            }
+
+            // we might have dex files inside the archive
+            try {
+                recordDex.accept(new File(aPath));
+            } catch (CompilationDeathException e)
+            { //There might be cases where there is no dex file within a JAR or ZIP file...
+            } catch (IOException e) {
+                /* Ignore unreadable files */
+            }
+        } else if (cst == ClassSourceType.directory) {
+            File file = new File(aPath);
+
+            File[] files = file.listFiles();
+            if (files == null) {
+                files = new File[1];
+                files[0] = file;
+            }
+
+            for (File element : files) {
+                String fileName = element.getName();
+                if (element.isDirectory()) {
+                    getClassesUnder(aPath + File.separatorChar + fileName, pkgPrefix + fileName + "."
+                                   ,out_classes, out_classesWithJava);
+                } else if (fileName.endsWith(".dex")) {
+                    try { recordDex.accept(element); }
+                    catch (IOException e) { /* Ignore unreadable files */ }
+                } else {
+                    recordFile.apply(dirSrcFileExts, fileName);
+                }
+            }
+        } else
+            throw new RuntimeException("Invalid class source type");
     }
 
     private String getDavaFilenameFor(SootClass c, StringBuffer b) {
@@ -441,7 +452,7 @@ public class SourceLocator {
                 continue;
             }
             // For jimple files
-            List<String> l = getClassesUnder(path);
+            Collection<String> l = getClassesUnder(path);
             for (String filename : l) {
                 if (filename.startsWith(str))
                     set.add(filename);

@@ -35,14 +35,17 @@ public class JavaClassSource extends ClassSource
     }
 
     public Dependencies resolve( SootClass sc ) {
-        assert sc.getName().equals(className);
+        assert (sc == null) || sc.getName().equals(className);
 
         if (Options.v().verbose())
             G.v().out.println("resolving [from .java]: " + className);
 
         ExtendJInitialResolver resolver = ExtendJInitialResolver.v();
-        return resolver.resolveFromJavaFile(SourceLocator.v().sourcePath(), fullPath.getPath(), className, sc);
+        return resolver.resolveFromJavaFile(SourceLocator.v().sourcePath(), fullPath, className, sc);
     }
+
+    public File   sourceFile() { return fullPath; }
+    public String className()  { return className; }
 
     private File fullPath;
 }

@@ -24,6 +24,11 @@
 
 package soot;
 
+import soot.javaToJimple.ExtendJInitialResolver;
+import soot.javaToJimple.IInitialResolver;
+import soot.javaToJimple.extendj.ast.CompilationUnit;
+import soot.javaToJimple.extendj.ast.Option;
+
 /** A class provider looks for a file of a specific format for a specified
  * class, and returns a ClassSource for it if it finds it.
  */
@@ -41,6 +46,16 @@ public class JavaClassProvider implements ClassProvider
     /** Look for the specified class. Return a ClassSource for it if found,
      * or null if it was not found. */
     public ClassSource find( String className ) {
+        Option<CompilationUnit> cu = ExtendJInitialResolver.v().cuForClass(className);
+        if (!cu.hasValue()) return findSrcFile(className);
+
+        return new ClassSource(className) {
+            public IInitialResolver.Dependencies resolve(SootClass sc)
+            { return ExtendJInitialResolver.v().resolveFromCache(className, sc); }
+        };
+    }
+
+    private JavaClassSource findSrcFile(String className) {
         // 04.04.2006 mbatch
         //  if there is a $ in the name then we need to check if it's a real file, not just an inner class
         boolean checkForLiteralFileName = className.indexOf('$') >= 0;
@@ -60,7 +75,7 @@ public class JavaClassProvider implements ClassProvider
             }
 
             if (file == null    ) return null;
-            if (file.isZipFile()) throw new JarException(className);
+            if (file.isZipFile()) return null;//throw new JarException(className);
 
             return new JavaClassSource(className, file.getFile());
         }

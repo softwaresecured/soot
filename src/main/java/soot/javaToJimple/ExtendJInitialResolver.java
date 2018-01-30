@@ -19,15 +19,20 @@
  */
 package soot.javaToJimple;
 
-import java.lang.ref.WeakReference;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import soot.*;
 import soot.javaToJimple.extendj.ast.*;
 import soot.javaToJimple.extendj.ast.ClassSource;
 import soot.options.Options;
-import soot.toolkits.scalar.Pair;
+
 
 /**
  * An {@link IInitialResolver} for the ExtendJ frontend.
@@ -40,51 +45,75 @@ import soot.toolkits.scalar.Pair;
 public class ExtendJInitialResolver implements IInitialResolver {
     public static ExtendJInitialResolver v() { return soot.G.v().soot_javaToJimple_ExtendJInitialResolver(); }
 
-    private Map<String, WeakReference<CompilationUnit>> classNameToCU     = new TreeMap<>();
-    private Map<String, ClassSource                   > className2source  = new HashMap<>();
-    private WeakReference<Program>                      program           = null;
+    // TODO: Make these weak references so we can reclaim memory once the bodies are loaded?
+    private Program program = null;
 
     public ExtendJInitialResolver(soot.Singletons.Global g) { }
 
-    // SS SPECIFIC: Grafiketisto requires access to this lookup info.
-    public Map<String, ClassSource> classNameToSource() { return className2source; }
-
     @Override
-    public Dependencies resolveFromJavaFile(List<String> locations, String fullPath, String className, SootClass sc) {
-        assert sc.getName().equals(className);
-
-        final Option<Pair<CompilationUnit, Dependencies>> ud = loadAST(className);
-        if (!ud.hasValue())
+    public Dependencies resolveFromJavaFile(List<String> locations, File src, String className, SootClass sc) {
+        if (!loadAST(src, className).hasValue())
             throw new RuntimeException("Error: couldn't find class: " + className + " are the packages set properly?");
 
-        return ud.get().getO2();
+        return resolveFromCache(className, sc);
     }
 
-    protected Option<Pair<CompilationUnit, Dependencies>> loadAST(String className) {
-        Option<CompilationUnit> optCU = parseAST(className);
+    public Dependencies resolveFromCache(String className, SootClass sc) {
+        assert (sc == null) || sc.getName().equals(className);
+
+        final Option<CompilationUnit> u = cuForClass(className);
+        if (!u.hasValue()) {
+            // HACK: Utter BS, but we need to humour anyone who happens to use annotations.
+            if (className.endsWith(".package-info")) return dependencies(getProgram().getCompilationUnit(className));
+
+            throw new RuntimeException("Error: couldn't find class: " + className + " are the packages set properly?");
+        }
+
+        return dependencies(u.get());
+    }
+
+    protected Dependencies dependencies(CompilationUnit u) {
+        Dependencies deps = new Dependencies();
+        deps.typesToHierarchy = u.hierarchyDependencies();
+        deps.typesToSignature = u.signatureDependencies();
+
+        for (Type t : deps.typesToHierarchy) assert !t.toString().contains("<");
+        for (Type t : deps.typesToSignature) assert !t.toString().contains("<");
+        return deps;
+    }
+
+    protected Option<CompilationUnit> loadAST(File src, String className) {
+        Option<CompilationUnit> optCU = parseAST(src, className);
         if (!optCU.hasValue() ) return Option.none();
         // if resolved -> all the dependencies for this CU have already been added to the worklist
         CompilationUnit u = optCU.get();
-        if (u.isResolved      ) return Option.some(new Pair<>(u, new Dependencies()));
+        if (u.isResolved      ) return Option.some(u);
         u.isResolved = true;
 
-        u.jimplify1();
+        u.jimpleDeclare();
 
         HashSet<TypeDecl> types = new HashSet<>();
         for (TypeDecl   t : u.getTypeDecls())
             collectTypeDecl(t, types);
 
         for (final TypeDecl t : types) {
-            final Map<SootMethod, BodyDecl> method2body = new HashMap<>();
+            final Map<SootMethod, MethodLikeDecl<?>> method2body = new HashMap<>();
             for (BodyDecl d : t.methodsAndConstructors()) {
-                if (d instanceof      MethodDecl) method2body.put(((     MethodDecl)d).sootMethod, d);
-                if (d instanceof ConstructorDecl) method2body.put(((ConstructorDecl)d).sootMethod, d);
+                MethodLikeDecl<?> m = null;
+                if (d instanceof      MethodDecl) m = (MethodDecl     )d;
+                if (d instanceof ConstructorDecl) m = (ConstructorDecl)d;
+
+                if (m != null) method2body.put(m.sootMethod(), m);
+            }
+            if (t.needsClinit()) {
+                MethodLikeDecl<?> body = t.clinitHelper();
+                method2body.put(body.sootMethod(), body);
             }
 
             // HACK: FIXME: Extendj isn't yet thread-safe. Serialise at program granularity.
             final Object  lock  = u.program();
             // FIXME: Do we just need to honour the signature? If so then we need to generalise
-            //        body-production to be reentrant/pure and change the lookup mapping key.
+            //        body-production to be reentrant/pure and change the lookup key.
             MethodSource  ms    = new MethodSource() {
                 @Override
                 public Body getBody(SootMethod m, String phaseName) { synchronized(lock) {
@@ -92,19 +121,15 @@ public class ExtendJInitialResolver implements IInitialResolver {
                     throw new RuntimeException("Attempted to load a method from some other class: " +
                             m.getDeclaringClass().getName());
 
-                if (t.clinit == m) {
-                    m.setActiveBody(t.jimplify2clinit(m));
-                    return m.getActiveBody();
-                }
-
-                // TODO: Convert the jimplify2 routines to something that's reentrant instead of implicitly mugging
-                //       the existing body. (If any.)
                 if (!method2body.containsKey(m))
-                    throw new RuntimeException(
-                            "Could not find body for " + m.getSignature() +
-                                    " in " + m.getDeclaringClass().getName() + " during " + phaseName);
+                    throw new RuntimeException("Could not find body for " + m.getSignature() + " in " +
+                            m.getDeclaringClass().getName() + " during " + phaseName);
 
-                method2body.get(m).jimplify2();
+                final Body b = method2body.get(m).jimpleBody();
+                // must set the method before, otherwise `setActiveBody` tries to access the previous method owning the
+                // body & panics when there isn't one
+                b.setMethod(m);
+                m.setActiveBody(b);
                 return m.getActiveBody();
             } } };
 
@@ -112,14 +137,12 @@ public class ExtendJInitialResolver implements IInitialResolver {
                 m.setSource(ms);
         }
 
-        Dependencies deps = new Dependencies();
-        deps.typesToHierarchy = u.hierarchyDependencies();
-        deps.typesToSignature = u.signatureDependencies();
-        return Option.some(new Pair<>(u, deps));
+
+        return Option.some(u);
     }
 
     // parses the file(s) for the given class-name. result is cached.
-    protected Option<CompilationUnit> parseAST(String className) {
+    protected Option<CompilationUnit> parseAST(File src, String className) {
         // extendj is finicky about how it loads its sources, so we need to work around some ugly behaviour:
         //  If we're attempting to load a (possibly) class, try to load the (possible) outer-class(es) first.
         //  If that succeeds, then we check to see if the class was loaded into our known-classes map.
@@ -131,18 +154,15 @@ public class ExtendJInitialResolver implements IInitialResolver {
         int outerClassSepIdx = className.lastIndexOf("$");
         if (outerClassSepIdx != -1) {
             // attempt to load the class as an inner class of some compilation unit
-            // Local var to keep it alive until we finish checking below if it is the right one
-            Option<CompilationUnit> liveHolder = parseAST(className.substring(0, outerClassSepIdx));
+            new JavaClassProvider().find(className.substring(0, outerClassSepIdx)).resolve(null);
 
             // note that the 'outer' file might not contain the class (e.g. auto-gen code from jastadd)
             { Option<CompilationUnit> optCU = cuForClass(className);
               if (optCU.hasValue()) return optCU; }
         }
 
-        CompilationUnit u = getProgram().getLibCompilationUnit(className);
-        if (u == null) return Option.none();
-
-        Collection<Problem> errors = u.errors();
+        CompilationUnit     u       = getProgram().getCompilationUnit(className);
+        Collection<Problem> errors  = u.errors();
         if (!errors.isEmpty()) {
             for (Problem p : errors)
                 G.v().out.println(p);
@@ -155,13 +175,6 @@ public class ExtendJInitialResolver implements IInitialResolver {
         for (TypeDecl typeDecl : u.getTypeDecls())
             collectTypeDecl(typeDecl, types);
 
-        WeakReference<CompilationUnit> ru = new WeakReference<>(u);
-        for (TypeDecl t : types) {
-            assert !classNameToCU.containsKey(t.jvmName());
-            classNameToCU   .put(t.jvmName(), ru);
-            className2source.put(t.jvmName(), u.getClassSource());
-        }
-
         // Odd. We expect that the file would at least declare this className (if given).
         assert !types.isEmpty();
 //        if (types.isEmpty()) {
@@ -169,8 +182,6 @@ public class ExtendJInitialResolver implements IInitialResolver {
 //            classNameToCU.put(className, ru);
 //        }
 
-        assert classNameToCU.containsKey(className);
-        assert classNameToCU.get(className).get() == u;
         return Option.some(u);
     }
 
@@ -208,20 +219,25 @@ public class ExtendJInitialResolver implements IInitialResolver {
         return program;
     }
 
-    protected Program getProgram() {
-        Program p = (program == null) ? null : program.get();
-        if (p == null) {
-            p = mkProgram();
-            program = new WeakReference<>(p);
-        }
+    // SS SPECIFIC: Grafiketisto requires access to this for lookup info.
+    public Program getProgram() {
+        if (program == null)
+            program = mkProgram();
 
-        return p;
+        return program;
     }
 
-    protected Option<CompilationUnit> cuForClass(String className) {
-        if (!classNameToCU.containsKey(className)) return Option.none();
+    public Option<CompilationUnit> cuForClass(String jvmName) {
+        TypeDecl t = getProgram().lookupTypeByJvmName(jvmName);
+        if ( t.isUnknown()  ) return Option.none();
 
-        return Option.maybe(classNameToCU.get(className).get());
+        CompilationUnit u = t.compilationUnit();
+        // Don't provide CUs for things which were parsed from byte-code.
+        // If we try to handle it via extendj, we might get a byte-code class with constructs
+        // that our current version of extendj cannot handle.
+        if (!u.fromSource() ) return Option.none();
+
+        return Option.some(u);
     }
 
     private void collectTypeDecl(TypeDecl typeDecl, HashSet<TypeDecl> types) {
