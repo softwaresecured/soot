@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,42 +38,11 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:141
+ * @astdecl NumericType : PrimitiveType;
  * @production NumericType : {@link PrimitiveType};
 
  */
 public abstract class NumericType extends PrimitiveType implements Cloneable {
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:392
-   */
-  public soot.Value refined_EmitJimple_NumericType_emitCastTo(Body b, soot.Value v, TypeDecl type, ASTNode location) {
-    // `isNumericType` == a numeric primitive type or `UnknownType` or boxed numeric type
-    // NOTE: not all `is<Kind>{Type}` follow this convention. You must check each one.
-    assert type.isNumericType() || type.isObject();
-
-    // primitive -> primitive cast
-    // `isPrimitiveType`  == a primitive type  or `UnknownType`
-    // NOTE:  This is *NOT* the same convention as `isNumericType`!
-    //        `isPrimitiveType` excludes boxed typed, unlike `isNumericType`.
-    if (type.isPrimitiveType()) {
-      // JVM only has a `{lfd}2i` for integral primitive casts, thus Soot implicitly
-      // assumes it'll never see anything weird like a `l2s` cast.
-      // Have to cast to `int` first, then to target type.
-      //
-      // `isPrimitiveType`  == a primitive type  or `UnknownType`
-      // NOTE:  This is *NOT* the same convention as `isNumericType`!
-      //        `isPrimitiveType` excludes boxed typed, unlike `isNumericType`.
-      if (!isInt() && type.isIntegralType() && !(type.isLong() || type.isInt())) {
-        TypeDecl    intType = lookupType("int").singletonValue();
-        soot.Value  valInt  = asImmediate(b, emitCastTo(b, v, intType, location));
-        return intType.emitCastTo(b, valInt, type, location);
-      }
-
-      return b.newCastExpr(asImmediate(b, v), type.getSootType(), location);
-    }
-
-    return super.emitCastTo(b, v, type, location);
-  }
   /**
    * @declaredat ASTNode:1
    */
@@ -93,6 +64,11 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "SuperClass", "BodyDecl"},
+    type = {"Modifiers", "String", "Opt<Access>", "List<BodyDecl>"},
+    kind = {"Child", "Token", "Opt", "List"}
+  )
   public NumericType(Modifiers p0, String p1, Opt<Access> p2, List<BodyDecl> p3) {
     setChild(p0, 0);
     setID(p1);
@@ -100,7 +76,7 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
     setChild(p3, 2);
   }
   /**
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   public NumericType(Modifiers p0, beaver.Symbol p1, Opt<Access> p2, List<BodyDecl> p3) {
     setChild(p0, 0);
@@ -109,20 +85,20 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
     setChild(p3, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -130,13 +106,13 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
     binaryNumericPromotion_TypeDecl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public NumericType clone() throws CloneNotSupportedException {
     NumericType node = (NumericType) super.clone();
@@ -148,7 +124,7 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   @Deprecated
   public abstract NumericType fullCopy();
@@ -157,7 +133,7 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:67
+   * @declaredat ASTNode:72
    */
   public abstract NumericType treeCopyNoTransform();
   /**
@@ -166,7 +142,7 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:75
+   * @declaredat ASTNode:80
    */
   public abstract NumericType treeCopy();
   /**
@@ -386,27 +362,8 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
     return getBodyDeclListNoTransform();
   }
   /**
-   * @aspect AutoBoxingCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/AutoBoxingCodegen.jrag:45
-   */
-   
-  public soot.Value emitCastTo(Body b, soot.Value v, TypeDecl type, ASTNode location) {
-    // `isNumericType` == a numeric primitive type or `UnknownType` or boxed numeric type
-    // NOTE: not all `is<Kind>{Type}` follow this convention. You must check each one.
-    assert type.isNumericType() || type.isObject();
-
-    // primitive -> boxed numeric cast; convert to unbox of new type, then box it
-    if (type.isNumericType() && !type.isPrimitiveType()) {
-      PrimitiveType typeUnboxed = (PrimitiveType)type.unboxed();
-      soot.Value    valUnboxed  = emitCastTo(b, v, typeUnboxed, location);
-      return typeUnboxed.emitBoxingOperation(b, valUnboxed, location);
-    }
-
-    return refined_EmitJimple_NumericType_emitCastTo(b, v, type, location);
-  }
-  /**
    * @aspect NumericPromotion
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:168
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:167
    */
   private TypeDecl refined_NumericPromotion_NumericType_binaryNumericPromotion_TypeDecl(TypeDecl type)
 {
@@ -415,13 +372,46 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
     }
      return unaryNumericPromotion().instanceOf(type) ? type : unaryNumericPromotion();
   }
+  /**
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:385
+   */
+  private Value refined_EmitJimple_NumericType_emitCastTo_Body_Value_TypeDecl_ASTNode(Body b, Value v, TypeDecl type, ASTNode location)
+{
+    // `isNumericType` == a numeric primitive type or `UnknownType` or boxed numeric type
+    // NOTE: not all `is<Kind>{Type}` follow this convention. You must check each one.
+    assert type.isNumericType() || type.isObject();
+
+    // primitive -> primitive cast
+    // `isPrimitiveType`  == a primitive type  or `UnknownType`
+    // NOTE:  This is *NOT* the same convention as `isNumericType`!
+    //        `isPrimitiveType` excludes boxed typed, unlike `isNumericType`.
+    if (type.isPrimitiveType()) {
+      // JVM only has a `{lfd}2i` for integral primitive casts, thus Soot implicitly
+      // assumes it'll never see anything weird like a `l2s` cast.
+      // Have to cast to `int` first, then to target type.
+      //
+      // `isPrimitiveType`  == a primitive type  or `UnknownType`
+      // NOTE:  This is *NOT* the same convention as `isNumericType`!
+      //        `isPrimitiveType` excludes boxed typed, unlike `isNumericType`.
+      if (!isInt() && type.isIntegralType() && !(type.isLong() || type.isInt())) {
+        TypeDecl  intType = lookupType("int").singletonValue();
+        Value     valInt  = emitCastTo(b, v, intType, location);
+        return intType.emitCastTo(b, valInt, type, location);
+      }
+
+      return b.newCastExpr(v, type.sootType(), location);
+    }
+
+    return super.emitCastTo(b, v, type, location);
+  }
   /** @apilevel internal */
   private void unaryNumericPromotion_reset() {
     unaryNumericPromotion_computed = null;
     unaryNumericPromotion_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle unaryNumericPromotion_computed = null;
+  protected ASTState.Cycle unaryNumericPromotion_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl unaryNumericPromotion_value;
@@ -429,13 +419,13 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
   /**
    * @attribute syn
    * @aspect NumericPromotion
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:160
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:159
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NumericPromotion", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:160")
+  @ASTNodeAnnotation.Source(aspect="NumericPromotion", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:159")
   public TypeDecl unaryNumericPromotion() {
-    ASTNode$State state = state();
-    if (unaryNumericPromotion_computed == ASTNode$State.NON_CYCLE || unaryNumericPromotion_computed == state().cycle()) {
+    ASTState state = state();
+    if (unaryNumericPromotion_computed == ASTState.NON_CYCLE || unaryNumericPromotion_computed == state().cycle()) {
       return unaryNumericPromotion_value;
     }
     unaryNumericPromotion_value = this;
@@ -443,14 +433,14 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
       unaryNumericPromotion_computed = state().cycle();
     
     } else {
-      unaryNumericPromotion_computed = ASTNode$State.NON_CYCLE;
+      unaryNumericPromotion_computed = ASTState.NON_CYCLE;
     
     }
     return unaryNumericPromotion_value;
   }
   /** @apilevel internal */
   private void binaryNumericPromotion_TypeDecl_reset() {
-    binaryNumericPromotion_TypeDecl_computed = new java.util.HashMap(4);
+    binaryNumericPromotion_TypeDecl_computed = null;
     binaryNumericPromotion_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -460,18 +450,18 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
   /**
    * @attribute syn
    * @aspect NumericPromotion
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:168
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:167
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NumericPromotion", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:168")
+  @ASTNodeAnnotation.Source(aspect="NumericPromotion", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:167")
   public TypeDecl binaryNumericPromotion(TypeDecl type) {
     Object _parameters = type;
     if (binaryNumericPromotion_TypeDecl_computed == null) binaryNumericPromotion_TypeDecl_computed = new java.util.HashMap(4);
     if (binaryNumericPromotion_TypeDecl_values == null) binaryNumericPromotion_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (binaryNumericPromotion_TypeDecl_values.containsKey(_parameters) && binaryNumericPromotion_TypeDecl_computed != null
+    ASTState state = state();
+    if (binaryNumericPromotion_TypeDecl_values.containsKey(_parameters)
         && binaryNumericPromotion_TypeDecl_computed.containsKey(_parameters)
-        && (binaryNumericPromotion_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || binaryNumericPromotion_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (binaryNumericPromotion_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || binaryNumericPromotion_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (TypeDecl) binaryNumericPromotion_TypeDecl_values.get(_parameters);
     }
     TypeDecl binaryNumericPromotion_TypeDecl_value = binaryNumericPromotion_compute(type);
@@ -481,7 +471,7 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
     
     } else {
       binaryNumericPromotion_TypeDecl_values.put(_parameters, binaryNumericPromotion_TypeDecl_value);
-      binaryNumericPromotion_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      binaryNumericPromotion_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return binaryNumericPromotion_TypeDecl_value;
@@ -497,13 +487,36 @@ public abstract class NumericType extends PrimitiveType implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:187
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:186
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:187")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:186")
   public boolean isNumericType() {
     boolean isNumericType_value = true;
     return isNumericType_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:378
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:378")
+  public Value emitCastTo(Body b, Value v, TypeDecl type, ASTNode location) {
+    {
+        // `isNumericType` == a numeric primitive type or `UnknownType` or boxed numeric type
+        // NOTE: not all `is<Kind>{Type}` follow this convention. You must check each one.
+        assert type.isNumericType() || type.isObject();
+    
+        // primitive -> boxed numeric cast; convert to unbox of new type, then box it
+        if (type.isNumericType() && !type.isPrimitiveType()) {
+          PrimitiveType typeUnboxed = (PrimitiveType)type.unboxed();
+          Value         valUnboxed  = emitCastTo(b, v, typeUnboxed, location);
+          return typeUnboxed.emitBoxingOperation(b, valUnboxed, location);
+        }
+    
+        return refined_EmitJimple_NumericType_emitCastTo_Body_Value_TypeDecl_ASTNode(b, v, type, location);
+      }
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {

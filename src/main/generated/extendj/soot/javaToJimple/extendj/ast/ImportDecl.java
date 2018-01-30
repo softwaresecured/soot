@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -42,6 +44,7 @@ import soot.coffi.CoffiMethodSource;
  * See JLS 6 &sect;7.5.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:61
+ * @astdecl ImportDecl : ASTNode ::= Access;
  * @production ImportDecl : {@link ASTNode} ::= <span class="component">{@link Access}</span>;
 
  */
@@ -65,24 +68,29 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Access"},
+    type = {"Access"},
+    kind = {"Child"}
+  )
   public ImportDecl(Access p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -92,13 +100,13 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
     importedMethods_String_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public ImportDecl clone() throws CloneNotSupportedException {
     ImportDecl node = (ImportDecl) super.clone();
@@ -110,7 +118,7 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   @Deprecated
   public abstract ImportDecl fullCopy();
@@ -119,7 +127,7 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:58
+   * @declaredat ASTNode:63
    */
   public abstract ImportDecl treeCopyNoTransform();
   /**
@@ -128,7 +136,7 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:71
    */
   public abstract ImportDecl treeCopy();
   /**
@@ -159,7 +167,7 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
   }
   /** @apilevel internal */
   private void importedTypes_String_reset() {
-    importedTypes_String_computed = new java.util.HashMap(4);
+    importedTypes_String_computed = null;
     importedTypes_String_values = null;
   }
   /** @apilevel internal */
@@ -169,18 +177,18 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:479
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:483
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:479")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:483")
   public SimpleSet<TypeDecl> importedTypes(String name) {
     Object _parameters = name;
     if (importedTypes_String_computed == null) importedTypes_String_computed = new java.util.HashMap(4);
     if (importedTypes_String_values == null) importedTypes_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (importedTypes_String_values.containsKey(_parameters) && importedTypes_String_computed != null
+    ASTState state = state();
+    if (importedTypes_String_values.containsKey(_parameters)
         && importedTypes_String_computed.containsKey(_parameters)
-        && (importedTypes_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || importedTypes_String_computed.get(_parameters) == state().cycle())) {
+        && (importedTypes_String_computed.get(_parameters) == ASTState.NON_CYCLE || importedTypes_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<TypeDecl>) importedTypes_String_values.get(_parameters);
     }
     SimpleSet<TypeDecl> importedTypes_String_value = emptySet();
@@ -190,7 +198,7 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
     
     } else {
       importedTypes_String_values.put(_parameters, importedTypes_String_value);
-      importedTypes_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      importedTypes_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return importedTypes_String_value;
@@ -201,7 +209,7 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
     importedTypes_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle importedTypes_computed = null;
+  protected ASTState.Cycle importedTypes_computed = null;
 
   /** @apilevel internal */
   protected SimpleSet<TypeDecl> importedTypes_value;
@@ -213,13 +221,13 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
    * @return TypeDecl of imported type wrapped in SimpleSet
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:496
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:500
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:496")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:500")
   public SimpleSet<TypeDecl> importedTypes() {
-    ASTNode$State state = state();
-    if (importedTypes_computed == ASTNode$State.NON_CYCLE || importedTypes_computed == state().cycle()) {
+    ASTState state = state();
+    if (importedTypes_computed == ASTState.NON_CYCLE || importedTypes_computed == state().cycle()) {
       return importedTypes_value;
     }
     importedTypes_value = emptySet();
@@ -227,7 +235,7 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
       importedTypes_computed = state().cycle();
     
     } else {
-      importedTypes_computed = ASTNode$State.NON_CYCLE;
+      importedTypes_computed = ASTState.NON_CYCLE;
     
     }
     return importedTypes_value;
@@ -235,10 +243,10 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:527
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:531
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:527")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:531")
   public boolean isOnDemand() {
     boolean isOnDemand_value = false;
     return isOnDemand_value;
@@ -270,31 +278,31 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
   }
   protected java.util.Map importedFields_String_values;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:55")
+  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:63")
   public SimpleSet<Variable> importedFields(String name) {
     Object _parameters = name;
     if (importedFields_String_values == null) importedFields_String_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (importedFields_String_values.containsKey(_parameters)) {
       Object _cache = importedFields_String_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (SimpleSet<Variable>) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       importedFields_String_values.put(_parameters, _value);
       _value.value = emptySet();
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       SimpleSet<Variable> new_importedFields_String_value;
       do {
         _value.cycle = state.nextCycle();
         new_importedFields_String_value = emptySet();
-        if ((new_importedFields_String_value == null && ((SimpleSet<Variable>)_value.value) != null) || (new_importedFields_String_value != null && !new_importedFields_String_value.equals(((SimpleSet<Variable>)_value.value)))) {
+        if (!AttributeValue.equals(((SimpleSet<Variable>)_value.value), new_importedFields_String_value)) {
           state.setChangeInCycle();
           _value.value = new_importedFields_String_value;
         }
@@ -306,7 +314,7 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       SimpleSet<Variable> new_importedFields_String_value = emptySet();
-      if ((new_importedFields_String_value == null && ((SimpleSet<Variable>)_value.value) != null) || (new_importedFields_String_value != null && !new_importedFields_String_value.equals(((SimpleSet<Variable>)_value.value)))) {
+      if (!AttributeValue.equals(((SimpleSet<Variable>)_value.value), new_importedFields_String_value)) {
         state.setChangeInCycle();
         _value.value = new_importedFields_String_value;
       }
@@ -317,7 +325,7 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
   }
   /** @apilevel internal */
   private void importedMethods_String_reset() {
-    importedMethods_String_computed = new java.util.HashMap(4);
+    importedMethods_String_computed = null;
     importedMethods_String_values = null;
   }
   /** @apilevel internal */
@@ -327,18 +335,18 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect StaticImports
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:76
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:84
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:76")
+  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:84")
   public Collection<MethodDecl> importedMethods(String name) {
     Object _parameters = name;
     if (importedMethods_String_computed == null) importedMethods_String_computed = new java.util.HashMap(4);
     if (importedMethods_String_values == null) importedMethods_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (importedMethods_String_values.containsKey(_parameters) && importedMethods_String_computed != null
+    ASTState state = state();
+    if (importedMethods_String_values.containsKey(_parameters)
         && importedMethods_String_computed.containsKey(_parameters)
-        && (importedMethods_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || importedMethods_String_computed.get(_parameters) == state().cycle())) {
+        && (importedMethods_String_computed.get(_parameters) == ASTState.NON_CYCLE || importedMethods_String_computed.get(_parameters) == state().cycle())) {
       return (Collection<MethodDecl>) importedMethods_String_values.get(_parameters);
     }
     Collection<MethodDecl> importedMethods_String_value = Collections.EMPTY_LIST;
@@ -348,7 +356,7 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
     
     } else {
       importedMethods_String_values.put(_parameters, importedMethods_String_value);
-      importedMethods_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      importedMethods_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return importedMethods_String_value;
@@ -356,10 +364,10 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:525
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:529
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:525")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:529")
   public String packageName() {
     String packageName_value = getParent().Define_packageName(this, null);
     return packageName_value;
@@ -388,6 +396,11 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
       return getParent().Define_isDest(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:34
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isDest
+   */
   protected boolean canDefine_isDest(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -404,6 +417,11 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
       return getParent().Define_isSource(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:44
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isSource
+   */
   protected boolean canDefine_isSource(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -415,6 +433,11 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:86
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isLeftChildOfDot
+   */
   protected boolean canDefine_isLeftChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -426,6 +449,11 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:101
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isRightChildOfDot
+   */
   protected boolean canDefine_isRightChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -437,6 +465,11 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return prevExprError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:118
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute prevExpr
+   */
   protected boolean canDefine_prevExpr(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -448,6 +481,11 @@ public abstract class ImportDecl extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return nextAccessError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:142
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nextAccess
+   */
   protected boolean canDefine_nextAccess(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

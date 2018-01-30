@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:70
+ * @astdecl AbstractWildcardType : TypeDecl;
  * @production AbstractWildcardType : {@link TypeDecl};
 
  */
@@ -69,13 +72,18 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "BodyDecl"},
+    type = {"Modifiers", "String", "List<BodyDecl>"},
+    kind = {"Child", "Token", "List"}
+  )
   public AbstractWildcardType(Modifiers p0, String p1, List<BodyDecl> p2) {
     setChild(p0, 0);
     setID(p1);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   public AbstractWildcardType(Modifiers p0, beaver.Symbol p1, List<BodyDecl> p2) {
     setChild(p0, 0);
@@ -83,36 +91,36 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     castingConversionTo_TypeDecl_reset();
     typeDescriptor_reset();
     needsSignatureAttribute_reset();
-    getSootClassDecl_reset();
+    sootClass_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:52
    */
   public AbstractWildcardType clone() throws CloneNotSupportedException {
     AbstractWildcardType node = (AbstractWildcardType) super.clone();
@@ -124,7 +132,7 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:58
+   * @declaredat ASTNode:63
    */
   @Deprecated
   public abstract AbstractWildcardType fullCopy();
@@ -133,7 +141,7 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:71
    */
   public abstract AbstractWildcardType treeCopyNoTransform();
   /**
@@ -142,7 +150,7 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   public abstract AbstractWildcardType treeCopy();
   /**
@@ -312,7 +320,7 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
   }
   /** @apilevel internal */
   private void castingConversionTo_TypeDecl_reset() {
-    castingConversionTo_TypeDecl_computed = new java.util.HashMap(4);
+    castingConversionTo_TypeDecl_computed = null;
     castingConversionTo_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -330,10 +338,10 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
     Object _parameters = type;
     if (castingConversionTo_TypeDecl_computed == null) castingConversionTo_TypeDecl_computed = new java.util.HashMap(4);
     if (castingConversionTo_TypeDecl_values == null) castingConversionTo_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (castingConversionTo_TypeDecl_values.containsKey(_parameters) && castingConversionTo_TypeDecl_computed != null
+    ASTState state = state();
+    if (castingConversionTo_TypeDecl_values.containsKey(_parameters)
         && castingConversionTo_TypeDecl_computed.containsKey(_parameters)
-        && (castingConversionTo_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || castingConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (castingConversionTo_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || castingConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) castingConversionTo_TypeDecl_values.get(_parameters);
     }
     boolean castingConversionTo_TypeDecl_value = erasure().castingConversionTo(type);
@@ -343,7 +351,7 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
     
     } else {
       castingConversionTo_TypeDecl_values.put(_parameters, castingConversionTo_TypeDecl_value);
-      castingConversionTo_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      castingConversionTo_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return castingConversionTo_TypeDecl_value;
@@ -351,10 +359,10 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:178
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:177
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:178")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:177")
   public boolean isReferenceType() {
     boolean isReferenceType_value = true;
     return isReferenceType_value;
@@ -373,10 +381,10 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
   /**
    * @attribute syn
    * @aspect GenericsSubtype
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:579
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:576
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:579")
+  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:576")
   public boolean supertypeNullType(NullType type) {
     boolean supertypeNullType_NullType_value = true;
     return supertypeNullType_NullType_value;
@@ -403,7 +411,7 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
     typeDescriptor_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle typeDescriptor_computed = null;
+  protected ASTState.Cycle typeDescriptor_computed = null;
 
   /** @apilevel internal */
   protected String typeDescriptor_value;
@@ -416,8 +424,8 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstantPoolNames", declaredAt="/home/olivier/projects/extendj/java4/backend/ConstantPoolNames.jrag:78")
   public String typeDescriptor() {
-    ASTNode$State state = state();
-    if (typeDescriptor_computed == ASTNode$State.NON_CYCLE || typeDescriptor_computed == state().cycle()) {
+    ASTState state = state();
+    if (typeDescriptor_computed == ASTState.NON_CYCLE || typeDescriptor_computed == state().cycle()) {
       return typeDescriptor_value;
     }
     typeDescriptor_value = erasure().typeDescriptor();
@@ -425,7 +433,7 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
       typeDescriptor_computed = state().cycle();
     
     } else {
-      typeDescriptor_computed = ASTNode$State.NON_CYCLE;
+      typeDescriptor_computed = ASTState.NON_CYCLE;
     
     }
     return typeDescriptor_value;
@@ -435,7 +443,7 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
     needsSignatureAttribute_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle needsSignatureAttribute_computed = null;
+  protected ASTState.Cycle needsSignatureAttribute_computed = null;
 
   /** @apilevel internal */
   protected boolean needsSignatureAttribute_value;
@@ -443,13 +451,13 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:209
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:217
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:209")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:217")
   public boolean needsSignatureAttribute() {
-    ASTNode$State state = state();
-    if (needsSignatureAttribute_computed == ASTNode$State.NON_CYCLE || needsSignatureAttribute_computed == state().cycle()) {
+    ASTState state = state();
+    if (needsSignatureAttribute_computed == ASTState.NON_CYCLE || needsSignatureAttribute_computed == state().cycle()) {
       return needsSignatureAttribute_value;
     }
     needsSignatureAttribute_value = true;
@@ -457,43 +465,43 @@ public abstract class AbstractWildcardType extends TypeDecl implements Cloneable
       needsSignatureAttribute_computed = state().cycle();
     
     } else {
-      needsSignatureAttribute_computed = ASTNode$State.NON_CYCLE;
+      needsSignatureAttribute_computed = ASTState.NON_CYCLE;
     
     }
     return needsSignatureAttribute_value;
   }
   /** @apilevel internal */
-  private void getSootClassDecl_reset() {
-    getSootClassDecl_computed = null;
-    getSootClassDecl_value = null;
+  private void sootClass_reset() {
+    sootClass_computed = null;
+    sootClass_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle getSootClassDecl_computed = null;
+  protected ASTState.Cycle sootClass_computed = null;
 
   /** @apilevel internal */
-  protected SootClass getSootClassDecl_value;
+  protected SootClass sootClass_value;
 
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:29
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:63
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:29")
-  public SootClass getSootClassDecl() {
-    ASTNode$State state = state();
-    if (getSootClassDecl_computed == ASTNode$State.NON_CYCLE || getSootClassDecl_computed == state().cycle()) {
-      return getSootClassDecl_value;
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:63")
+  public SootClass sootClass() {
+    ASTState state = state();
+    if (sootClass_computed == ASTState.NON_CYCLE || sootClass_computed == state().cycle()) {
+      return sootClass_value;
     }
-    getSootClassDecl_value = typeObject().getSootClassDecl();
+    sootClass_value = typeObject().sootClass();
     if (state().inCircle()) {
-      getSootClassDecl_computed = state().cycle();
+      sootClass_computed = state().cycle();
     
     } else {
-      getSootClassDecl_computed = ASTNode$State.NON_CYCLE;
+      sootClass_computed = ASTState.NON_CYCLE;
     
     }
-    return getSootClassDecl_value;
+    return sootClass_value;
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {

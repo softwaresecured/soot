@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:200
+ * @astdecl AssignMultiplicativeExpr : AssignExpr;
  * @production AssignMultiplicativeExpr : {@link AssignExpr};
 
  */
@@ -59,37 +62,42 @@ public abstract class AssignMultiplicativeExpr extends AssignExpr implements Clo
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Dest", "Source"},
+    type = {"Expr", "Expr"},
+    kind = {"Child", "Child"}
+  )
   public AssignMultiplicativeExpr(Expr p0, Expr p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public AssignMultiplicativeExpr clone() throws CloneNotSupportedException {
     AssignMultiplicativeExpr node = (AssignMultiplicativeExpr) super.clone();
@@ -101,7 +109,7 @@ public abstract class AssignMultiplicativeExpr extends AssignExpr implements Clo
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:52
    */
   @Deprecated
   public abstract AssignMultiplicativeExpr fullCopy();
@@ -110,7 +118,7 @@ public abstract class AssignMultiplicativeExpr extends AssignExpr implements Clo
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:55
+   * @declaredat ASTNode:60
    */
   public abstract AssignMultiplicativeExpr treeCopyNoTransform();
   /**
@@ -119,7 +127,7 @@ public abstract class AssignMultiplicativeExpr extends AssignExpr implements Clo
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   public abstract AssignMultiplicativeExpr treeCopy();
   /**
@@ -177,10 +185,10 @@ public abstract class AssignMultiplicativeExpr extends AssignExpr implements Clo
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:77
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:79
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:77")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:79")
   public Collection<Problem> typeProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>(super.typeProblems());

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:292
+ * @astdecl EmptyStmt : Stmt;
  * @production EmptyStmt : {@link Stmt};
 
  */
@@ -49,9 +52,9 @@ public class EmptyStmt extends Stmt implements Cloneable {
   }
   /**
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:14
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:17
    */
-  public void jimplify2(Body b) { }
+  public void jimpleEmit(Body b) { }
   /**
    * @declaredat ASTNode:1
    */
@@ -186,27 +189,27 @@ public class EmptyStmt extends Stmt implements Cloneable {
   public boolean assignedAfter(Variable v) {
     Object _parameters = v;
     if (assignedAfter_Variable_values == null) assignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfter_Variable_value = assignedBefore(v);
-        if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfter_Variable_value;
         }
@@ -218,7 +221,7 @@ public class EmptyStmt extends Stmt implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfter_Variable_value = assignedBefore(v);
-      if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfter_Variable_value;
       }
@@ -237,27 +240,27 @@ public class EmptyStmt extends Stmt implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = unassignedBefore(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -269,7 +272,7 @@ public class EmptyStmt extends Stmt implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = unassignedBefore(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -283,7 +286,7 @@ public class EmptyStmt extends Stmt implements Cloneable {
     canCompleteNormally_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle canCompleteNormally_computed = null;
+  protected ASTState.Cycle canCompleteNormally_computed = null;
 
   /** @apilevel internal */
   protected boolean canCompleteNormally_value;
@@ -296,8 +299,8 @@ public class EmptyStmt extends Stmt implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="UnreachableStatements", declaredAt="/home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:50")
   public boolean canCompleteNormally() {
-    ASTNode$State state = state();
-    if (canCompleteNormally_computed == ASTNode$State.NON_CYCLE || canCompleteNormally_computed == state().cycle()) {
+    ASTState state = state();
+    if (canCompleteNormally_computed == ASTState.NON_CYCLE || canCompleteNormally_computed == state().cycle()) {
       return canCompleteNormally_value;
     }
     canCompleteNormally_value = reachable();
@@ -305,7 +308,7 @@ public class EmptyStmt extends Stmt implements Cloneable {
       canCompleteNormally_computed = state().cycle();
     
     } else {
-      canCompleteNormally_computed = ASTNode$State.NON_CYCLE;
+      canCompleteNormally_computed = ASTState.NON_CYCLE;
     
     }
     return canCompleteNormally_value;

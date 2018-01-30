@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:150
+ * @astdecl FloatType : FloatingPointType;
  * @production FloatType : {@link FloatingPointType};
 
  */
@@ -68,6 +71,11 @@ public class FloatType extends FloatingPointType implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "SuperClass", "BodyDecl"},
+    type = {"Modifiers", "String", "Opt<Access>", "List<BodyDecl>"},
+    kind = {"Child", "Token", "Opt", "List"}
+  )
   public FloatType(Modifiers p0, String p1, Opt<Access> p2, List<BodyDecl> p3) {
     setChild(p0, 0);
     setID(p1);
@@ -75,7 +83,7 @@ public class FloatType extends FloatingPointType implements Cloneable {
     setChild(p3, 2);
   }
   /**
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   public FloatType(Modifiers p0, beaver.Symbol p1, Opt<Access> p2, List<BodyDecl> p3) {
     setChild(p0, 0);
@@ -84,42 +92,41 @@ public class FloatType extends FloatingPointType implements Cloneable {
     setChild(p3, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     typeDescriptor_reset();
     boxed_reset();
-    getSootType_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:49
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:53
    */
   public FloatType clone() throws CloneNotSupportedException {
     FloatType node = (FloatType) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:54
+   * @declaredat ASTNode:58
    */
   public FloatType copy() {
     try {
@@ -139,7 +146,7 @@ public class FloatType extends FloatingPointType implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:77
    */
   @Deprecated
   public FloatType fullCopy() {
@@ -150,7 +157,7 @@ public class FloatType extends FloatingPointType implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:83
+   * @declaredat ASTNode:87
    */
   public FloatType treeCopyNoTransform() {
     FloatType tree = (FloatType) copy();
@@ -171,7 +178,7 @@ public class FloatType extends FloatingPointType implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:103
+   * @declaredat ASTNode:107
    */
   public FloatType treeCopy() {
     FloatType tree = (FloatType) copy();
@@ -187,7 +194,7 @@ public class FloatType extends FloatingPointType implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:117
+   * @declaredat ASTNode:121
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((FloatType) node).tokenString_ID);    
@@ -543,10 +550,10 @@ public class FloatType extends FloatingPointType implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:209
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:208
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:209")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:208")
   public boolean isFloat() {
     boolean isFloat_value = true;
     return isFloat_value;
@@ -557,7 +564,7 @@ public class FloatType extends FloatingPointType implements Cloneable {
     typeDescriptor_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle typeDescriptor_computed = null;
+  protected ASTState.Cycle typeDescriptor_computed = null;
 
   /** @apilevel internal */
   protected String typeDescriptor_value;
@@ -570,8 +577,8 @@ public class FloatType extends FloatingPointType implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstantPoolNames", declaredAt="/home/olivier/projects/extendj/java4/backend/ConstantPoolNames.jrag:78")
   public String typeDescriptor() {
-    ASTNode$State state = state();
-    if (typeDescriptor_computed == ASTNode$State.NON_CYCLE || typeDescriptor_computed == state().cycle()) {
+    ASTState state = state();
+    if (typeDescriptor_computed == ASTState.NON_CYCLE || typeDescriptor_computed == state().cycle()) {
       return typeDescriptor_value;
     }
     typeDescriptor_value = "F";
@@ -579,7 +586,7 @@ public class FloatType extends FloatingPointType implements Cloneable {
       typeDescriptor_computed = state().cycle();
     
     } else {
-      typeDescriptor_computed = ASTNode$State.NON_CYCLE;
+      typeDescriptor_computed = ASTState.NON_CYCLE;
     
     }
     return typeDescriptor_value;
@@ -590,7 +597,7 @@ public class FloatType extends FloatingPointType implements Cloneable {
     boxed_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle boxed_computed = null;
+  protected ASTState.Cycle boxed_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl boxed_value;
@@ -603,8 +610,8 @@ public class FloatType extends FloatingPointType implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="AutoBoxing", declaredAt="/home/olivier/projects/extendj/java5/frontend/AutoBoxing.jrag:53")
   public TypeDecl boxed() {
-    ASTNode$State state = state();
-    if (boxed_computed == ASTNode$State.NON_CYCLE || boxed_computed == state().cycle()) {
+    ASTState state = state();
+    if (boxed_computed == ASTState.NON_CYCLE || boxed_computed == state().cycle()) {
       return boxed_value;
     }
     boxed_value = lookupType("java.lang", "Float");
@@ -612,43 +619,21 @@ public class FloatType extends FloatingPointType implements Cloneable {
       boxed_computed = state().cycle();
     
     } else {
-      boxed_computed = ASTNode$State.NON_CYCLE;
+      boxed_computed = ASTState.NON_CYCLE;
     
     }
     return boxed_value;
   }
-  /** @apilevel internal */
-  private void getSootType_reset() {
-    getSootType_computed = null;
-    getSootType_value = null;
-  }
-  /** @apilevel internal */
-  protected ASTNode$State.Cycle getSootType_computed = null;
-
-  /** @apilevel internal */
-  protected Type getSootType_value;
-
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:42
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:77
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:42")
-  public Type getSootType() {
-    ASTNode$State state = state();
-    if (getSootType_computed == ASTNode$State.NON_CYCLE || getSootType_computed == state().cycle()) {
-      return getSootType_value;
-    }
-    getSootType_value = soot.FloatType.v();
-    if (state().inCircle()) {
-      getSootType_computed = state().cycle();
-    
-    } else {
-      getSootType_computed = ASTNode$State.NON_CYCLE;
-    
-    }
-    return getSootType_value;
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:77")
+  public soot.Type sootType() {
+    soot.Type sootType_value = soot.FloatType.v();
+    return sootType_value;
   }
   /**
    * @attribute syn

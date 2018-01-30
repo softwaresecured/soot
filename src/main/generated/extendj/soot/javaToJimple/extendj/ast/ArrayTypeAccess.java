@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:94
+ * @astdecl ArrayTypeAccess : TypeAccess ::= <Package:String> <ID:String> Access;
  * @production ArrayTypeAccess : {@link TypeAccess} ::= <span class="component">&lt;Package:String&gt;</span> <span class="component">&lt;ID:String&gt;</span> <span class="component">{@link Access}</span>;
 
  */
@@ -47,6 +50,13 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
   public void prettyPrint(PrettyPrinter out) {
     out.print(getAccess());
     out.print("[]");
+  }
+  /**
+   * @aspect PrettyPrintUtil
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:83
+   */
+  @Override public String toString() {
+    return getAccessNoTransform().toString() + "[]";
   }
   /**
    * @aspect FunctionalInterface
@@ -69,11 +79,10 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:705
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:631
    */
-  public void addArraySize(Body b, ArrayList list) {
-    getAccess().addArraySize(b, list);
-  }
+  void evalArraySize(Body b, ArrayList<Value> list)
+  { getAccess().evalArraySize(b, list); }
   /**
    * @declaredat ASTNode:1
    */
@@ -93,24 +102,29 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Access"},
+    type = {"Access"},
+    kind = {"Child"}
+  )
   public ArrayTypeAccess(Access p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -120,20 +134,20 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
     decl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public ArrayTypeAccess clone() throws CloneNotSupportedException {
     ArrayTypeAccess node = (ArrayTypeAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public ArrayTypeAccess copy() {
     try {
@@ -153,7 +167,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   @Deprecated
   public ArrayTypeAccess fullCopy() {
@@ -164,7 +178,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:78
    */
   public ArrayTypeAccess treeCopyNoTransform() {
     ArrayTypeAccess tree = (ArrayTypeAccess) copy();
@@ -185,7 +199,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:93
+   * @declaredat ASTNode:98
    */
   public ArrayTypeAccess treeCopy() {
     ArrayTypeAccess tree = (ArrayTypeAccess) copy();
@@ -201,7 +215,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:107
+   * @declaredat ASTNode:112
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -262,7 +276,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
     getPackage_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle getPackage_computed = null;
+  protected ASTState.Cycle getPackage_computed = null;
 
   /** @apilevel internal */
   protected String getPackage_value;
@@ -275,8 +289,8 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="Arrays", declaredAt="/home/olivier/projects/extendj/java4/frontend/Arrays.jrag:95")
   public String getPackage() {
-    ASTNode$State state = state();
-    if (getPackage_computed == ASTNode$State.NON_CYCLE || getPackage_computed == state().cycle()) {
+    ASTState state = state();
+    if (getPackage_computed == ASTState.NON_CYCLE || getPackage_computed == state().cycle()) {
       return getPackage_value;
     }
     getPackage_value = getAccess().type().packageName();
@@ -284,7 +298,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
       getPackage_computed = state().cycle();
     
     } else {
-      getPackage_computed = ASTNode$State.NON_CYCLE;
+      getPackage_computed = ASTState.NON_CYCLE;
     
     }
     return getPackage_value;
@@ -295,7 +309,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
     getID_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle getID_computed = null;
+  protected ASTState.Cycle getID_computed = null;
 
   /** @apilevel internal */
   protected String getID_value;
@@ -308,8 +322,8 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="Arrays", declaredAt="/home/olivier/projects/extendj/java4/frontend/Arrays.jrag:97")
   public String getID() {
-    ASTNode$State state = state();
-    if (getID_computed == ASTNode$State.NON_CYCLE || getID_computed == state().cycle()) {
+    ASTState state = state();
+    if (getID_computed == ASTState.NON_CYCLE || getID_computed == state().cycle()) {
       return getID_value;
     }
     getID_value = getAccess().type().name();
@@ -317,7 +331,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
       getID_computed = state().cycle();
     
     } else {
-      getID_computed = ASTNode$State.NON_CYCLE;
+      getID_computed = ASTState.NON_CYCLE;
     
     }
     return getID_value;
@@ -343,27 +357,27 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = getAccess().unassignedAfter(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -375,7 +389,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = getAccess().unassignedAfter(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -390,7 +404,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
     decl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decl_computed = null;
+  protected ASTState.Cycle decl_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl decl_value;
@@ -398,13 +412,13 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:365
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:369
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:365")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:369")
   public TypeDecl decl() {
-    ASTNode$State state = state();
-    if (decl_computed == ASTNode$State.NON_CYCLE || decl_computed == state().cycle()) {
+    ASTState state = state();
+    if (decl_computed == ASTState.NON_CYCLE || decl_computed == state().cycle()) {
       return decl_value;
     }
     decl_value = getAccess().type().arrayType();
@@ -412,7 +426,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
       decl_computed = state().cycle();
     
     } else {
-      decl_computed = ASTNode$State.NON_CYCLE;
+      decl_computed = ASTState.NON_CYCLE;
     
     }
     return decl_value;
@@ -448,10 +462,10 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeHierarchyCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:224
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:240
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:224")
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:240")
   public boolean staticContextQualifier() {
     boolean staticContextQualifier_value = true;
     return staticContextQualifier_value;
@@ -460,10 +474,10 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
    * Creates a copy of this access where parameterized types have been erased.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1597
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1596
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1597")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1596")
   public Access erasedCopy() {
     Access erasedCopy_value = new ArrayTypeAccess(getAccess().erasedCopy());
     return erasedCopy_value;

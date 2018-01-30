@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:66
+ * @astdecl Wildcard : AbstractWildcard;
  * @production Wildcard : {@link AbstractWildcard};
 
  */
@@ -46,6 +49,13 @@ public class Wildcard extends AbstractWildcard implements Cloneable {
    */
   public void prettyPrint(PrettyPrinter out) {
     out.print("?");
+  }
+  /**
+   * @aspect PrettyPrintUtil5
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/PrettyPrintUtil.jrag:125
+   */
+  @Override public String toString() {
+    return "?";
   }
   /**
    * @declaredat ASTNode:1
@@ -175,7 +185,7 @@ public class Wildcard extends AbstractWildcard implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -183,13 +193,13 @@ public class Wildcard extends AbstractWildcard implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = typeWildcard();
@@ -197,7 +207,7 @@ public class Wildcard extends AbstractWildcard implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -205,10 +215,10 @@ public class Wildcard extends AbstractWildcard implements Cloneable {
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1735
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1734
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1735")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1734")
   public TypeDecl typeWildcard() {
     TypeDecl typeWildcard_value = getParent().Define_typeWildcard(this, null);
     return typeWildcard_value;

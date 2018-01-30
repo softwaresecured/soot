@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,6 +37,7 @@ import beaver.*;
 import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
+ * @astdecl ASTNode;
  * @production ASTNode;
 
  */
@@ -60,7 +63,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:312
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:313
    */
   public static <T> SimpleSet<T> emptySet() {
     return (SimpleSet<T>) SimpleSet.EMPTY_SET;
@@ -331,7 +334,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * 
    * @return the filtered collection of methods.
    * @aspect LookupMethod
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:156
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:183
    */
   public static Collection<MethodDecl> keepStaticMethods(
       Collection<MethodDecl> methods) {
@@ -346,7 +349,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * Utility method to add a single item in a {@code SimpleSet}-based map.
    * @aspect MemberMethods
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:725
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:699
    */
   protected static <E> void putSimpleSetElement(Map<String, SimpleSet<E>> map,
       String key, E value) {
@@ -360,7 +363,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * Converts a null SimpleSet to an empty set.
    * If the passed SimpleSet is not null, the input set is returned.
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:345
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:349
    */
   public static <T extends SimpleSet<T>> SimpleSet<T> toSet(T set) {
     if (set != null) {
@@ -427,14 +430,14 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
   /** @return the name of the class implementing this AST node. 
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:56
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:63
    */
   @Override public String toString() {
     return getClass().getName();
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:80
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:159
    */
   public void prettyPrint(PrettyPrinter out) {
   }
@@ -523,26 +526,9 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     }
   }
   /**
-   * Imperative transformation of the AST.
-   * This should be removed.
-   * 
-   * <p>Usage: this.replaceWith(replacement)
-   * 
-   * @param replacement node to replace this node with
-   * @return the new node
-   * @deprecated
-   * @aspect Transformations
-   * @declaredat /home/olivier/projects/extendj/java4/backend/Transformations.jrag:118
-   */
-  @Deprecated
-  protected void replaceWith(ASTNode replacement) {
-	  int replacePos = getParent().getIndexOfChild(this);
-	  getParent().setChild(replacement, replacePos);
-  }
-  /**
    * Create a copy of the access list where each access has been erased.
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1625
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1624
    */
   protected List<Access> erasedAccessList(List<Access> list) {
     List<Access> result = new List<Access>();
@@ -554,7 +540,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * Create a copy of the parameter list where each parameter has been erased.
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1636
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1635
    */
   protected List<ParameterDeclaration> erasedParameterList(List<ParameterDeclaration> list) {
     List<ParameterDeclaration> result = new List<ParameterDeclaration>();
@@ -577,128 +563,35 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     }
   }
   /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:84
+   * Identifies which Java version this ExtendJ build supports.
+   * 
+   * <p>Version 4 = Java 1.4, 5 = Java 5, 6 = Java 6, ...
+   * @aspect JavaVersion
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/JavaVersion.jrag:7
    */
-  public void jimplify1() {
+  public static final int JAVA_VERSION = 8;
+  /**
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:94
+   */
+  public void jimpleDeclare() {
     for (ASTNode n : astChildren())
-      n.jimplify1();
+      n.jimpleDeclare();
   }
   /**
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:306
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:274
    */
-  public void jimplify2() {
-    for(int i = 0; i < getNumChild(); i++)
-      getChild(i).jimplify2();
+  public void jimpleDefineTopLevelTerms() {
+    for (ASTNode n : astChildren())
+      n.jimpleDefineTopLevelTerms();
   }
   /**
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:311
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:340
    */
-  public void jimplify2(Body b) {
-    for(int i = 0; i < getNumChild(); i++)
-      getChild(i).jimplify2(b);
-  }
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:354
-   */
-  public soot.Immediate asImmediate(Body b, soot.Value v) {
-    if(v instanceof soot.Immediate) return (soot.Immediate)v;
-    return b.newTemp(v);
-  }
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:358
-   */
-  public soot.Local asLocal(Body b, soot.Value v) {
-    if(v instanceof soot.Local) return (soot.Local)v;
-    return b.newTemp(v);
-  }
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:362
-   */
-  public soot.Local asLocal(Body b, soot.Value v, Type t) {
-    if(v instanceof soot.Local) return (soot.Local)v;
-    // FIXME: This src loc precision is crap
-    soot.Local              local    = b.newTemp(t, this);
-    soot.jimple.AssignStmt  stmtInit = b.newAssignStmt(local, v, this);
-    b.add(b.setSrcLoc(stmtInit, v));
-    return b.setSrcLoc(local, v);
-  }
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:370
-   */
-  public soot.Value asRValue(Body b, soot.Value v) {
-    if(v instanceof soot.Local) return v;
-    if(v instanceof soot.jimple.Constant) return v;
-    if(v instanceof soot.jimple.ConcreteRef) return v;
-    if(v instanceof soot.jimple.Expr) return v;
-    throw new Error("Need to convert " + v.getClass().getName() + " to RValue");
-  }
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:771
-   */
-  protected soot.jimple.Stmt newLabel() {
-    soot.jimple.Stmt stmt = soot.jimple.Jimple.v().newNopStmt();
-    // FXIME: Don't really have enough span-info for arbitrary labels. Would need a proper syntax tree.
-    stmt.addTag(createTagSrcSpan());
-    return stmt;
-  }
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:809
-   */
-  public soot.tagkit.Tag createTagSrcSpan() {
-    int srcStart = srcSpanStart();
-    if (srcStart == 0)
-      return new soot.tagkit.LineNumberTag(lineNumber());
-
-    int     srcEnd    = srcSpanEnd();
-    int     line      = getLine  (srcStart);
-    int     endLine   = getLine  (srcEnd);
-    int     column    = getColumn(srcStart);
-    int     endColumn = getColumn(srcEnd);
-    String  s         = sourceFile();
-    s = s != null ? s.substring(s.lastIndexOf(java.io.File.separatorChar)+1) : "Unknown";
-
-    return new soot.tagkit.SourceLnNamePosTag(s, line, endLine, column, endColumn);
-  }
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:932
-   */
-  public void addAttributes() {
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:765
-   */
-  public soot.Value emitConstant(Body b, Constant constant) {
-    soot.Value v;
-    if(constant instanceof Constant.ConstantInt)
-      v = IntType.emitConstant(constant.intValue(), b, this);
-    else if(constant instanceof Constant.ConstantLong)
-      v = soot.jimple.LongConstant.v(constant.longValue());
-    else if(constant instanceof Constant.ConstantFloat)
-      v = soot.jimple.FloatConstant.v(constant.floatValue());
-    else if(constant instanceof Constant.ConstantDouble)
-      v = soot.jimple.DoubleConstant.v(constant.doubleValue());
-    else if(constant instanceof Constant.ConstantChar)
-      v = IntType.emitConstant(constant.intValue(), b, this);
-    else if(constant instanceof Constant.ConstantBoolean)
-      v = BooleanType.emitConstant(constant.booleanValue(), b, this);
-    else if(constant instanceof Constant.ConstantString)
-      v = soot.jimple.StringConstant.v(constant.stringValue());
-    else
-      throw new Error("Unexpected constant");
-
-    return b.setSrcLoc(v, this);
-  }
+  public void jimpleEmit(Body b)
+  { throw new Error("lacking jimple-emit for node " + getClass().getName()); }
   /**
    * @aspect PreserveSpansForNTAs
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/PreserveSpansForNTAs.jrag:3
@@ -706,24 +599,6 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   protected <T extends ASTNode> T cloneLocationOnto(T nta) {
     nta.setLocation(this);
     return nta;
-  }
-  /**
-   * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:289
-   */
-  public void endExceptionRange(Body b, ArrayList<soot.jimple.Stmt> list, soot.jimple.Stmt fresh_lbl_end_range) {
-    if (list == null) return;
-
-    b.addLabel(fresh_lbl_end_range);
-    list.add(fresh_lbl_end_range);
-    //list.add(b.previousStmt());
-  }
-  /**
-   * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:296
-   */
-  public void beginExceptionRange(Body b, ArrayList<soot.jimple.Stmt> list) {
-    if (list != null) b.addNextStmt(list);
   }
   /**
    * @declaredat ASTNode:1
@@ -770,32 +645,34 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * @declaredat ASTNode:38
    */
   public static final boolean generatedWithCacheCycle = false;
-  /** @apilevel internal 
-   * @declaredat ASTNode:41
-   */
-  public static final boolean generatedWithComponentCheck = false;
   /** @apilevel low-level 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:41
    */
   protected ASTNode parent;
   /** @apilevel low-level 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:44
    */
   protected ASTNode[] children;
   /** @apilevel internal 
+   * @declaredat ASTNode:48
+   */
+  private static ASTState state = new ASTState();
+  /** @apilevel internal 
    * @declaredat ASTNode:51
    */
-  private static ASTNode$State state = new ASTNode$State();
-  /** @apilevel internal 
-   * @declaredat ASTNode:54
-   */
-  public final ASTNode$State state() {
+  public final ASTState state() {
     return state;
+  }
+  /** @apilevel internal 
+   * @declaredat ASTNode:56
+   */
+  public final static ASTState resetState() {
+    return state = new ASTState();
   }
   /**
    * @return an iterator that can be used to iterate over the children of this node.
    * The iterator does not allow removing children.
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:65
    */
   public java.util.Iterator<T> astChildIterator() {
     return new java.util.Iterator<T>() {
@@ -818,7 +695,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     };
   }
   /** @return an object that can be used to iterate over the children of this node 
-   * @declaredat ASTNode:85
+   * @declaredat ASTNode:87
    */
   public Iterable<T> astChildren() {
     return new Iterable<T>() {
@@ -829,7 +706,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     };
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:95
+   * @declaredat ASTNode:97
    */
   public T getChild(int i) {
     ASTNode node = this.getChildNoTransform(i);
@@ -843,7 +720,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     return (T) node;
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:107
+   * @declaredat ASTNode:109
    */
   public void addChild(T node) {
     setChild(node, getNumChildNoTransform());
@@ -851,7 +728,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * <p><em>This method does not invoke AST transformations.</em></p>
    * @apilevel low-level
-   * @declaredat ASTNode:114
+   * @declaredat ASTNode:116
    */
   public final T getChildNoTransform(int i) {
     if (children == null) {
@@ -861,17 +738,17 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     return child;
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:122
+   * @declaredat ASTNode:124
    */
   protected int numChildren;
   /** @apilevel low-level 
-   * @declaredat ASTNode:125
+   * @declaredat ASTNode:127
    */
   protected int numChildren() {
     return numChildren;
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:130
+   * @declaredat ASTNode:132
    */
   public int getNumChild() {
     return numChildren();
@@ -879,13 +756,13 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * Behaves like getNumChild, but does not invoke AST transformations (rewrites).
    * @apilevel low-level
-   * @declaredat ASTNode:138
+   * @declaredat ASTNode:140
    */
   public final int getNumChildNoTransform() {
     return numChildren();
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:142
+   * @declaredat ASTNode:144
    */
   public void setChild(ASTNode node, int i) {
     if (children == null) {
@@ -905,7 +782,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     }
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:160
+   * @declaredat ASTNode:162
    */
   public void insertChild(ASTNode node, int i) {
     if (children == null) {
@@ -932,7 +809,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     }
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:185
+   * @declaredat ASTNode:187
    */
   public void removeChild(int i) {
     if (children != null) {
@@ -961,26 +838,26 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     }
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:212
+   * @declaredat ASTNode:214
    */
   public ASTNode getParent() {
     return (ASTNode) parent;
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:216
+   * @declaredat ASTNode:218
    */
   public void setParent(ASTNode node) {
     parent = node;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:274
+   * @declaredat ASTNode:285
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:278
+   * @declaredat ASTNode:289
    */
   public void flushTreeCache() {
     flushCache();
@@ -993,32 +870,32 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     }
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:289
+   * @declaredat ASTNode:300
    */
   public void flushCache() {
     flushAttrAndCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:293
+   * @declaredat ASTNode:304
    */
   public void flushAttrAndCollectionCache() {
     flushAttrCache();
     flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:298
+   * @declaredat ASTNode:309
    */
   public void flushAttrCache() {
     recursiveSpanStart_reset();
     recursiveSpanEnd_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:303
+   * @declaredat ASTNode:314
    */
   public void flushCollectionCache() {
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:306
+   * @declaredat ASTNode:317
    */
   public ASTNode<T> clone() throws CloneNotSupportedException {
     ASTNode node = (ASTNode) super.clone();
@@ -1026,7 +903,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:312
+   * @declaredat ASTNode:323
    */
   public ASTNode<T> copy() {
     try {
@@ -1046,7 +923,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:331
+   * @declaredat ASTNode:342
    */
   @Deprecated
   public ASTNode<T> fullCopy() {
@@ -1057,7 +934,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:341
+   * @declaredat ASTNode:352
    */
   public ASTNode<T> treeCopyNoTransform() {
     ASTNode tree = (ASTNode) copy();
@@ -1078,7 +955,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:361
+   * @declaredat ASTNode:372
    */
   public ASTNode<T> treeCopy() {
     ASTNode tree = (ASTNode) copy();
@@ -1096,7 +973,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * Performs a full traversal of the tree using getChild to trigger rewrites
    * @apilevel low-level
-   * @declaredat ASTNode:378
+   * @declaredat ASTNode:389
    */
   public void doFullTraversal() {
     for (int i = 0; i < getNumChild(); i++) {
@@ -1104,7 +981,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     }
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:384
+   * @declaredat ASTNode:395
    */
   protected boolean is$Equal(ASTNode n1, ASTNode n2) {
     if (n1 == null && n2 == null) return true;
@@ -1112,7 +989,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     return n1.is$Equal(n2);
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:390
+   * @declaredat ASTNode:401
    */
   protected boolean is$Equal(ASTNode node) {
     if (getClass() != node.getClass()) {
@@ -1135,11 +1012,13 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * @aspect <NoAspect>
    * @declaredat /home/olivier/projects/extendj/java4/frontend/ErrorCheck.jrag:283
    */
-    protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+    /** @apilevel internal */
+  protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     for (int i = 0; i < getNumChild(); i++) {
       getChild(i).collect_contributors_CompilationUnit_problems(_root, _map);
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
   }
 
@@ -1147,11 +1026,13 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * @aspect <NoAspect>
    * @declaredat /home/olivier/projects/extendj/soot8/backend/ResolverDependencies.jrag:12
    */
-    protected void collect_contributors_CompilationUnit_hierarchyDependencies(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+    /** @apilevel internal */
+  protected void collect_contributors_CompilationUnit_hierarchyDependencies(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     for (int i = 0; i < getNumChild(); i++) {
       getChild(i).collect_contributors_CompilationUnit_hierarchyDependencies(_root, _map);
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_hierarchyDependencies(HashSet<Type> collection) {
   }
 
@@ -1159,11 +1040,13 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * @aspect <NoAspect>
    * @declaredat /home/olivier/projects/extendj/soot8/backend/ResolverDependencies.jrag:13
    */
-    protected void collect_contributors_CompilationUnit_signatureDependencies(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+    /** @apilevel internal */
+  protected void collect_contributors_CompilationUnit_signatureDependencies(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     for (int i = 0; i < getNumChild(); i++) {
       getChild(i).collect_contributors_CompilationUnit_signatureDependencies(_root, _map);
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_signatureDependencies(HashSet<Type> collection) {
   }
 
@@ -1171,11 +1054,13 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * @aspect <NoAspect>
    * @declaredat /home/olivier/projects/extendj/java4/backend/InnerClasses.jrag:155
    */
-    protected void collect_contributors_TypeDecl_nestedTypes(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+    /** @apilevel internal */
+  protected void collect_contributors_TypeDecl_nestedTypes(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     for (int i = 0; i < getNumChild(); i++) {
       getChild(i).collect_contributors_TypeDecl_nestedTypes(_root, _map);
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_nestedTypes(LinkedList<TypeDecl> collection) {
   }
 
@@ -1183,11 +1068,13 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * @aspect <NoAspect>
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/EnumsCodegen.jrag:158
    */
-    protected void collect_contributors_TypeDecl_enumSwitchStatements(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+    /** @apilevel internal */
+  protected void collect_contributors_TypeDecl_enumSwitchStatements(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     for (int i = 0; i < getNumChild(); i++) {
       getChild(i).collect_contributors_TypeDecl_enumSwitchStatements(_root, _map);
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_enumSwitchStatements(LinkedList<SwitchStmt> collection) {
   }
 
@@ -1195,23 +1082,27 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * @aspect <NoAspect>
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:60
    */
-    protected void collect_contributors_TypeDecl_accessors(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+    /** @apilevel internal */
+  protected void collect_contributors_TypeDecl_accessors(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     for (int i = 0; i < getNumChild(); i++) {
       getChild(i).collect_contributors_TypeDecl_accessors(_root, _map);
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_accessors(HashSet<BodyDecl> collection) {
   }
 
   /**
    * @aspect <NoAspect>
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:112
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:120
    */
-    protected void collect_contributors_TypeDecl_bridgeMethods(TypeDecl _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+    /** @apilevel internal */
+  protected void collect_contributors_TypeDecl_bridgeMethods(TypeDecl _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     for (int i = 0; i < getNumChild(); i++) {
       getChild(i).collect_contributors_TypeDecl_bridgeMethods(_root, _map);
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_bridgeMethods(HashSet<MethodDecl> collection) {
   }
 
@@ -1219,23 +1110,27 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
    * @aspect <NoAspect>
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/ScopeCapture.jrag:90
    */
-    protected void collect_contributors_TypeDecl_typesConstructed(TypeDecl _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+    /** @apilevel internal */
+  protected void collect_contributors_TypeDecl_typesConstructed(TypeDecl _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     for (int i = 0; i < getNumChild(); i++) {
       getChild(i).collect_contributors_TypeDecl_typesConstructed(_root, _map);
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_typesConstructed(HashSet<ClassDecl> collection) {
   }
 
   /**
    * @aspect <NoAspect>
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:47
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:64
    */
-    protected void collect_contributors_BlockLambdaBody_lambdaReturns(Program _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+    /** @apilevel internal */
+  protected void collect_contributors_BlockLambdaBody_lambdaReturns(BlockLambdaBody _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     for (int i = 0; i < getNumChild(); i++) {
       getChild(i).collect_contributors_BlockLambdaBody_lambdaReturns(_root, _map);
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_BlockLambdaBody_lambdaReturns(ArrayList<ReturnStmt> collection) {
   }
 
@@ -1269,10 +1164,10 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1306
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1302
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1306")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1302")
   public boolean usesTypeVariable() {
     {
         for (int i = 0; i < getNumChild(); i++) {
@@ -1286,10 +1181,10 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * @attribute syn
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:21
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:24
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:21")
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:24")
   public boolean definesLabel() {
     boolean definesLabel_value = false;
     return definesLabel_value;
@@ -1297,10 +1192,21 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:778
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:419
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:778")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:419")
+  public Body.Label newLabel(Body b) {
+    Body.Label newLabel_Body_value = b.newLabel(this);
+    return newLabel_Body_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:421
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:421")
   public int srcSpanStart() {
     int srcSpanStart_value = getStart();
     return srcSpanStart_value;
@@ -1308,10 +1214,10 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:779
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:422
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:779")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:422")
   public int srcSpanEnd() {
     int srcSpanEnd_value = getEnd();
     return srcSpanEnd_value;
@@ -1321,7 +1227,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     recursiveSpanStart_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle recursiveSpanStart_computed = null;
+  protected ASTState.Cycle recursiveSpanStart_computed = null;
 
   /** @apilevel internal */
   protected int recursiveSpanStart_value;
@@ -1329,13 +1235,13 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:785
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:428
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:785")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:428")
   public int recursiveSpanStart() {
-    ASTNode$State state = state();
-    if (recursiveSpanStart_computed == ASTNode$State.NON_CYCLE || recursiveSpanStart_computed == state().cycle()) {
+    ASTState state = state();
+    if (recursiveSpanStart_computed == ASTState.NON_CYCLE || recursiveSpanStart_computed == state().cycle()) {
       return recursiveSpanStart_value;
     }
     recursiveSpanStart_value = recursiveSpanStart_compute();
@@ -1343,7 +1249,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
       recursiveSpanStart_computed = state().cycle();
     
     } else {
-      recursiveSpanStart_computed = ASTNode$State.NON_CYCLE;
+      recursiveSpanStart_computed = ASTState.NON_CYCLE;
     
     }
     return recursiveSpanStart_value;
@@ -1365,7 +1271,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     recursiveSpanEnd_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle recursiveSpanEnd_computed = null;
+  protected ASTState.Cycle recursiveSpanEnd_computed = null;
 
   /** @apilevel internal */
   protected int recursiveSpanEnd_value;
@@ -1373,13 +1279,13 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:797
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:440
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:797")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:440")
   public int recursiveSpanEnd() {
-    ASTNode$State state = state();
-    if (recursiveSpanEnd_computed == ASTNode$State.NON_CYCLE || recursiveSpanEnd_computed == state().cycle()) {
+    ASTState state = state();
+    if (recursiveSpanEnd_computed == ASTState.NON_CYCLE || recursiveSpanEnd_computed == state().cycle()) {
       return recursiveSpanEnd_value;
     }
     recursiveSpanEnd_value = recursiveSpanEnd_compute();
@@ -1387,7 +1293,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
       recursiveSpanEnd_computed = state().cycle();
     
     } else {
-      recursiveSpanEnd_computed = ASTNode$State.NON_CYCLE;
+      recursiveSpanEnd_computed = ASTState.NON_CYCLE;
     
     }
     return recursiveSpanEnd_value;
@@ -1404,6 +1310,53 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   
       return i;
     }
+  /**
+   * @attribute syn
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:452
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:452")
+  public soot.tagkit.Tag createTagSrcSpan() {
+    {
+        int srcStart = srcSpanStart();
+        if (srcStart == 0)
+          return new soot.tagkit.LineNumberTag(lineNumber());
+    
+        int     srcEnd    = srcSpanEnd();
+        int     line      = getLine  (srcStart);
+        int     endLine   = getLine  (srcEnd);
+        int     column    = getColumn(srcStart);
+        int     endColumn = getColumn(srcEnd);
+        String  s         = sourceFile();
+        s = s != null ? s.substring(s.lastIndexOf(java.io.File.separatorChar)+1) : "Unknown";
+    
+        return new soot.tagkit.SourceLnNamePosTag(s, line, endLine, column, endColumn);
+      }
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:686
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:686")
+  public soot.jimple.Constant emitConstant(Body b, Constant constant) {
+    {
+        soot.jimple.Constant v;
+    
+             if (constant instanceof Constant.ConstantLong    ) v =   LongConstant.v(constant.  longValue());
+        else if (constant instanceof Constant.ConstantFloat   ) v =  FloatConstant.v(constant. floatValue());
+        else if (constant instanceof Constant.ConstantDouble  ) v = DoubleConstant.v(constant.doubleValue());
+        else if (constant instanceof Constant.ConstantString  ) v = StringConstant.v(constant.stringValue());
+        else if (constant instanceof Constant.ConstantInt     ) v = IntType     .emitConstant(constant.    intValue(), b, this);
+        else if (constant instanceof Constant.ConstantChar    ) v = IntType     .emitConstant(constant.    intValue(), b, this);
+        else if (constant instanceof Constant.ConstantBoolean ) v = BooleanType .emitConstant(constant.booleanValue(), b, this);
+        else                                                    throw new Error("Unexpected constant");
+    
+        return b.setSrcLoc(v, this);
+      }
+  }
   /**
    * @attribute syn
    * @aspect Java2Rewrites
@@ -1446,10 +1399,10 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /** @return the enclosing compilation unit. 
    * @attribute inh
    * @aspect ClassPath
-   * @declaredat /home/olivier/projects/extendj/soot8/frontend/ClassPath.jrag:105
+   * @declaredat /home/olivier/projects/extendj/soot8/frontend/ClassPath.jrag:192
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="ClassPath", declaredAt="/home/olivier/projects/extendj/soot8/frontend/ClassPath.jrag:105")
+  @ASTNodeAnnotation.Source(aspect="ClassPath", declaredAt="/home/olivier/projects/extendj/soot8/frontend/ClassPath.jrag:192")
   public CompilationUnit compilationUnit() {
     CompilationUnit compilationUnit_value = getParent().Define_compilationUnit(this, null);
     return compilationUnit_value;
@@ -1675,7 +1628,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:227
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:207
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
    */
@@ -1815,7 +1768,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:154
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:158
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute handlesException
    */
@@ -1875,7 +1828,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:73
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:100
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute nestedScope
    */
@@ -1895,7 +1848,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:140
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:251
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupMethod
    */
@@ -1915,7 +1868,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:41
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:45
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeObject
    */
@@ -1935,7 +1888,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:42
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:46
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeCloneable
    */
@@ -1955,7 +1908,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:43
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:47
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeSerializable
    */
@@ -1975,7 +1928,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:55
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:59
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeBoolean
    */
@@ -1995,7 +1948,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:56
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:60
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeByte
    */
@@ -2015,7 +1968,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:57
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:61
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeShort
    */
@@ -2035,7 +1988,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:58
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:62
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeChar
    */
@@ -2055,7 +2008,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:59
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:63
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeInt
    */
@@ -2075,7 +2028,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:60
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:64
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeLong
    */
@@ -2095,7 +2048,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:61
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:65
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeFloat
    */
@@ -2115,7 +2068,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:62
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:66
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeDouble
    */
@@ -2135,7 +2088,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:63
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:67
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeString
    */
@@ -2155,7 +2108,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:66
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:70
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeVoid
    */
@@ -2175,7 +2128,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:69
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:73
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeNull
    */
@@ -2215,7 +2168,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:120
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:124
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute hasPackage
    */
@@ -2235,7 +2188,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:134
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:138
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupType
    */
@@ -2255,7 +2208,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1051
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:61
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupType
    */
@@ -2295,7 +2248,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:326
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:324
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute mayBePublic
    */
@@ -2315,7 +2268,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:327
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:325
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute mayBeProtected
    */
@@ -2335,7 +2288,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:328
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:326
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute mayBePrivate
    */
@@ -2375,7 +2328,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:314
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:308
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute mayBeFinal
    */
@@ -2415,7 +2368,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:323
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:321
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute mayBeVolatile
    */
@@ -2435,7 +2388,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:319
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:317
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute mayBeTransient
    */
@@ -2455,7 +2408,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:334
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:332
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute mayBeStrictfp
    */
@@ -2475,7 +2428,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:332
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:330
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute mayBeSynchronized
    */
@@ -2495,7 +2448,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:333
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:331
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute mayBeNative
    */
@@ -2635,7 +2588,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:217
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:215
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute nameType
    */
@@ -2655,7 +2608,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:233
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute isAnonymous
    */
@@ -2675,7 +2628,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:249
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:248
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute unknownField
    */
@@ -2695,7 +2648,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:255
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:254
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute unknownMethod
    */
@@ -2715,7 +2668,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:262
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:261
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute unknownConstructor
    */
@@ -2735,7 +2688,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:717
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:727
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute declType
    */
@@ -2755,7 +2708,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:577
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:573
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute enclosingBodyDecl
    */
@@ -2775,7 +2728,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:590
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:586
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute isMemberType
    */
@@ -2795,7 +2748,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:651
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:647
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute hostType
    */
@@ -2815,7 +2768,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:483
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:485
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute switchType
    */
@@ -2855,7 +2808,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:688
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:690
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute enclosingInstance
    */
@@ -2875,7 +2828,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:773
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:783
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute methodHost
    */
@@ -2895,7 +2848,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:194
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:210
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute inExplicitConstructorInvocation
    */
@@ -2915,7 +2868,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:204
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:220
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute enclosingExplicitConstructorHostType
    */
@@ -2935,7 +2888,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:210
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:256
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute inStaticContext
    */
@@ -3115,7 +3068,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:409
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:406
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute withinSuppressWarnings
    */
@@ -3135,7 +3088,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:538
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:535
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute withinDeprecatedAnnotation
    */
@@ -3215,7 +3168,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1391
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1390
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute fieldDecl
    */
@@ -3235,7 +3188,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1745
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1744
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeWildcard
    */
@@ -3255,7 +3208,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1754
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1753
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupWildcardExtends
    */
@@ -3275,7 +3228,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1768
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1767
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupWildcardSuper
    */
@@ -3295,7 +3248,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1796
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1795
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupLUBType
    */
@@ -3315,7 +3268,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1837
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1836
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupGLBType
    */
@@ -3375,7 +3328,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:96
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:108
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute getClassInstanceExpr
    */
@@ -3395,7 +3348,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:434
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:312
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute isAnonymousDecl
    */
@@ -3415,7 +3368,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:447
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:325
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute isExplicitGenericConstructorAccess
    */
@@ -3475,7 +3428,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:200
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:180
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute resourcePreviouslyDeclared
    */
@@ -3495,7 +3448,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:126
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:46
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute targetType
    */
@@ -3503,43 +3456,43 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     return false;
   }
   /** @apilevel internal */
-  public soot.jimple.Stmt Define_condition_false_label(ASTNode _callerNode, ASTNode _childNode) {
+  public Body.Label Define_condition_false_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
     ASTNode self = this;
     ASTNode parent = getParent();
-    while (parent != null && !parent.canDefine_condition_false_label(self, _callerNode)) {
+    while (parent != null && !parent.canDefine_condition_false_label(self, _callerNode, b)) {
       _callerNode = self;
       self = parent;
       parent = self.getParent();
     }
-    return parent.Define_condition_false_label(self, _callerNode);
-  }
-
-  /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:44
-   * @apilevel internal
-   * @return {@code true} if this node has an equation for the inherited attribute condition_false_label
-   */
-  protected boolean canDefine_condition_false_label(ASTNode _callerNode, ASTNode _childNode) {
-    return false;
-  }
-  /** @apilevel internal */
-  public soot.jimple.Stmt Define_condition_true_label(ASTNode _callerNode, ASTNode _childNode) {
-    ASTNode self = this;
-    ASTNode parent = getParent();
-    while (parent != null && !parent.canDefine_condition_true_label(self, _callerNode)) {
-      _callerNode = self;
-      self = parent;
-      parent = self.getParent();
-    }
-    return parent.Define_condition_true_label(self, _callerNode);
+    return parent.Define_condition_false_label(self, _callerNode, b);
   }
 
   /**
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:45
    * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute condition_false_label
+   */
+  protected boolean canDefine_condition_false_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
+    return false;
+  }
+  /** @apilevel internal */
+  public Body.Label Define_condition_true_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
+    ASTNode self = this;
+    ASTNode parent = getParent();
+    while (parent != null && !parent.canDefine_condition_true_label(self, _callerNode, b)) {
+      _callerNode = self;
+      self = parent;
+      parent = self.getParent();
+    }
+    return parent.Define_condition_true_label(self, _callerNode, b);
+  }
+
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:46
+   * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute condition_true_label
    */
-  protected boolean canDefine_condition_true_label(ASTNode _callerNode, ASTNode _childNode) {
+  protected boolean canDefine_condition_true_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
     return false;
   }
   /** @apilevel internal */
@@ -3555,7 +3508,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:539
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:476
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute hostingCtorHack
    */
@@ -3575,7 +3528,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:379
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:313
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute enclosedByExceptionHandler
    */
@@ -3583,23 +3536,23 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     return false;
   }
   /** @apilevel internal */
-  public ArrayList Define_exceptionRanges(ASTNode _callerNode, ASTNode _childNode) {
+  public ArrayList<soot.jimple.Stmt> Define_exceptionRanges(ASTNode _callerNode, ASTNode _childNode, Body b) {
     ASTNode self = this;
     ASTNode parent = getParent();
-    while (parent != null && !parent.canDefine_exceptionRanges(self, _callerNode)) {
+    while (parent != null && !parent.canDefine_exceptionRanges(self, _callerNode, b)) {
       _callerNode = self;
       self = parent;
       parent = self.getParent();
     }
-    return parent.Define_exceptionRanges(self, _callerNode);
+    return parent.Define_exceptionRanges(self, _callerNode, b);
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:483
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:427
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute exceptionRanges
    */
-  protected boolean canDefine_exceptionRanges(ASTNode _callerNode, ASTNode _childNode) {
+  protected boolean canDefine_exceptionRanges(ASTNode _callerNode, ASTNode _childNode, Body b) {
     return false;
   }
   /** @apilevel internal */
@@ -3615,7 +3568,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/soot8/frontend/ClassPath.jrag:107
+   * @declaredat /home/olivier/projects/extendj/soot8/frontend/ClassPath.jrag:194
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute compilationUnit
    */
@@ -3663,6 +3616,26 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
     return false;
   }
   /** @apilevel internal */
+  public boolean Define_canResolve(ASTNode _callerNode, ASTNode _childNode) {
+    ASTNode self = this;
+    ASTNode parent = getParent();
+    while (parent != null && !parent.canDefine_canResolve(self, _callerNode)) {
+      _callerNode = self;
+      self = parent;
+      parent = self.getParent();
+    }
+    return parent.Define_canResolve(self, _callerNode);
+  }
+
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:411
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute canResolve
+   */
+  protected boolean canDefine_canResolve(ASTNode _callerNode, ASTNode _childNode) {
+    return false;
+  }
+  /** @apilevel internal */
   public TypeDecl Define_enclosingType(ASTNode _callerNode, ASTNode _childNode) {
     ASTNode self = this;
     ASTNode parent = getParent();
@@ -3675,7 +3648,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:766
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:758
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute enclosingType
    */
@@ -3695,7 +3668,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:765
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:757
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute isNestedType
    */
@@ -3715,7 +3688,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:612
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:608
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute isLocalClass
    */
@@ -3735,7 +3708,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:770
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:780
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute hostPackage
    */
@@ -3795,7 +3768,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:583
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:565
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute inEnumInitializer
    */
@@ -3815,7 +3788,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:862
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:854
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeVariableContext
    */
@@ -3835,7 +3808,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:430
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:523
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute enclosingBlock
    */
@@ -3875,7 +3848,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:397
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:581
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
    */
@@ -3895,7 +3868,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:398
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:582
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute invocationContext
    */
@@ -3915,7 +3888,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:399
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:583
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute castContext
    */
@@ -3935,7 +3908,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:400
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:584
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute stringContext
    */
@@ -3955,7 +3928,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:401
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:585
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute numericContext
    */
@@ -4255,7 +4228,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:308
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:302
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute declarationModifiers
    */
@@ -4275,7 +4248,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:311
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:305
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute declarationType
    */
@@ -4295,7 +4268,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1648
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1647
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute erasedField
    */
@@ -4315,7 +4288,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:144
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:124
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute reachableCatchClause
    */
@@ -4375,7 +4348,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:503
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:539
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute inferredType
    */

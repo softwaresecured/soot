@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/Lambda.ast:6
+ * @astdecl InferredParameterDeclaration : ASTNode ::= <ID:String>;
  * @production InferredParameterDeclaration : {@link ASTNode} ::= <span class="component">&lt;ID:String&gt;</span>;
 
  */
@@ -110,6 +113,13 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
     out.print(name());
   }
   /**
+   * @aspect PrettyPrintUtil8
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/PrettyPrintUtil.jadd:71
+   */
+  @Override public String toString() {
+    return getID();
+  }
+  /**
    * @declaredat ASTNode:1
    */
   public InferredParameterDeclaration() {
@@ -127,30 +137,35 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID"},
+    type = {"String"},
+    kind = {"Token"}
+  )
   public InferredParameterDeclaration(String p0) {
     setID(p0);
   }
   /**
-   * @declaredat ASTNode:15
+   * @declaredat ASTNode:20
    */
   public InferredParameterDeclaration(beaver.Symbol p0) {
     setID(p0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -160,20 +175,20 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
     inferredType_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public InferredParameterDeclaration clone() throws CloneNotSupportedException {
     InferredParameterDeclaration node = (InferredParameterDeclaration) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public InferredParameterDeclaration copy() {
     try {
@@ -193,7 +208,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:65
+   * @declaredat ASTNode:70
    */
   @Deprecated
   public InferredParameterDeclaration fullCopy() {
@@ -204,7 +219,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:75
+   * @declaredat ASTNode:80
    */
   public InferredParameterDeclaration treeCopyNoTransform() {
     InferredParameterDeclaration tree = (InferredParameterDeclaration) copy();
@@ -225,7 +240,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:95
+   * @declaredat ASTNode:100
    */
   public InferredParameterDeclaration treeCopy() {
     InferredParameterDeclaration tree = (InferredParameterDeclaration) copy();
@@ -241,7 +256,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:109
+   * @declaredat ASTNode:114
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((InferredParameterDeclaration) node).tokenString_ID);    
@@ -289,7 +304,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
     isEffectivelyFinal_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isEffectivelyFinal_computed = null;
+  protected ASTState.Cycle isEffectivelyFinal_computed = null;
 
   /** @apilevel internal */
   protected boolean isEffectivelyFinal_value;
@@ -302,8 +317,8 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="EffectivelyFinal", declaredAt="/home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:136")
   public boolean isEffectivelyFinal() {
-    ASTNode$State state = state();
-    if (isEffectivelyFinal_computed == ASTNode$State.NON_CYCLE || isEffectivelyFinal_computed == state().cycle()) {
+    ASTState state = state();
+    if (isEffectivelyFinal_computed == ASTState.NON_CYCLE || isEffectivelyFinal_computed == state().cycle()) {
       return isEffectivelyFinal_value;
     }
     isEffectivelyFinal_value = isFinal() || !inhModifiedInScope(this);
@@ -311,7 +326,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
       isEffectivelyFinal_computed = state().cycle();
     
     } else {
-      isEffectivelyFinal_computed = ASTNode$State.NON_CYCLE;
+      isEffectivelyFinal_computed = ASTState.NON_CYCLE;
     
     }
     return isEffectivelyFinal_value;
@@ -627,10 +642,10 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:278
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:278")
   public boolean isProtected() {
     boolean isProtected_value = getModifiers().isProtected();
     return isProtected_value;
@@ -638,13 +653,24 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280")
   public boolean isPrivate() {
     boolean isPrivate_value = getModifiers().isPrivate();
     return isPrivate_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:74
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:74")
+  public soot.Type sootType() {
+    soot.Type sootType_value = type().sootType();
+    return sootType_value;
   }
   /**
    * @attribute syn
@@ -676,8 +702,8 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="EnclosingLambda", declaredAt="/home/olivier/projects/extendj/java8/frontend/EnclosingLambda.jrag:35")
   public LambdaExpr enclosingLambda() {
-    ASTNode$State state = state();
-    if (enclosingLambda_computed == ASTNode$State.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
+    ASTState state = state();
+    if (enclosingLambda_computed == ASTState.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
       return enclosingLambda_value;
     }
     enclosingLambda_value = getParent().Define_enclosingLambda(this, null);
@@ -685,7 +711,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
       enclosingLambda_computed = state().cycle();
     
     } else {
-      enclosingLambda_computed = ASTNode$State.NON_CYCLE;
+      enclosingLambda_computed = ASTState.NON_CYCLE;
     
     }
     return enclosingLambda_value;
@@ -696,7 +722,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
     enclosingLambda_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle enclosingLambda_computed = null;
+  protected ASTState.Cycle enclosingLambda_computed = null;
 
   /** @apilevel internal */
   protected LambdaExpr enclosingLambda_value;
@@ -712,10 +738,10 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
     Object _parameters = name;
     if (lookupVariable_String_computed == null) lookupVariable_String_computed = new java.util.HashMap(4);
     if (lookupVariable_String_values == null) lookupVariable_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (lookupVariable_String_values.containsKey(_parameters) && lookupVariable_String_computed != null
+    ASTState state = state();
+    if (lookupVariable_String_values.containsKey(_parameters)
         && lookupVariable_String_computed.containsKey(_parameters)
-        && (lookupVariable_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || lookupVariable_String_computed.get(_parameters) == state().cycle())) {
+        && (lookupVariable_String_computed.get(_parameters) == ASTState.NON_CYCLE || lookupVariable_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<Variable>) lookupVariable_String_values.get(_parameters);
     }
     SimpleSet<Variable> lookupVariable_String_value = getParent().Define_lookupVariable(this, null, name);
@@ -725,14 +751,14 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
     
     } else {
       lookupVariable_String_values.put(_parameters, lookupVariable_String_value);
-      lookupVariable_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      lookupVariable_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return lookupVariable_String_value;
   }
   /** @apilevel internal */
   private void lookupVariable_String_reset() {
-    lookupVariable_String_computed = new java.util.HashMap(4);
+    lookupVariable_String_computed = null;
     lookupVariable_String_values = null;
   }
   /** @apilevel internal */
@@ -775,13 +801,13 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
   /**
    * @attribute inh
    * @aspect LambdaParametersInference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:502
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:538
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:502")
+  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:538")
   public TypeDecl inferredType() {
-    ASTNode$State state = state();
-    if (inferredType_computed == ASTNode$State.NON_CYCLE || inferredType_computed == state().cycle()) {
+    ASTState state = state();
+    if (inferredType_computed == ASTState.NON_CYCLE || inferredType_computed == state().cycle()) {
       return inferredType_value;
     }
     inferredType_value = getParent().Define_inferredType(this, null);
@@ -789,7 +815,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
       inferredType_computed = state().cycle();
     
     } else {
-      inferredType_computed = ASTNode$State.NON_CYCLE;
+      inferredType_computed = ASTState.NON_CYCLE;
     
     }
     return inferredType_value;
@@ -800,7 +826,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
     inferredType_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle inferredType_computed = null;
+  protected ASTState.Cycle inferredType_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl inferredType_value;
@@ -819,10 +845,10 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:641
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:637
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:641")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:637")
   public String hostPackage() {
     String hostPackage_value = getParent().Define_hostPackage(this, null);
     return hostPackage_value;
@@ -830,10 +856,10 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384")
   public FieldDecl fieldDecl() {
     FieldDecl fieldDecl_value = getParent().Define_fieldDecl(this, null);
     return fieldDecl_value;
@@ -846,6 +872,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java8/frontend/NameCheck.jrag:39
     {
@@ -858,6 +885,7 @@ public class InferredParameterDeclaration extends ASTNode<ASTNode> implements Cl
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : nameProblems()) {

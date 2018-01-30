@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:77
+ * @astdecl MethodDeclSubstituted : MethodDecl ::= <Original:MethodDecl>;
  * @production MethodDeclSubstituted : {@link MethodDecl} ::= <span class="component">&lt;Original:MethodDecl&gt;</span>;
 
  */
@@ -62,6 +65,11 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
   /**
    * @declaredat ASTNode:16
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID", "Parameter", "Exception", "Block", "Original"},
+    type = {"Modifiers", "Access", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Block>", "MethodDecl"},
+    kind = {"Child", "Child", "Token", "List", "List", "Opt", "Token"}
+  )
   public MethodDeclSubstituted(Modifiers p0, Access p1, String p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, MethodDecl p6) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -72,7 +80,7 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
     setOriginal(p6);
   }
   /**
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public MethodDeclSubstituted(Modifiers p0, Access p1, beaver.Symbol p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, MethodDecl p6) {
     setChild(p0, 0);
@@ -84,40 +92,40 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
     setOriginal(p6);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   protected int numChildren() {
     return 5;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     sourceMethodDecl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:54
+   * @declaredat ASTNode:59
    */
   public MethodDeclSubstituted clone() throws CloneNotSupportedException {
     MethodDeclSubstituted node = (MethodDeclSubstituted) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   public MethodDeclSubstituted copy() {
     try {
@@ -137,7 +145,7 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:78
+   * @declaredat ASTNode:83
    */
   @Deprecated
   public MethodDeclSubstituted fullCopy() {
@@ -148,7 +156,7 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:88
+   * @declaredat ASTNode:93
    */
   public MethodDeclSubstituted treeCopyNoTransform() {
     MethodDeclSubstituted tree = (MethodDeclSubstituted) copy();
@@ -169,7 +177,7 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:108
+   * @declaredat ASTNode:113
    */
   public MethodDeclSubstituted treeCopy() {
     MethodDeclSubstituted tree = (MethodDeclSubstituted) copy();
@@ -185,7 +193,7 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:122
+   * @declaredat ASTNode:127
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((MethodDeclSubstituted) node).tokenString_ID) && (tokenMethodDecl_Original == ((MethodDeclSubstituted) node).tokenMethodDecl_Original);    
@@ -565,10 +573,10 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1659
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1659")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658")
   public MethodDecl erasedMethod() {
     MethodDecl erasedMethod_value = getOriginal().erasedMethod();
     return erasedMethod_value;
@@ -579,7 +587,7 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
     sourceMethodDecl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle sourceMethodDecl_computed = null;
+  protected ASTState.Cycle sourceMethodDecl_computed = null;
 
   /** @apilevel internal */
   protected MethodDecl sourceMethodDecl_value;
@@ -587,13 +595,13 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1887
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1887")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886")
   public MethodDecl sourceMethodDecl() {
-    ASTNode$State state = state();
-    if (sourceMethodDecl_computed == ASTNode$State.NON_CYCLE || sourceMethodDecl_computed == state().cycle()) {
+    ASTState state = state();
+    if (sourceMethodDecl_computed == ASTState.NON_CYCLE || sourceMethodDecl_computed == state().cycle()) {
       return sourceMethodDecl_value;
     }
     sourceMethodDecl_value = getOriginal().sourceMethodDecl();
@@ -601,7 +609,7 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
       sourceMethodDecl_computed = state().cycle();
     
     } else {
-      sourceMethodDecl_computed = ASTNode$State.NON_CYCLE;
+      sourceMethodDecl_computed = ASTState.NON_CYCLE;
     
     }
     return sourceMethodDecl_value;
@@ -612,10 +620,10 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
    * @return type parameters for this declaration.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:355
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:448
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:355")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:448")
   public List<TypeVariable> typeParameters() {
     List<TypeVariable> typeParameters_value = sourceMethodDecl().typeParameters();
     return typeParameters_value;
@@ -626,10 +634,10 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
    * Otherwise, an unknown method is returned.
    * @attribute syn
    * @aspect LambdaParametersInference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:532
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:568
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:532")
+  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:568")
   public Option<MethodDecl> nonWildcardParameterization() {
     {
         TypeDecl host = hostType();
@@ -659,10 +667,10 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
    * the source declaration being identical to the given method.
    * @attribute syn
    * @aspect LambdaParametersInference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:561
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:597
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:561")
+  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:597")
   public boolean isSubstitutionOf(MethodDecl method) {
     boolean isSubstitutionOf_MethodDecl_value = sourceMethodDecl() == method;
     return isSubstitutionOf_MethodDecl_value;

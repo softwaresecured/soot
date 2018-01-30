@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:167
+ * @astdecl FieldDecl : MemberDecl ::= Modifiers TypeAccess:Access Declarator:FieldDeclarator*;
  * @production FieldDecl : {@link MemberDecl} ::= <span class="component">{@link Modifiers}</span> <span class="component">TypeAccess:{@link Access}</span> <span class="component">Declarator:{@link FieldDeclarator}*</span>;
 
  */
@@ -66,7 +69,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1472
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1471
    */
   public BodyDecl signatureCopy() {
     List<FieldDeclarator> decls = new List<FieldDeclarator>();
@@ -81,7 +84,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1569
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1568
    */
   public BodyDecl erasedCopy() {
     List<FieldDeclarator> decls = new List<FieldDeclarator>();
@@ -96,11 +99,11 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   }
   /**
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:263
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:241
    */
-  public void jimplify1() {
+  public void jimpleDeclare() {
     for (FieldDeclarator f : getDeclarators())
-      f.jimplify1();
+      f.jimpleDeclare();
   }
   /**
    * @declaredat ASTNode:1
@@ -122,26 +125,31 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "Declarator"},
+    type = {"Modifiers", "Access", "List<FieldDeclarator>"},
+    kind = {"Child", "Child", "List"}
+  )
   public FieldDecl(Modifiers p0, Access p1, List<FieldDeclarator> p2) {
     setChild(p0, 0);
     setChild(p1, 1);
     setChild(p2, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -150,20 +158,20 @@ public class FieldDecl extends MemberDecl implements Cloneable {
     usesTypeVariable_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public FieldDecl clone() throws CloneNotSupportedException {
     FieldDecl node = (FieldDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public FieldDecl copy() {
     try {
@@ -183,7 +191,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:65
+   * @declaredat ASTNode:70
    */
   @Deprecated
   public FieldDecl fullCopy() {
@@ -194,7 +202,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:75
+   * @declaredat ASTNode:80
    */
   public FieldDecl treeCopyNoTransform() {
     FieldDecl tree = (FieldDecl) copy();
@@ -215,7 +223,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:95
+   * @declaredat ASTNode:100
    */
   public FieldDecl treeCopy() {
     FieldDecl tree = (FieldDecl) copy();
@@ -231,7 +239,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:109
+   * @declaredat ASTNode:114
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -447,27 +455,27 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   public boolean assignedAfter(Variable v) {
     Object _parameters = v;
     if (assignedAfter_Variable_values == null) assignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfter_Variable_value = getDeclarator(getNumDeclarator() - 1).assignedAfter(v);
-        if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfter_Variable_value;
         }
@@ -479,7 +487,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfter_Variable_value = getDeclarator(getNumDeclarator() - 1).assignedAfter(v);
-      if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfter_Variable_value;
       }
@@ -498,27 +506,27 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = getDeclarator(getNumDeclarator() - 1).unassignedAfter(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -530,7 +538,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = getDeclarator(getNumDeclarator() - 1).unassignedAfter(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -542,10 +550,10 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:130
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:128
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:130")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:128")
   public Collection<Problem> modifierProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -569,13 +577,24 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:249
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:247
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:249")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:247")
   public boolean isSynthetic() {
     boolean isSynthetic_value = getModifiers().isSynthetic();
     return isSynthetic_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282")
+  public boolean isPublic() {
+    boolean isPublic_value = getModifiers().isPublic() || hostType().isInterfaceDecl();
+    return isPublic_value;
   }
   /**
    * @attribute syn
@@ -584,9 +603,20 @@ public class FieldDecl extends MemberDecl implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:284")
-  public boolean isPublic() {
-    boolean isPublic_value = getModifiers().isPublic() || hostType().isInterfaceDecl();
-    return isPublic_value;
+  public boolean isPrivate() {
+    boolean isPrivate_value = getModifiers().isPrivate();
+    return isPrivate_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:285
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:285")
+  public boolean isProtected() {
+    boolean isProtected_value = getModifiers().isProtected();
+    return isProtected_value;
   }
   /**
    * @attribute syn
@@ -595,20 +625,9 @@ public class FieldDecl extends MemberDecl implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:286")
-  public boolean isPrivate() {
-    boolean isPrivate_value = getModifiers().isPrivate();
-    return isPrivate_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:287
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:287")
-  public boolean isProtected() {
-    boolean isProtected_value = getModifiers().isProtected();
-    return isProtected_value;
+  public boolean isStatic() {
+    boolean isStatic_value = getModifiers().isStatic() || hostType().isInterfaceDecl();
+    return isStatic_value;
   }
   /**
    * @attribute syn
@@ -617,9 +636,20 @@ public class FieldDecl extends MemberDecl implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:288")
-  public boolean isStatic() {
-    boolean isStatic_value = getModifiers().isStatic() || hostType().isInterfaceDecl();
-    return isStatic_value;
+  public boolean isFinal() {
+    boolean isFinal_value = getModifiers().isFinal() || hostType().isInterfaceDecl();
+    return isFinal_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:289
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:289")
+  public boolean isTransient() {
+    boolean isTransient_value = getModifiers().isTransient();
+    return isTransient_value;
   }
   /**
    * @attribute syn
@@ -628,28 +658,6 @@ public class FieldDecl extends MemberDecl implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:290")
-  public boolean isFinal() {
-    boolean isFinal_value = getModifiers().isFinal() || hostType().isInterfaceDecl();
-    return isFinal_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:291
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:291")
-  public boolean isTransient() {
-    boolean isTransient_value = getModifiers().isTransient();
-    return isTransient_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:292
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:292")
   public boolean isVolatile() {
     boolean isVolatile_value = getModifiers().isVolatile();
     return isVolatile_value;
@@ -657,10 +665,10 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:241
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:320
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:241")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:320")
   public boolean hasModifiers() {
     boolean hasModifiers_value = getModifiers().getNumModifier() > 0;
     return hasModifiers_value;
@@ -668,10 +676,10 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:269
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:268
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:269")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:268")
   public TypeDecl type() {
     TypeDecl type_value = getTypeAccess().type();
     return type_value;
@@ -696,10 +704,10 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:428
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:425
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:428")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:425")
   public boolean hasAnnotationSuppressWarnings(String annot) {
     boolean hasAnnotationSuppressWarnings_String_value = getModifiers().hasAnnotationSuppressWarnings(annot);
     return hasAnnotationSuppressWarnings_String_value;
@@ -709,7 +717,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
     usesTypeVariable_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle usesTypeVariable_computed = null;
+  protected ASTState.Cycle usesTypeVariable_computed = null;
 
   /** @apilevel internal */
   protected boolean usesTypeVariable_value;
@@ -717,13 +725,13 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1319
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1315
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1319")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1315")
   public boolean usesTypeVariable() {
-    ASTNode$State state = state();
-    if (usesTypeVariable_computed == ASTNode$State.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {
+    ASTState state = state();
+    if (usesTypeVariable_computed == ASTState.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {
       return usesTypeVariable_value;
     }
     usesTypeVariable_value = getTypeAccess().usesTypeVariable();
@@ -731,7 +739,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       usesTypeVariable_computed = state().cycle();
     
     } else {
-      usesTypeVariable_computed = ASTNode$State.NON_CYCLE;
+      usesTypeVariable_computed = ASTState.NON_CYCLE;
     
     }
     return usesTypeVariable_value;
@@ -739,10 +747,10 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1715
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1715")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714")
   public boolean isSubstitutable() {
     boolean isSubstitutable_value = !isStatic();
     return isSubstitutable_value;
@@ -801,10 +809,10 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect GenerateClassfile
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:169
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:171
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenerateClassfile", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:169")
+  @ASTNodeAnnotation.Source(aspect="GenerateClassfile", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:171")
   public boolean isField() {
     boolean isField_value = true;
     return isField_value;
@@ -830,6 +838,11 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return getParent().Define_declaredBefore(this, _callerNode, decl);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DeclareBeforeUse.jrag:58
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declaredBefore
+   */
   protected boolean canDefine_declaredBefore(ASTNode _callerNode, ASTNode _childNode, Variable decl) {
     return true;
   }
@@ -847,6 +860,11 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return getParent().Define_isIncOrDec(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:66
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isIncOrDec
+   */
   protected boolean canDefine_isIncOrDec(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -864,6 +882,11 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return super.Define_assignedBefore(_callerNode, _childNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -881,11 +904,16 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return super.Define_unassignedBefore(_callerNode, _childNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:115
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
    * @apilevel internal
    */
   public boolean Define_handlesException(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
@@ -902,118 +930,158 @@ public class FieldDecl extends MemberDecl implements Cloneable {
         return true;
       }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute handlesException
+   */
   protected boolean canDefine_handlesException(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:432
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:430
    * @apilevel internal
    */
   public boolean Define_mayBePublic(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:314
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:312
       return true;
     }
     else {
       return getParent().Define_mayBePublic(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:430
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBePublic
+   */
   protected boolean canDefine_mayBePublic(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:432
    * @apilevel internal
    */
   public boolean Define_mayBeProtected(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:315
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:313
       return true;
     }
     else {
       return getParent().Define_mayBeProtected(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:432
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeProtected
+   */
   protected boolean canDefine_mayBeProtected(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:433
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:431
    * @apilevel internal
    */
   public boolean Define_mayBePrivate(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:316
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:314
       return true;
     }
     else {
       return getParent().Define_mayBePrivate(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:431
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBePrivate
+   */
   protected boolean canDefine_mayBePrivate(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:435
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:433
    * @apilevel internal
    */
   public boolean Define_mayBeStatic(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:317
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:315
       return true;
     }
     else {
       return getParent().Define_mayBeStatic(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:433
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeStatic
+   */
   protected boolean canDefine_mayBeStatic(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:436
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
    * @apilevel internal
    */
   public boolean Define_mayBeFinal(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:318
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:316
       return true;
     }
     else {
       return getParent().Define_mayBeFinal(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeFinal
+   */
   protected boolean canDefine_mayBeFinal(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:439
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:437
    * @apilevel internal
    */
   public boolean Define_mayBeTransient(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:319
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:317
       return true;
     }
     else {
       return getParent().Define_mayBeTransient(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:437
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeTransient
+   */
   protected boolean canDefine_mayBeTransient(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:438
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:436
    * @apilevel internal
    */
   public boolean Define_mayBeVolatile(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:320
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:318
       return true;
     }
     else {
       return getParent().Define_mayBeVolatile(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:436
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeVolatile
+   */
   protected boolean canDefine_mayBeVolatile(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1030,16 +1098,21 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:713
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
    * @apilevel internal
    */
   public TypeDecl Define_declType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getDeclaratorListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:279
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:278
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return null;
     }
@@ -1047,17 +1120,27 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return getParent().Define_declType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declType
+   */
   protected boolean canDefine_declType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:207
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
    * @apilevel internal
    */
   public boolean Define_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return isStatic();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inStaticContext
+   */
   protected boolean canDefine_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1075,6 +1158,11 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return getParent().Define_declarationModifiers(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:133
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declarationModifiers
+   */
   protected boolean canDefine_declarationModifiers(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1092,6 +1180,11 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return getParent().Define_declarationType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:144
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declarationType
+   */
   protected boolean canDefine_declarationType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1108,27 +1201,37 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return getParent().Define_mayUseAnnotationTarget(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:131
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayUseAnnotationTarget
+   */
   protected boolean canDefine_mayUseAnnotationTarget(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:581
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:563
    * @apilevel internal
    */
   public boolean Define_inEnumInitializer(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return !isStatic() && hostType().isEnumDecl();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:563
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inEnumInitializer
+   */
   protected boolean canDefine_inEnumInitializer(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
    * @apilevel internal
    */
   public FieldDecl Define_fieldDecl(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getDeclaratorListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1387
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1386
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return this;
     }
@@ -1136,16 +1239,21 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return getParent().Define_fieldDecl(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute fieldDecl
+   */
   protected boolean canDefine_fieldDecl(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1644
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
    * @apilevel internal
    */
   public FieldDeclarator Define_erasedField(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getDeclaratorListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1646
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1645
       int index = _callerNode.getIndexOfChild(_childNode);
       return getDeclarator(index);
     }
@@ -1153,6 +1261,11 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return getParent().Define_erasedField(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute erasedField
+   */
   protected boolean canDefine_erasedField(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1170,6 +1283,11 @@ public class FieldDecl extends MemberDecl implements Cloneable {
       return getParent().Define_inhModifiedInScope(this, _callerNode, var);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inhModifiedInScope
+   */
   protected boolean canDefine_inhModifiedInScope(ASTNode _callerNode, ASTNode _childNode, Variable var) {
     return true;
   }
@@ -1181,8 +1299,9 @@ public class FieldDecl extends MemberDecl implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:128
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:126
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -1193,6 +1312,7 @@ public class FieldDecl extends MemberDecl implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : modifierProblems()) {

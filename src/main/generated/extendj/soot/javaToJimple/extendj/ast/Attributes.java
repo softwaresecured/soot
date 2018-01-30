@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -385,8 +387,17 @@ import soot.coffi.CoffiMethodSource;
                 p.println("      Class " + inner_class_name + " is inner (" + inner_name + ")");
               }
               typeDecl.setID(inner_name);
+
+              // Replace non-annotation modifiers:
+              List<Modifier> prevModifiers = typeDecl.getModifiers().getModifierList();
               typeDecl.setModifiers(
                   AbstractClassfileParser.modifiers(inner_class_access_flags & 0x041f));
+              for (Modifier mod : prevModifiers) {
+                if (mod instanceof Annotation) {
+                  typeDecl.getModifiers().addModifier(mod);
+                }
+              }
+
               if (p.outerClassNameEquals(outer_class_name)) {
                 MemberTypeDecl m = null;
                 if (typeDecl instanceof ClassDecl) {

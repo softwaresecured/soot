@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/IntersectionCasts.ast:1
+ * @astdecl IntersectionCastExpr : Expr ::= TypeAccess:Access TypeList:Access* Expr;
  * @production IntersectionCastExpr : {@link Expr} ::= <span class="component">TypeAccess:{@link Access}</span> <span class="component">TypeList:{@link Access}*</span> <span class="component">{@link Expr}</span>;
 
  */
@@ -79,46 +82,51 @@ public class IntersectionCastExpr extends Expr implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"TypeAccess", "TypeList", "Expr"},
+    type = {"Access", "List<Access>", "Expr"},
+    kind = {"Child", "List", "Child"}
+  )
   public IntersectionCastExpr(Access p0, List<Access> p1, Expr p2) {
     setChild(p0, 0);
     setChild(p1, 1);
     setChild(p2, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     type_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public IntersectionCastExpr clone() throws CloneNotSupportedException {
     IntersectionCastExpr node = (IntersectionCastExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public IntersectionCastExpr copy() {
     try {
@@ -138,7 +146,7 @@ public class IntersectionCastExpr extends Expr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   @Deprecated
   public IntersectionCastExpr fullCopy() {
@@ -149,7 +157,7 @@ public class IntersectionCastExpr extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:78
    */
   public IntersectionCastExpr treeCopyNoTransform() {
     IntersectionCastExpr tree = (IntersectionCastExpr) copy();
@@ -170,7 +178,7 @@ public class IntersectionCastExpr extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:93
+   * @declaredat ASTNode:98
    */
   public IntersectionCastExpr treeCopy() {
     IntersectionCastExpr tree = (IntersectionCastExpr) copy();
@@ -186,7 +194,7 @@ public class IntersectionCastExpr extends Expr implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:107
+   * @declaredat ASTNode:112
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -359,7 +367,7 @@ public class IntersectionCastExpr extends Expr implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -372,8 +380,8 @@ public class IntersectionCastExpr extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:36")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = unknownType();
@@ -381,10 +389,25 @@ public class IntersectionCastExpr extends Expr implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    {
+        return getExpr().type().emitCastTo(b,
+          getExpr().eval(b),
+          type(),
+          this);
+      }
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {

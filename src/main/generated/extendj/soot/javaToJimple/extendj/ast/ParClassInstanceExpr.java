@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/GenericMethods.ast:22
+ * @astdecl ParClassInstanceExpr : ClassInstanceExpr ::= TypeArgument:Access*;
  * @production ParClassInstanceExpr : {@link ClassInstanceExpr} ::= <span class="component">TypeArgument:{@link Access}*</span>;
 
  */
@@ -77,6 +80,11 @@ public class ParClassInstanceExpr extends ClassInstanceExpr implements Cloneable
   /**
    * @declaredat ASTNode:16
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Access", "Arg", "TypeDecl", "TypeArgument"},
+    type = {"Access", "List<Expr>", "Opt<TypeDecl>", "List<Access>"},
+    kind = {"Child", "List", "Opt", "List"}
+  )
   public ParClassInstanceExpr(Access p0, List<Expr> p1, Opt<TypeDecl> p2, List<Access> p3) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -84,39 +92,39 @@ public class ParClassInstanceExpr extends ClassInstanceExpr implements Cloneable
     setChild(p3, 3);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   protected int numChildren() {
     return 4;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public ParClassInstanceExpr clone() throws CloneNotSupportedException {
     ParClassInstanceExpr node = (ParClassInstanceExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public ParClassInstanceExpr copy() {
     try {
@@ -136,7 +144,7 @@ public class ParClassInstanceExpr extends ClassInstanceExpr implements Cloneable
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:65
+   * @declaredat ASTNode:70
    */
   @Deprecated
   public ParClassInstanceExpr fullCopy() {
@@ -147,7 +155,7 @@ public class ParClassInstanceExpr extends ClassInstanceExpr implements Cloneable
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:75
+   * @declaredat ASTNode:80
    */
   public ParClassInstanceExpr treeCopyNoTransform() {
     ParClassInstanceExpr tree = (ParClassInstanceExpr) copy();
@@ -168,7 +176,7 @@ public class ParClassInstanceExpr extends ClassInstanceExpr implements Cloneable
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:95
+   * @declaredat ASTNode:100
    */
   public ParClassInstanceExpr treeCopy() {
     ParClassInstanceExpr tree = (ParClassInstanceExpr) copy();
@@ -184,7 +192,7 @@ public class ParClassInstanceExpr extends ClassInstanceExpr implements Cloneable
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:109
+   * @declaredat ASTNode:114
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -500,6 +508,11 @@ public class ParClassInstanceExpr extends ClassInstanceExpr implements Cloneable
       return super.Define_nameType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -517,22 +530,32 @@ public class ParClassInstanceExpr extends ClassInstanceExpr implements Cloneable
       return super.Define_lookupType(_callerNode, _childNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:445
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:323
    * @apilevel internal
    */
   public boolean Define_isExplicitGenericConstructorAccess(ASTNode _callerNode, ASTNode _childNode) {
     if (getAccessNoTransform() != null && _callerNode == getAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:447
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:325
       return true;
     }
     else {
       return getParent().Define_isExplicitGenericConstructorAccess(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:323
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isExplicitGenericConstructorAccess
+   */
   protected boolean canDefine_isExplicitGenericConstructorAccess(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

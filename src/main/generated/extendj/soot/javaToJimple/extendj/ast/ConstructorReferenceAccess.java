@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,18 +38,19 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/ConstructorReference.ast:5
+ * @astdecl ConstructorReferenceAccess : ClassInstanceExpr;
  * @production ConstructorReferenceAccess : {@link ClassInstanceExpr};
 
  */
 public class ConstructorReferenceAccess extends ClassInstanceExpr implements Cloneable {
   /**
    * @aspect Synthetics
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:445
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:444
    */
   private FunctionDescriptor targetDescriptor;
   /**
    * @aspect Synthetics
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:446
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:445
    */
   public ConstructorReferenceAccess(Access access,
       List<Expr> args, FunctionDescriptor fd) {
@@ -75,46 +78,51 @@ public class ConstructorReferenceAccess extends ClassInstanceExpr implements Clo
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Access", "Arg", "TypeDecl"},
+    type = {"Access", "List<Expr>", "Opt<TypeDecl>"},
+    kind = {"Child", "List", "Opt"}
+  )
   public ConstructorReferenceAccess(Access p0, List<Expr> p1, Opt<TypeDecl> p2) {
     setChild(p0, 0);
     setChild(p1, 1);
     setChild(p2, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     targetType_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public ConstructorReferenceAccess clone() throws CloneNotSupportedException {
     ConstructorReferenceAccess node = (ConstructorReferenceAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public ConstructorReferenceAccess copy() {
     try {
@@ -134,7 +142,7 @@ public class ConstructorReferenceAccess extends ClassInstanceExpr implements Clo
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:64
+   * @declaredat ASTNode:69
    */
   @Deprecated
   public ConstructorReferenceAccess fullCopy() {
@@ -145,7 +153,7 @@ public class ConstructorReferenceAccess extends ClassInstanceExpr implements Clo
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   public ConstructorReferenceAccess treeCopyNoTransform() {
     ConstructorReferenceAccess tree = (ConstructorReferenceAccess) copy();
@@ -166,7 +174,7 @@ public class ConstructorReferenceAccess extends ClassInstanceExpr implements Clo
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:94
+   * @declaredat ASTNode:99
    */
   public ConstructorReferenceAccess treeCopy() {
     ConstructorReferenceAccess tree = (ConstructorReferenceAccess) copy();
@@ -182,7 +190,7 @@ public class ConstructorReferenceAccess extends ClassInstanceExpr implements Clo
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:108
+   * @declaredat ASTNode:113
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -380,7 +388,7 @@ public class ConstructorReferenceAccess extends ClassInstanceExpr implements Clo
     targetType_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle targetType_computed = null;
+  protected ASTState.Cycle targetType_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl targetType_value;
@@ -388,13 +396,13 @@ public class ConstructorReferenceAccess extends ClassInstanceExpr implements Clo
   /**
    * @attribute syn
    * @aspect TargetType
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:206
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:390
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:206")
+  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:390")
   public TypeDecl targetType() {
-    ASTNode$State state = state();
-    if (targetType_computed == ASTNode$State.NON_CYCLE || targetType_computed == state().cycle()) {
+    ASTState state = state();
+    if (targetType_computed == ASTState.NON_CYCLE || targetType_computed == state().cycle()) {
       return targetType_value;
     }
     targetType_value = targetType_compute();
@@ -402,7 +410,7 @@ public class ConstructorReferenceAccess extends ClassInstanceExpr implements Clo
       targetType_computed = state().cycle();
     
     } else {
-      targetType_computed = ASTNode$State.NON_CYCLE;
+      targetType_computed = ASTState.NON_CYCLE;
     
     }
     return targetType_value;
@@ -421,7 +429,7 @@ public class ConstructorReferenceAccess extends ClassInstanceExpr implements Clo
    */
   public TypeDecl Define_targetType(ASTNode _callerNode, ASTNode _childNode) {
     if (getAccessNoTransform() != null && _callerNode == getAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:222
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:406
       {
           if (targetDescriptor.method.hasValue()) {
             return targetDescriptor.method.get().type();
@@ -434,6 +442,11 @@ public class ConstructorReferenceAccess extends ClassInstanceExpr implements Clo
       return super.Define_targetType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
   protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

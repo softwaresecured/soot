@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:92
+ * @astdecl TypeAccess : Access ::= <Package:String> <ID:String>;
  * @production TypeAccess : {@link Access} ::= <span class="component">&lt;Package:String&gt;</span> <span class="component">&lt;ID:String&gt;</span>;
 
  */
@@ -67,6 +70,17 @@ public class TypeAccess extends Access implements Cloneable {
     }
     out.print(getID());
   }
+  /**
+   * @aspect PrettyPrintUtil
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:67
+   */
+  @Override public String toString() {
+    if (getPackage().isEmpty()) {
+      return getID();
+    } else {
+      return getPackage() + "." + getID();
+    }
+  }
   /** This method assumes that the bound type is generic. 
    * @aspect GenericsTypeAnalysis
    * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:417
@@ -86,7 +100,7 @@ public class TypeAccess extends Access implements Cloneable {
   }
   /**
    * @aspect Diamond
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:402
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:268
    */
   @Override
   public Access substituted(Collection<TypeVariable> original,
@@ -167,51 +181,56 @@ public class TypeAccess extends Access implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Package", "ID"},
+    type = {"String", "String"},
+    kind = {"Token", "Token"}
+  )
   public TypeAccess(String p0, String p1) {
     setPackage(p0);
     setID(p1);
   }
   /**
-   * @declaredat ASTNode:16
+   * @declaredat ASTNode:21
    */
   public TypeAccess(beaver.Symbol p0, beaver.Symbol p1) {
     setPackage(p0);
     setID(p1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public TypeAccess clone() throws CloneNotSupportedException {
     TypeAccess node = (TypeAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public TypeAccess copy() {
     try {
@@ -231,7 +250,7 @@ public class TypeAccess extends Access implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   @Deprecated
   public TypeAccess fullCopy() {
@@ -242,7 +261,7 @@ public class TypeAccess extends Access implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:78
    */
   public TypeAccess treeCopyNoTransform() {
     TypeAccess tree = (TypeAccess) copy();
@@ -263,7 +282,7 @@ public class TypeAccess extends Access implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:93
+   * @declaredat ASTNode:98
    */
   public TypeAccess treeCopy() {
     TypeAccess tree = (TypeAccess) copy();
@@ -279,7 +298,7 @@ public class TypeAccess extends Access implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:107
+   * @declaredat ASTNode:112
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_Package == ((TypeAccess) node).tokenString_Package) && (tokenString_ID == ((TypeAccess) node).tokenString_ID);    
@@ -362,7 +381,7 @@ public class TypeAccess extends Access implements Cloneable {
   }
   /**
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:357
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:361
    */
   private TypeDecl refined_TypeScopePropagation_TypeAccess_decl()
 {
@@ -396,10 +415,10 @@ public class TypeAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:328
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:332
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:328")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:332")
   public SimpleSet<TypeDecl> decls() {
     SimpleSet<TypeDecl> decls_value = packageName().equals("")
           ? lookupType(name())
@@ -409,10 +428,10 @@ public class TypeAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:357
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:361
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:357")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:361")
   public TypeDecl decl() {
     {
         TypeDecl decl = refined_TypeScopePropagation_TypeAccess_decl();
@@ -485,10 +504,10 @@ public class TypeAccess extends Access implements Cloneable {
    * Has package name (not @primitive)
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:205
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:284
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:205")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:284")
   public boolean hasPackage() {
     boolean hasPackage_value = !getPackage().isEmpty() && decl().isReferenceType();
     return hasPackage_value;
@@ -577,10 +596,10 @@ public class TypeAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:299
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:298
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:299")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:298")
   public TypeDecl type() {
     TypeDecl type_value = decl();
     return type_value;
@@ -588,10 +607,10 @@ public class TypeAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeHierarchyCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:224
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:240
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:224")
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:240")
   public boolean staticContextQualifier() {
     boolean staticContextQualifier_value = true;
     return staticContextQualifier_value;
@@ -599,10 +618,10 @@ public class TypeAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1306
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1302
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1306")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1302")
   public boolean usesTypeVariable() {
     boolean usesTypeVariable_value = decl().usesTypeVariable() || super.usesTypeVariable();
     return usesTypeVariable_value;
@@ -610,13 +629,24 @@ public class TypeAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect LambdaParametersInference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:620
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:656
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:620")
+  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:656")
   public boolean mentionsTypeVariable(TypeVariable var) {
     boolean mentionsTypeVariable_TypeVariable_value = getPackage().isEmpty() && getID().equals(var.getID());
     return mentionsTypeVariable_TypeVariable_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    Value eval_Body_value = eval_fail_general();
+    return eval_Body_value;
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {
@@ -626,6 +656,7 @@ public class TypeAccess extends Access implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java4/frontend/AccessControl.jrag:156
     {
@@ -645,7 +676,7 @@ public class TypeAccess extends Access implements Cloneable {
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:491
+    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:488
     if (decl().isDeprecated()
               && !withinDeprecatedAnnotation()
               && (hostType() == null || hostType().topLevelType() != decl().topLevelType())
@@ -659,7 +690,7 @@ public class TypeAccess extends Access implements Cloneable {
         contributors.add(this);
       }
     }
-    // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:687
+    // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:679
     if (type().isRawType() && type().isNestedType()
               && type().enclosingType().isParameterizedType()
               && !type().enclosingType().isRawType()) {
@@ -674,6 +705,7 @@ public class TypeAccess extends Access implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : accessControlProblems()) {

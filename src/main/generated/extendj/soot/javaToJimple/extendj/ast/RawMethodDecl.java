@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/GenericMethods.ast:8
+ * @astdecl RawMethodDecl : ParMethodDecl;
  * @production RawMethodDecl : {@link ParMethodDecl};
 
  */
@@ -64,6 +67,11 @@ public class RawMethodDecl extends ParMethodDecl implements Cloneable {
   /**
    * @declaredat ASTNode:18
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID", "Parameter", "Exception", "Block", "TypeArgument", "GenericMethodDecl", "TypeParameter", "Parameterization"},
+    type = {"Modifiers", "Access", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Block>", "List<Access>", "GenericMethodDecl", "List<TypeVariable>", "Parameterization"},
+    kind = {"Child", "Child", "Token", "List", "List", "Opt", "List", "Token", "List", "Token"}
+  )
   public RawMethodDecl(Modifiers p0, Access p1, String p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<Access> p6, GenericMethodDecl p7, List<TypeVariable> p8, Parameterization p9) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -77,7 +85,7 @@ public class RawMethodDecl extends ParMethodDecl implements Cloneable {
     setParameterization(p9);
   }
   /**
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   public RawMethodDecl(Modifiers p0, Access p1, beaver.Symbol p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<Access> p6, GenericMethodDecl p7, List<TypeVariable> p8, Parameterization p9) {
     setChild(p0, 0);
@@ -92,39 +100,39 @@ public class RawMethodDecl extends ParMethodDecl implements Cloneable {
     setParameterization(p9);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   protected int numChildren() {
     return 7;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:58
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:57
+   * @declaredat ASTNode:62
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:66
    */
   public RawMethodDecl clone() throws CloneNotSupportedException {
     RawMethodDecl node = (RawMethodDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:71
    */
   public RawMethodDecl copy() {
     try {
@@ -144,7 +152,7 @@ public class RawMethodDecl extends ParMethodDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:85
+   * @declaredat ASTNode:90
    */
   @Deprecated
   public RawMethodDecl fullCopy() {
@@ -155,7 +163,7 @@ public class RawMethodDecl extends ParMethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:95
+   * @declaredat ASTNode:100
    */
   public RawMethodDecl treeCopyNoTransform() {
     RawMethodDecl tree = (RawMethodDecl) copy();
@@ -176,7 +184,7 @@ public class RawMethodDecl extends ParMethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:115
+   * @declaredat ASTNode:120
    */
   public RawMethodDecl treeCopy() {
     RawMethodDecl tree = (RawMethodDecl) copy();
@@ -192,7 +200,7 @@ public class RawMethodDecl extends ParMethodDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:129
+   * @declaredat ASTNode:134
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((RawMethodDecl) node).tokenString_ID) && (tokenGenericMethodDecl_GenericMethodDecl == ((RawMethodDecl) node).tokenGenericMethodDecl_GenericMethodDecl) && (tokenParameterization_Parameterization == ((RawMethodDecl) node).tokenParameterization_Parameterization);    

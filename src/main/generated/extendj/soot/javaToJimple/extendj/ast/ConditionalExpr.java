@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:277
+ * @astdecl ConditionalExpr : Expr ::= Condition:Expr TrueExpr:Expr FalseExpr:Expr;
  * @production ConditionalExpr : {@link Expr} ::= <span class="component">Condition:{@link Expr}</span> <span class="component">TrueExpr:{@link Expr}</span> <span class="component">FalseExpr:{@link Expr}</span>;
 
  */
@@ -53,63 +56,31 @@ public class ConditionalExpr extends Expr implements Cloneable {
   }
   /**
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:119
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:128
    */
-  public soot.Value eval(Body b) {
-    //b.setLine(this);
-    if (type().isBoolean())
-      return emitBooleanCondition(b);
-
-    Local result = b.newTemp(type().getSootType(), this);
-    soot.jimple.Stmt endBranch = newLabel();
-    getCondition().emitEvalBranch(b);
-    // if(getCondition().canBeTrue()) {
-      b.addLabel(then_branch_label());
-      b.add(b.newAssignStmt(result,
-        getTrueExpr().type().emitCastTo(b,
-          getTrueExpr(),
-          type()
-        ),
-        getTrueExpr()
-      ));
-
-      //if(getCondition().canBeFalse())
-        b.add(b.newGotoStmt(endBranch, this));
-    //}
-
-    //if(getCondition().canBeFalse()) {
-    b.addLabel(else_branch_label());
-    b.add(b.newAssignStmt(result,
-      getFalseExpr().type().emitCastTo(b,
-        getFalseExpr(),
-        type()
-      ),
-      getFalseExpr()
-    ));
-    //}
-    b.addLabel(endBranch);
-    return result;
-  }
+  private void emitSubExpr(Body b, Body.Label l, Expr e, Local r)
+  { b.addLabel(l);
+    b.add(b.newAssignStmt(r, e.evalAndCast(b, type()), e)); }
   /**
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:210
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:205
    */
-  public void emitEvalBranch(Body b) {
+  protected void emitEvalBranch(Body b) {
     // b.setLine(this);
 
-    soot.jimple.Stmt endBranch = newLabel();
+    Body.Label endBranch = newLabel(b);
     getCondition().emitEvalBranch(b);
 
-    b.addLabel(then_branch_label());
+    b.addLabel(then_branch_label(b));
     //if(getCondition().canBeTrue()) {
       getTrueExpr().emitEvalBranch(b);
-      b.add(b.newGotoStmt(true_label(), this));
+      b.addGoTo(true_label(b), this);
     //}
 
-    b.addLabel(else_branch_label());
+    b.addLabel(else_branch_label(b));
     //if(getCondition().canBeFalse()) {
       getFalseExpr().emitEvalBranch(b);
-      b.add(b.newGotoStmt(true_label(), this));
+      b.addGoTo(true_label(b), this);
     //}
   }
   /**
@@ -131,26 +102,31 @@ public class ConditionalExpr extends Expr implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Condition", "TrueExpr", "FalseExpr"},
+    type = {"Expr", "Expr", "Expr"},
+    kind = {"Child", "Child", "Child"}
+  )
   public ConditionalExpr(Expr p0, Expr p1, Expr p2) {
     setChild(p0, 0);
     setChild(p1, 1);
     setChild(p2, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -173,24 +149,24 @@ public class ConditionalExpr extends Expr implements Cloneable {
     isReferenceConditional_reset();
     isPolyExpression_reset();
     assignConversionTo_TypeDecl_reset();
-    else_branch_label_reset();
-    then_branch_label_reset();
+    else_branch_label_Body_reset();
+    then_branch_label_Body_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:54
+   * @declaredat ASTNode:59
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:58
+   * @declaredat ASTNode:63
    */
   public ConditionalExpr clone() throws CloneNotSupportedException {
     ConditionalExpr node = (ConditionalExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   public ConditionalExpr copy() {
     try {
@@ -210,7 +186,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:82
+   * @declaredat ASTNode:87
    */
   @Deprecated
   public ConditionalExpr fullCopy() {
@@ -221,7 +197,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:92
+   * @declaredat ASTNode:97
    */
   public ConditionalExpr treeCopyNoTransform() {
     ConditionalExpr tree = (ConditionalExpr) copy();
@@ -242,7 +218,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:112
+   * @declaredat ASTNode:117
    */
   public ConditionalExpr treeCopy() {
     ConditionalExpr tree = (ConditionalExpr) copy();
@@ -258,7 +234,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:126
+   * @declaredat ASTNode:131
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -343,7 +319,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
   }
   /**
    * @aspect AutoBoxing
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/AutoBoxing.jrag:249
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/AutoBoxing.jrag:252
    */
   private TypeDecl refined_AutoBoxing_ConditionalExpr_type()
 {
@@ -360,7 +336,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
 
     if (second.isPrimitiveType()) {
       if (!second.isNull() && third.isNull()) {
-        return second;
+        return second.boxed();
       }
     } else if (!second.unboxed().isUnknown()) {
       second = second.unboxed();
@@ -368,7 +344,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
 
     if (third.isPrimitiveType()) {
       if (!third.isNull() && second.isNull()) {
-        return third;
+        return third.boxed();
       }
     } else if (!third.unboxed().isUnknown()) {
       third = third.unboxed();
@@ -382,7 +358,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     constant_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle constant_computed = null;
+  protected ASTState.Cycle constant_computed = null;
 
   /** @apilevel internal */
   protected Constant constant_value;
@@ -395,8 +371,8 @@ public class ConditionalExpr extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstantExpression", declaredAt="/home/olivier/projects/extendj/java4/frontend/ConstantExpression.jrag:85")
   public Constant constant() {
-    ASTNode$State state = state();
-    if (constant_computed == ASTNode$State.NON_CYCLE || constant_computed == state().cycle()) {
+    ASTState state = state();
+    if (constant_computed == ASTState.NON_CYCLE || constant_computed == state().cycle()) {
       return constant_value;
     }
     constant_value = type().questionColon(getCondition().constant(),
@@ -405,7 +381,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
       constant_computed = state().cycle();
     
     } else {
-      constant_computed = ASTNode$State.NON_CYCLE;
+      constant_computed = ASTState.NON_CYCLE;
     
     }
     return constant_value;
@@ -415,7 +391,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     isConstant_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isConstant_computed = null;
+  protected ASTState.Cycle isConstant_computed = null;
 
   /** @apilevel internal */
   protected boolean isConstant_value;
@@ -428,8 +404,8 @@ public class ConditionalExpr extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstantExpression", declaredAt="/home/olivier/projects/extendj/java4/frontend/ConstantExpression.jrag:406")
   public boolean isConstant() {
-    ASTNode$State state = state();
-    if (isConstant_computed == ASTNode$State.NON_CYCLE || isConstant_computed == state().cycle()) {
+    ASTState state = state();
+    if (isConstant_computed == ASTState.NON_CYCLE || isConstant_computed == state().cycle()) {
       return isConstant_value;
     }
     isConstant_value = getCondition().isConstant() && getTrueExpr().isConstant() && getFalseExpr().isConstant();
@@ -437,7 +413,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
       isConstant_computed = state().cycle();
     
     } else {
-      isConstant_computed = ASTNode$State.NON_CYCLE;
+      isConstant_computed = ASTState.NON_CYCLE;
     
     }
     return isConstant_value;
@@ -447,7 +423,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     booleanOperator_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle booleanOperator_computed = null;
+  protected ASTState.Cycle booleanOperator_computed = null;
 
   /** @apilevel internal */
   protected boolean booleanOperator_value;
@@ -460,8 +436,8 @@ public class ConditionalExpr extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="DefiniteAssignment", declaredAt="/home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:253")
   public boolean booleanOperator() {
-    ASTNode$State state = state();
-    if (booleanOperator_computed == ASTNode$State.NON_CYCLE || booleanOperator_computed == state().cycle()) {
+    ASTState state = state();
+    if (booleanOperator_computed == ASTState.NON_CYCLE || booleanOperator_computed == state().cycle()) {
       return booleanOperator_value;
     }
     booleanOperator_value = getTrueExpr().type().isBoolean() && getFalseExpr().type().isBoolean();
@@ -469,7 +445,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
       booleanOperator_computed = state().cycle();
     
     } else {
-      booleanOperator_computed = ASTNode$State.NON_CYCLE;
+      booleanOperator_computed = ASTState.NON_CYCLE;
     
     }
     return booleanOperator_value;
@@ -519,27 +495,27 @@ public class ConditionalExpr extends Expr implements Cloneable {
   public boolean unassignedAfterTrue(Variable v) {
     Object _parameters = v;
     if (unassignedAfterTrue_Variable_values == null) unassignedAfterTrue_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterTrue_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterTrue_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterTrue_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterTrue_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterTrue_Variable_value = getTrueExpr().unassignedAfterTrue(v) && getFalseExpr().unassignedAfterTrue(v);
-        if (new_unassignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterTrue_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterTrue_Variable_value;
         }
@@ -551,7 +527,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterTrue_Variable_value = getTrueExpr().unassignedAfterTrue(v) && getFalseExpr().unassignedAfterTrue(v);
-      if (new_unassignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterTrue_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterTrue_Variable_value;
       }
@@ -570,27 +546,27 @@ public class ConditionalExpr extends Expr implements Cloneable {
   public boolean unassignedAfterFalse(Variable v) {
     Object _parameters = v;
     if (unassignedAfterFalse_Variable_values == null) unassignedAfterFalse_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterFalse_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterFalse_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterFalse_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterFalse_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterFalse_Variable_value = getTrueExpr().unassignedAfterFalse(v) && getFalseExpr().unassignedAfterFalse(v);
-        if (new_unassignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterFalse_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterFalse_Variable_value;
         }
@@ -602,7 +578,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterFalse_Variable_value = getTrueExpr().unassignedAfterFalse(v) && getFalseExpr().unassignedAfterFalse(v);
-      if (new_unassignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterFalse_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterFalse_Variable_value;
       }
@@ -621,20 +597,20 @@ public class ConditionalExpr extends Expr implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
@@ -643,7 +619,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
         new_unassignedAfter_Variable_value = booleanOperator()
               ? unassignedAfterTrue(v) && unassignedAfterFalse(v)
               : getTrueExpr().unassignedAfter(v) && getFalseExpr().unassignedAfter(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -657,7 +633,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
       boolean new_unassignedAfter_Variable_value = booleanOperator()
             ? unassignedAfterTrue(v) && unassignedAfterFalse(v)
             : getTrueExpr().unassignedAfter(v) && getFalseExpr().unassignedAfter(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -672,7 +648,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -680,13 +656,13 @@ public class ConditionalExpr extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = type_compute();
@@ -694,7 +670,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -723,10 +699,10 @@ public class ConditionalExpr extends Expr implements Cloneable {
    * second and third operands.
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:396
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:395
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:396")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:395")
   public TypeDecl conditionalExprType(TypeDecl second, TypeDecl third) {
     {
         if (second == third) {
@@ -785,7 +761,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
   }
   /** @apilevel internal */
   private void compatibleStrictContext_TypeDecl_reset() {
-    compatibleStrictContext_TypeDecl_computed = new java.util.HashMap(4);
+    compatibleStrictContext_TypeDecl_computed = null;
     compatibleStrictContext_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -795,18 +771,18 @@ public class ConditionalExpr extends Expr implements Cloneable {
   /** Used to compute compatibility during phase 1 of overload resolution. 
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:50
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:91
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:50")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:91")
   public boolean compatibleStrictContext(TypeDecl type) {
     Object _parameters = type;
     if (compatibleStrictContext_TypeDecl_computed == null) compatibleStrictContext_TypeDecl_computed = new java.util.HashMap(4);
     if (compatibleStrictContext_TypeDecl_values == null) compatibleStrictContext_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (compatibleStrictContext_TypeDecl_values.containsKey(_parameters) && compatibleStrictContext_TypeDecl_computed != null
+    ASTState state = state();
+    if (compatibleStrictContext_TypeDecl_values.containsKey(_parameters)
         && compatibleStrictContext_TypeDecl_computed.containsKey(_parameters)
-        && (compatibleStrictContext_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || compatibleStrictContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (compatibleStrictContext_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || compatibleStrictContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) compatibleStrictContext_TypeDecl_values.get(_parameters);
     }
     boolean compatibleStrictContext_TypeDecl_value = compatibleStrictContext_compute(type);
@@ -816,7 +792,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     
     } else {
       compatibleStrictContext_TypeDecl_values.put(_parameters, compatibleStrictContext_TypeDecl_value);
-      compatibleStrictContext_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      compatibleStrictContext_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return compatibleStrictContext_TypeDecl_value;
@@ -832,7 +808,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     }
   /** @apilevel internal */
   private void compatibleLooseContext_TypeDecl_reset() {
-    compatibleLooseContext_TypeDecl_computed = new java.util.HashMap(4);
+    compatibleLooseContext_TypeDecl_computed = null;
     compatibleLooseContext_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -842,18 +818,18 @@ public class ConditionalExpr extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:94
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:135
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:94")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:135")
   public boolean compatibleLooseContext(TypeDecl type) {
     Object _parameters = type;
     if (compatibleLooseContext_TypeDecl_computed == null) compatibleLooseContext_TypeDecl_computed = new java.util.HashMap(4);
     if (compatibleLooseContext_TypeDecl_values == null) compatibleLooseContext_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (compatibleLooseContext_TypeDecl_values.containsKey(_parameters) && compatibleLooseContext_TypeDecl_computed != null
+    ASTState state = state();
+    if (compatibleLooseContext_TypeDecl_values.containsKey(_parameters)
         && compatibleLooseContext_TypeDecl_computed.containsKey(_parameters)
-        && (compatibleLooseContext_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || compatibleLooseContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (compatibleLooseContext_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || compatibleLooseContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) compatibleLooseContext_TypeDecl_values.get(_parameters);
     }
     boolean compatibleLooseContext_TypeDecl_value = compatibleLooseContext_compute(type);
@@ -863,7 +839,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     
     } else {
       compatibleLooseContext_TypeDecl_values.put(_parameters, compatibleLooseContext_TypeDecl_value);
-      compatibleLooseContext_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      compatibleLooseContext_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return compatibleLooseContext_TypeDecl_value;
@@ -879,7 +855,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     }
   /** @apilevel internal */
   private void pertinentToApplicability_Expr_BodyDecl_int_reset() {
-    pertinentToApplicability_Expr_BodyDecl_int_computed = new java.util.HashMap(4);
+    pertinentToApplicability_Expr_BodyDecl_int_computed = null;
     pertinentToApplicability_Expr_BodyDecl_int_values = null;
   }
   /** @apilevel internal */
@@ -889,10 +865,10 @@ public class ConditionalExpr extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:122
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:163
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:122")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:163")
   public boolean pertinentToApplicability(Expr access, BodyDecl decl, int argIndex) {
     java.util.List _parameters = new java.util.ArrayList(3);
     _parameters.add(access);
@@ -900,10 +876,10 @@ public class ConditionalExpr extends Expr implements Cloneable {
     _parameters.add(argIndex);
     if (pertinentToApplicability_Expr_BodyDecl_int_computed == null) pertinentToApplicability_Expr_BodyDecl_int_computed = new java.util.HashMap(4);
     if (pertinentToApplicability_Expr_BodyDecl_int_values == null) pertinentToApplicability_Expr_BodyDecl_int_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (pertinentToApplicability_Expr_BodyDecl_int_values.containsKey(_parameters) && pertinentToApplicability_Expr_BodyDecl_int_computed != null
+    ASTState state = state();
+    if (pertinentToApplicability_Expr_BodyDecl_int_values.containsKey(_parameters)
         && pertinentToApplicability_Expr_BodyDecl_int_computed.containsKey(_parameters)
-        && (pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == ASTNode$State.NON_CYCLE || pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == state().cycle())) {
+        && (pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == ASTState.NON_CYCLE || pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == state().cycle())) {
       return (Boolean) pertinentToApplicability_Expr_BodyDecl_int_values.get(_parameters);
     }
     boolean pertinentToApplicability_Expr_BodyDecl_int_value = getFalseExpr().pertinentToApplicability(access, decl, argIndex)
@@ -914,14 +890,14 @@ public class ConditionalExpr extends Expr implements Cloneable {
     
     } else {
       pertinentToApplicability_Expr_BodyDecl_int_values.put(_parameters, pertinentToApplicability_Expr_BodyDecl_int_value);
-      pertinentToApplicability_Expr_BodyDecl_int_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      pertinentToApplicability_Expr_BodyDecl_int_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return pertinentToApplicability_Expr_BodyDecl_int_value;
   }
   /** @apilevel internal */
   private void moreSpecificThan_TypeDecl_TypeDecl_reset() {
-    moreSpecificThan_TypeDecl_TypeDecl_computed = new java.util.HashMap(4);
+    moreSpecificThan_TypeDecl_TypeDecl_computed = null;
     moreSpecificThan_TypeDecl_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -935,20 +911,20 @@ public class ConditionalExpr extends Expr implements Cloneable {
    * @return {@code true} if type1 is more specific than type2, {@code false} otherwise
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:248
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:289
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:248")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:289")
   public boolean moreSpecificThan(TypeDecl type1, TypeDecl type2) {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(type1);
     _parameters.add(type2);
     if (moreSpecificThan_TypeDecl_TypeDecl_computed == null) moreSpecificThan_TypeDecl_TypeDecl_computed = new java.util.HashMap(4);
     if (moreSpecificThan_TypeDecl_TypeDecl_values == null) moreSpecificThan_TypeDecl_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (moreSpecificThan_TypeDecl_TypeDecl_values.containsKey(_parameters) && moreSpecificThan_TypeDecl_TypeDecl_computed != null
+    ASTState state = state();
+    if (moreSpecificThan_TypeDecl_TypeDecl_values.containsKey(_parameters)
         && moreSpecificThan_TypeDecl_TypeDecl_computed.containsKey(_parameters)
-        && (moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) moreSpecificThan_TypeDecl_TypeDecl_values.get(_parameters);
     }
     boolean moreSpecificThan_TypeDecl_TypeDecl_value = moreSpecificThan_compute(type1, type2);
@@ -958,7 +934,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     
     } else {
       moreSpecificThan_TypeDecl_TypeDecl_values.put(_parameters, moreSpecificThan_TypeDecl_TypeDecl_value);
-      moreSpecificThan_TypeDecl_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      moreSpecificThan_TypeDecl_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return moreSpecificThan_TypeDecl_TypeDecl_value;
@@ -973,7 +949,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     }
   /** @apilevel internal */
   private void potentiallyCompatible_TypeDecl_BodyDecl_reset() {
-    potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
+    potentiallyCompatible_TypeDecl_BodyDecl_computed = null;
     potentiallyCompatible_TypeDecl_BodyDecl_values = null;
   }
   /** @apilevel internal */
@@ -983,20 +959,20 @@ public class ConditionalExpr extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544")
   public boolean potentiallyCompatible(TypeDecl type, BodyDecl candidateDecl) {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(type);
     _parameters.add(candidateDecl);
     if (potentiallyCompatible_TypeDecl_BodyDecl_computed == null) potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
     if (potentiallyCompatible_TypeDecl_BodyDecl_values == null) potentiallyCompatible_TypeDecl_BodyDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters) && potentiallyCompatible_TypeDecl_BodyDecl_computed != null
+    ASTState state = state();
+    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters)
         && potentiallyCompatible_TypeDecl_BodyDecl_computed.containsKey(_parameters)
-        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
+        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTState.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) potentiallyCompatible_TypeDecl_BodyDecl_values.get(_parameters);
     }
     boolean potentiallyCompatible_TypeDecl_BodyDecl_value = potentiallyCompatible_compute(type, candidateDecl);
@@ -1006,7 +982,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     
     } else {
       potentiallyCompatible_TypeDecl_BodyDecl_values.put(_parameters, potentiallyCompatible_TypeDecl_BodyDecl_value);
-      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return potentiallyCompatible_TypeDecl_BodyDecl_value;
@@ -1024,7 +1000,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     isBooleanExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isBooleanExpression_computed = null;
+  protected ASTState.Cycle isBooleanExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isBooleanExpression_value;
@@ -1037,8 +1013,8 @@ public class ConditionalExpr extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:29")
   public boolean isBooleanExpression() {
-    ASTNode$State state = state();
-    if (isBooleanExpression_computed == ASTNode$State.NON_CYCLE || isBooleanExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isBooleanExpression_computed == ASTState.NON_CYCLE || isBooleanExpression_computed == state().cycle()) {
       return isBooleanExpression_value;
     }
     isBooleanExpression_value = isBooleanConditional();
@@ -1046,7 +1022,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
       isBooleanExpression_computed = state().cycle();
     
     } else {
-      isBooleanExpression_computed = ASTNode$State.NON_CYCLE;
+      isBooleanExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isBooleanExpression_value;
@@ -1056,7 +1032,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     isBooleanConditional_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isBooleanConditional_computed = null;
+  protected ASTState.Cycle isBooleanConditional_computed = null;
 
   /** @apilevel internal */
   protected boolean isBooleanConditional_value;
@@ -1069,8 +1045,8 @@ public class ConditionalExpr extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:55")
   public boolean isBooleanConditional() {
-    ASTNode$State state = state();
-    if (isBooleanConditional_computed == ASTNode$State.NON_CYCLE || isBooleanConditional_computed == state().cycle()) {
+    ASTState state = state();
+    if (isBooleanConditional_computed == ASTState.NON_CYCLE || isBooleanConditional_computed == state().cycle()) {
       return isBooleanConditional_value;
     }
     isBooleanConditional_value = getTrueExpr().isBooleanExpression() && getFalseExpr().isBooleanExpression()
@@ -1080,7 +1056,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
       isBooleanConditional_computed = state().cycle();
     
     } else {
-      isBooleanConditional_computed = ASTNode$State.NON_CYCLE;
+      isBooleanConditional_computed = ASTState.NON_CYCLE;
     
     }
     return isBooleanConditional_value;
@@ -1090,7 +1066,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     isNumericExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isNumericExpression_computed = null;
+  protected ASTState.Cycle isNumericExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isNumericExpression_value;
@@ -1103,8 +1079,8 @@ public class ConditionalExpr extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:60")
   public boolean isNumericExpression() {
-    ASTNode$State state = state();
-    if (isNumericExpression_computed == ASTNode$State.NON_CYCLE || isNumericExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isNumericExpression_computed == ASTState.NON_CYCLE || isNumericExpression_computed == state().cycle()) {
       return isNumericExpression_value;
     }
     isNumericExpression_value = isNumericConditional();
@@ -1112,7 +1088,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
       isNumericExpression_computed = state().cycle();
     
     } else {
-      isNumericExpression_computed = ASTNode$State.NON_CYCLE;
+      isNumericExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isNumericExpression_value;
@@ -1122,7 +1098,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     isNumericConditional_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isNumericConditional_computed = null;
+  protected ASTState.Cycle isNumericConditional_computed = null;
 
   /** @apilevel internal */
   protected boolean isNumericConditional_value;
@@ -1135,8 +1111,8 @@ public class ConditionalExpr extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:78")
   public boolean isNumericConditional() {
-    ASTNode$State state = state();
-    if (isNumericConditional_computed == ASTNode$State.NON_CYCLE || isNumericConditional_computed == state().cycle()) {
+    ASTState state = state();
+    if (isNumericConditional_computed == ASTState.NON_CYCLE || isNumericConditional_computed == state().cycle()) {
       return isNumericConditional_value;
     }
     isNumericConditional_value = getTrueExpr().isNumericExpression() && getFalseExpr().isNumericExpression()
@@ -1146,7 +1122,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
       isNumericConditional_computed = state().cycle();
     
     } else {
-      isNumericConditional_computed = ASTNode$State.NON_CYCLE;
+      isNumericConditional_computed = ASTState.NON_CYCLE;
     
     }
     return isNumericConditional_value;
@@ -1156,7 +1132,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     isReferenceConditional_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isReferenceConditional_computed = null;
+  protected ASTState.Cycle isReferenceConditional_computed = null;
 
   /** @apilevel internal */
   protected boolean isReferenceConditional_value;
@@ -1169,8 +1145,8 @@ public class ConditionalExpr extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:83")
   public boolean isReferenceConditional() {
-    ASTNode$State state = state();
-    if (isReferenceConditional_computed == ASTNode$State.NON_CYCLE || isReferenceConditional_computed == state().cycle()) {
+    ASTState state = state();
+    if (isReferenceConditional_computed == ASTState.NON_CYCLE || isReferenceConditional_computed == state().cycle()) {
       return isReferenceConditional_value;
     }
     isReferenceConditional_value = !isBooleanConditional() && !isNumericConditional();
@@ -1178,7 +1154,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
       isReferenceConditional_computed = state().cycle();
     
     } else {
-      isReferenceConditional_computed = ASTNode$State.NON_CYCLE;
+      isReferenceConditional_computed = ASTState.NON_CYCLE;
     
     }
     return isReferenceConditional_value;
@@ -1188,7 +1164,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     isPolyExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isPolyExpression_computed = null;
+  protected ASTState.Cycle isPolyExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isPolyExpression_value;
@@ -1201,8 +1177,8 @@ public class ConditionalExpr extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:86")
   public boolean isPolyExpression() {
-    ASTNode$State state = state();
-    if (isPolyExpression_computed == ASTNode$State.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isPolyExpression_computed == ASTState.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
       return isPolyExpression_value;
     }
     isPolyExpression_value = isReferenceConditional() && (assignmentContext() || invocationContext());
@@ -1210,14 +1186,14 @@ public class ConditionalExpr extends Expr implements Cloneable {
       isPolyExpression_computed = state().cycle();
     
     } else {
-      isPolyExpression_computed = ASTNode$State.NON_CYCLE;
+      isPolyExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isPolyExpression_value;
   }
   /** @apilevel internal */
   private void assignConversionTo_TypeDecl_reset() {
-    assignConversionTo_TypeDecl_computed = new java.util.HashMap(4);
+    assignConversionTo_TypeDecl_computed = null;
     assignConversionTo_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1235,10 +1211,10 @@ public class ConditionalExpr extends Expr implements Cloneable {
     Object _parameters = type;
     if (assignConversionTo_TypeDecl_computed == null) assignConversionTo_TypeDecl_computed = new java.util.HashMap(4);
     if (assignConversionTo_TypeDecl_values == null) assignConversionTo_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (assignConversionTo_TypeDecl_values.containsKey(_parameters) && assignConversionTo_TypeDecl_computed != null
+    ASTState state = state();
+    if (assignConversionTo_TypeDecl_values.containsKey(_parameters)
         && assignConversionTo_TypeDecl_computed.containsKey(_parameters)
-        && (assignConversionTo_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || assignConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (assignConversionTo_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || assignConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) assignConversionTo_TypeDecl_values.get(_parameters);
     }
     boolean assignConversionTo_TypeDecl_value = assignConversionTo_compute(type);
@@ -1248,7 +1224,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     
     } else {
       assignConversionTo_TypeDecl_values.put(_parameters, assignConversionTo_TypeDecl_value);
-      assignConversionTo_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      assignConversionTo_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return assignConversionTo_TypeDecl_value;
@@ -1264,79 +1240,119 @@ public class ConditionalExpr extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:21
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:24
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:21")
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:24")
   public boolean definesLabel() {
     boolean definesLabel_value = true;
     return definesLabel_value;
   }
-  /** @apilevel internal */
-  private void else_branch_label_reset() {
-    else_branch_label_computed = null;
-    else_branch_label_value = null;
-  }
-  /** @apilevel internal */
-  protected ASTNode$State.Cycle else_branch_label_computed = null;
-
-  /** @apilevel internal */
-  protected soot.jimple.Stmt else_branch_label_value;
-
   /**
    * @attribute syn
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:155
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:106
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:155")
-  public soot.jimple.Stmt else_branch_label() {
-    ASTNode$State state = state();
-    if (else_branch_label_computed == ASTNode$State.NON_CYCLE || else_branch_label_computed == state().cycle()) {
-      return else_branch_label_value;
-    }
-    else_branch_label_value = newLabel();
-    if (state().inCircle()) {
-      else_branch_label_computed = state().cycle();
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:106")
+  public Local eval(Body b) {
+    {
+        //b.setLine(this);
+        if (type().isBoolean())
+          return emitBooleanCondition(b);
     
-    } else {
-      else_branch_label_computed = ASTNode$State.NON_CYCLE;
+        Local       result    = b.newTemp(sootType(), this);
+        Body.Label  endBranch = newLabel(b);
+        getCondition().emitEvalBranch(b);
+        // if(getCondition().canBeTrue()) {
+          emitSubExpr(b, then_branch_label(b), getTrueExpr(), result);
     
-    }
-    return else_branch_label_value;
+          //if(getCondition().canBeFalse())
+            b.addGoTo(endBranch, this);
+        //}
+    
+        //if(getCondition().canBeFalse()) {
+          emitSubExpr(b, else_branch_label(b), getFalseExpr(), result);
+        //}
+        b.addLabel(endBranch);
+        return result;
+      }
   }
   /** @apilevel internal */
-  private void then_branch_label_reset() {
-    then_branch_label_computed = null;
-    then_branch_label_value = null;
+  private void else_branch_label_Body_reset() {
+    else_branch_label_Body_computed = null;
+    else_branch_label_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle then_branch_label_computed = null;
-
+  protected java.util.Map else_branch_label_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt then_branch_label_value;
-
+  protected java.util.Map else_branch_label_Body_computed;
   /**
    * @attribute syn
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:156
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:151
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:156")
-  public soot.jimple.Stmt then_branch_label() {
-    ASTNode$State state = state();
-    if (then_branch_label_computed == ASTNode$State.NON_CYCLE || then_branch_label_computed == state().cycle()) {
-      return then_branch_label_value;
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:151")
+  public Body.Label else_branch_label(Body b) {
+    Object _parameters = b;
+    if (else_branch_label_Body_computed == null) else_branch_label_Body_computed = new java.util.HashMap(4);
+    if (else_branch_label_Body_values == null) else_branch_label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (else_branch_label_Body_values.containsKey(_parameters)
+        && else_branch_label_Body_computed.containsKey(_parameters)
+        && (else_branch_label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || else_branch_label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) else_branch_label_Body_values.get(_parameters);
     }
-    then_branch_label_value = newLabel();
+    Body.Label else_branch_label_Body_value = newLabel(b);
     if (state().inCircle()) {
-      then_branch_label_computed = state().cycle();
+      else_branch_label_Body_values.put(_parameters, else_branch_label_Body_value);
+      else_branch_label_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      then_branch_label_computed = ASTNode$State.NON_CYCLE;
+      else_branch_label_Body_values.put(_parameters, else_branch_label_Body_value);
+      else_branch_label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return then_branch_label_value;
+    return else_branch_label_Body_value;
+  }
+  /** @apilevel internal */
+  private void then_branch_label_Body_reset() {
+    then_branch_label_Body_computed = null;
+    then_branch_label_Body_values = null;
+  }
+  /** @apilevel internal */
+  protected java.util.Map then_branch_label_Body_values;
+  /** @apilevel internal */
+  protected java.util.Map then_branch_label_Body_computed;
+  /**
+   * @attribute syn
+   * @aspect BooleanExpressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:152
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:152")
+  public Body.Label then_branch_label(Body b) {
+    Object _parameters = b;
+    if (then_branch_label_Body_computed == null) then_branch_label_Body_computed = new java.util.HashMap(4);
+    if (then_branch_label_Body_values == null) then_branch_label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (then_branch_label_Body_values.containsKey(_parameters)
+        && then_branch_label_Body_computed.containsKey(_parameters)
+        && (then_branch_label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || then_branch_label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) then_branch_label_Body_values.get(_parameters);
+    }
+    Body.Label then_branch_label_Body_value = newLabel(b);
+    if (state().inCircle()) {
+      then_branch_label_Body_values.put(_parameters, then_branch_label_Body_value);
+      then_branch_label_Body_computed.put(_parameters, state().cycle());
+    
+    } else {
+      then_branch_label_Body_values.put(_parameters, then_branch_label_Body_value);
+      then_branch_label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
+    
+    }
+    return then_branch_label_Body_value;
   }
   /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
@@ -1359,6 +1375,11 @@ public class ConditionalExpr extends Expr implements Cloneable {
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -1383,6 +1404,11 @@ public class ConditionalExpr extends Expr implements Cloneable {
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -1403,159 +1429,199 @@ public class ConditionalExpr extends Expr implements Cloneable {
       return getParent().Define_targetType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
   protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getConditionNoTransform() != null && _callerNode == getCondition()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:296
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:480
       return false;
     }
     else {
       return getParent().Define_assignmentContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getConditionNoTransform() != null && _callerNode == getCondition()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:297
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:481
       return false;
     }
     else {
       return getParent().Define_invocationContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getFalseExprNoTransform() != null && _callerNode == getFalseExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:308
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:492
       return false;
     }
     else if (getTrueExprNoTransform() != null && _callerNode == getTrueExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:303
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:487
       return false;
     }
     else if (getConditionNoTransform() != null && _callerNode == getCondition()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:298
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:482
       return false;
     }
     else {
       return getParent().Define_castContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getFalseExprNoTransform() != null && _callerNode == getFalseExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:310
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:494
       return false;
     }
     else if (getTrueExprNoTransform() != null && _callerNode == getTrueExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:305
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:489
       return false;
     }
     else if (getConditionNoTransform() != null && _callerNode == getCondition()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:299
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:483
       return false;
     }
     else {
       return getParent().Define_numericContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getFalseExprNoTransform() != null && _callerNode == getFalseExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:309
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:493
       return false;
     }
     else if (getTrueExprNoTransform() != null && _callerNode == getTrueExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:304
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:488
       return false;
     }
     else if (getConditionNoTransform() != null && _callerNode == getCondition()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:300
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:484
       return false;
     }
     else {
       return getParent().Define_stringContext(this, _callerNode);
     }
   }
-  protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
-    return true;
-  }
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:48
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
    */
-  public soot.jimple.Stmt Define_condition_false_label(ASTNode _callerNode, ASTNode _childNode) {
-    if (getFalseExprNoTransform() != null && _callerNode == getFalseExpr()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:63
-      return false_label();
-    }
-    else if (getTrueExprNoTransform() != null && _callerNode == getTrueExpr()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:61
-      return false_label();
-    }
-    else if (getConditionNoTransform() != null && _callerNode == getCondition()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:59
-      return else_branch_label();
-    }
-    else {
-      return getParent().Define_condition_false_label(this, _callerNode);
-    }
-  }
-  protected boolean canDefine_condition_false_label(ASTNode _callerNode, ASTNode _childNode) {
+  protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:49
    * @apilevel internal
    */
-  public soot.jimple.Stmt Define_condition_true_label(ASTNode _callerNode, ASTNode _childNode) {
+  public Body.Label Define_condition_false_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
     if (getFalseExprNoTransform() != null && _callerNode == getFalseExpr()) {
       // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:64
-      return true_label();
+      return false_label(b);
     }
     else if (getTrueExprNoTransform() != null && _callerNode == getTrueExpr()) {
       // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:62
-      return true_label();
+      return false_label(b);
     }
     else if (getConditionNoTransform() != null && _callerNode == getCondition()) {
       // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:60
-      return then_branch_label();
+      return else_branch_label(b);
     }
     else {
-      return getParent().Define_condition_true_label(this, _callerNode);
+      return getParent().Define_condition_false_label(this, _callerNode, b);
     }
   }
-  protected boolean canDefine_condition_true_label(ASTNode _callerNode, ASTNode _childNode) {
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:49
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute condition_false_label
+   */
+  protected boolean canDefine_condition_false_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:50
+   * @apilevel internal
+   */
+  public Body.Label Define_condition_true_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
+    if (getFalseExprNoTransform() != null && _callerNode == getFalseExpr()) {
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:65
+      return true_label(b);
+    }
+    else if (getTrueExprNoTransform() != null && _callerNode == getTrueExpr()) {
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:63
+      return true_label(b);
+    }
+    else if (getConditionNoTransform() != null && _callerNode == getCondition()) {
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:61
+      return then_branch_label(b);
+    }
+    else {
+      return getParent().Define_condition_true_label(this, _callerNode, b);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:50
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute condition_true_label
+   */
+  protected boolean canDefine_condition_true_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
     return true;
   }
   /** @apilevel internal */
@@ -1566,8 +1632,9 @@ public class ConditionalExpr extends Expr implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:738
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:740
     if (!getCondition().type().isBoolean()) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -1578,7 +1645,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
         contributors.add(this);
       }
     }
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:743
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:745
     if (type().isUnknown() && !getTrueExpr().type().isUnknown()
               && !getFalseExpr().type().isUnknown()) {
       {
@@ -1592,6 +1659,7 @@ public class ConditionalExpr extends Expr implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!getCondition().type().isBoolean()) {

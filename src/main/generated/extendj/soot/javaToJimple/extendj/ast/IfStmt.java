@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:301
+ * @astdecl IfStmt : Stmt ::= Condition:Expr Then:Stmt [Else:Stmt];
  * @production IfStmt : {@link Stmt} ::= <span class="component">Condition:{@link Expr}</span> <span class="component">Then:{@link Stmt}</span> <span class="component">[Else:{@link Stmt}]</span>;
 
  */
@@ -56,7 +59,7 @@ public class IfStmt extends Stmt implements Cloneable {
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:156
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:235
    */
   public void prettyPrint(PrettyPrinter out) {
     out.print("if (");
@@ -89,41 +92,21 @@ public class IfStmt extends Stmt implements Cloneable {
   }
   /**
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:118
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:155
    */
-  public void jimplify2(Body b) {
-    soot.jimple.Stmt endBranch = newLabel();
+  public void jimpleEmit(Body b) {
+    Body.Label label_end = newLabel(b);
 
-    // TODO: We want as literal a translation as possible. Should we defer the
-    //       `canCompleteNormally` to a later analysis?
-    //       If so, excise any use of `canCompleteNormally` from the backend.
-    // if(getCondition().isConstant()) {
-    //   if(getCondition().isTrue())
-    //     getThen().jimplify2(b);
-    //   else if(getCondition().isFalse() && hasElse())
-    //     getElse().jimplify2(b);
-    // } else
-    {
-      soot.jimple.Stmt elseBranch = else_branch_label();
-      soot.jimple.Stmt thenBranch = then_branch_label();
+    getCondition().emitEvalBranch(b);
 
-      getCondition().emitEvalBranch(b);
-      b.addLabel(thenBranch);
+    b.addLabel(then_branch_label(b));
+    getThen().jimpleEmit(b);
+    b.addGoTo(label_end, this);
 
-      getThen().jimplify2(b);
-      if (getThen().canCompleteNormally() && hasElse()) {
-        //b.setLine(this);
-        b.add(b.newGotoStmt(endBranch, this));
-      }
+    b.addLabel(else_branch_label(b));
+    if (hasElse()) getElse().jimpleEmit(b);
 
-      b.addLabel(elseBranch);
-
-      if (hasElse())
-        getElse().jimplify2(b);
-    }
-
-    if (getThen().canCompleteNormally() && hasElse())
-      b.addLabel(endBranch);
+    b.addLabel(label_end);
   }
   /**
    * @declaredat ASTNode:1
@@ -145,50 +128,55 @@ public class IfStmt extends Stmt implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Condition", "Then", "Else"},
+    type = {"Expr", "Stmt", "Opt<Stmt>"},
+    kind = {"Child", "Child", "Opt"}
+  )
   public IfStmt(Expr p0, Stmt p1, Opt<Stmt> p2) {
     setChild(p0, 0);
     setChild(p1, 1);
     setChild(p2, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     assignedAfter_Variable_reset();
     unassignedAfter_Variable_reset();
     canCompleteNormally_reset();
-    else_branch_label_reset();
-    then_branch_label_reset();
+    else_branch_label_Body_reset();
+    then_branch_label_Body_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   public IfStmt clone() throws CloneNotSupportedException {
     IfStmt node = (IfStmt) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public IfStmt copy() {
     try {
@@ -208,7 +196,7 @@ public class IfStmt extends Stmt implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:67
+   * @declaredat ASTNode:72
    */
   @Deprecated
   public IfStmt fullCopy() {
@@ -219,7 +207,7 @@ public class IfStmt extends Stmt implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:77
+   * @declaredat ASTNode:82
    */
   public IfStmt treeCopyNoTransform() {
     IfStmt tree = (IfStmt) copy();
@@ -240,7 +228,7 @@ public class IfStmt extends Stmt implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:97
+   * @declaredat ASTNode:102
    */
   public IfStmt treeCopy() {
     IfStmt tree = (IfStmt) copy();
@@ -256,7 +244,7 @@ public class IfStmt extends Stmt implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:111
+   * @declaredat ASTNode:116
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -374,20 +362,20 @@ public class IfStmt extends Stmt implements Cloneable {
   public boolean assignedAfter(Variable v) {
     Object _parameters = v;
     if (assignedAfter_Variable_values == null) assignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfter_Variable_value;
@@ -396,7 +384,7 @@ public class IfStmt extends Stmt implements Cloneable {
         new_assignedAfter_Variable_value = hasElse()
               ? getThen().assignedAfter(v) && getElse().assignedAfter(v)
               : getThen().assignedAfter(v) && getCondition().assignedAfterFalse(v);
-        if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfter_Variable_value;
         }
@@ -410,7 +398,7 @@ public class IfStmt extends Stmt implements Cloneable {
       boolean new_assignedAfter_Variable_value = hasElse()
             ? getThen().assignedAfter(v) && getElse().assignedAfter(v)
             : getThen().assignedAfter(v) && getCondition().assignedAfterFalse(v);
-      if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfter_Variable_value;
       }
@@ -429,20 +417,20 @@ public class IfStmt extends Stmt implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
@@ -451,7 +439,7 @@ public class IfStmt extends Stmt implements Cloneable {
         new_unassignedAfter_Variable_value = hasElse()
               ? getThen().unassignedAfter(v) && getElse().unassignedAfter(v)
               : getThen().unassignedAfter(v) && getCondition().unassignedAfterFalse(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -465,7 +453,7 @@ public class IfStmt extends Stmt implements Cloneable {
       boolean new_unassignedAfter_Variable_value = hasElse()
             ? getThen().unassignedAfter(v) && getElse().unassignedAfter(v)
             : getThen().unassignedAfter(v) && getCondition().unassignedAfterFalse(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -479,7 +467,7 @@ public class IfStmt extends Stmt implements Cloneable {
     canCompleteNormally_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle canCompleteNormally_computed = null;
+  protected ASTState.Cycle canCompleteNormally_computed = null;
 
   /** @apilevel internal */
   protected boolean canCompleteNormally_value;
@@ -492,8 +480,8 @@ public class IfStmt extends Stmt implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="UnreachableStatements", declaredAt="/home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:50")
   public boolean canCompleteNormally() {
-    ASTNode$State state = state();
-    if (canCompleteNormally_computed == ASTNode$State.NON_CYCLE || canCompleteNormally_computed == state().cycle()) {
+    ASTState state = state();
+    if (canCompleteNormally_computed == ASTState.NON_CYCLE || canCompleteNormally_computed == state().cycle()) {
       return canCompleteNormally_value;
     }
     canCompleteNormally_value = (reachable() && !hasElse())
@@ -502,7 +490,7 @@ public class IfStmt extends Stmt implements Cloneable {
       canCompleteNormally_computed = state().cycle();
     
     } else {
-      canCompleteNormally_computed = ASTNode$State.NON_CYCLE;
+      canCompleteNormally_computed = ASTState.NON_CYCLE;
     
     }
     return canCompleteNormally_value;
@@ -525,79 +513,89 @@ public class IfStmt extends Stmt implements Cloneable {
   /**
    * @attribute syn
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:21
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:24
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:21")
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:24")
   public boolean definesLabel() {
     boolean definesLabel_value = true;
     return definesLabel_value;
   }
   /** @apilevel internal */
-  private void else_branch_label_reset() {
-    else_branch_label_computed = null;
-    else_branch_label_value = null;
+  private void else_branch_label_Body_reset() {
+    else_branch_label_Body_computed = null;
+    else_branch_label_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle else_branch_label_computed = null;
-
+  protected java.util.Map else_branch_label_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt else_branch_label_value;
-
+  protected java.util.Map else_branch_label_Body_computed;
   /**
    * @attribute syn
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:116
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:153
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:116")
-  public soot.jimple.Stmt else_branch_label() {
-    ASTNode$State state = state();
-    if (else_branch_label_computed == ASTNode$State.NON_CYCLE || else_branch_label_computed == state().cycle()) {
-      return else_branch_label_value;
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:153")
+  public Body.Label else_branch_label(Body b) {
+    Object _parameters = b;
+    if (else_branch_label_Body_computed == null) else_branch_label_Body_computed = new java.util.HashMap(4);
+    if (else_branch_label_Body_values == null) else_branch_label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (else_branch_label_Body_values.containsKey(_parameters)
+        && else_branch_label_Body_computed.containsKey(_parameters)
+        && (else_branch_label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || else_branch_label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) else_branch_label_Body_values.get(_parameters);
     }
-    else_branch_label_value = newLabel();
+    Body.Label else_branch_label_Body_value = newLabel(b);
     if (state().inCircle()) {
-      else_branch_label_computed = state().cycle();
+      else_branch_label_Body_values.put(_parameters, else_branch_label_Body_value);
+      else_branch_label_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      else_branch_label_computed = ASTNode$State.NON_CYCLE;
+      else_branch_label_Body_values.put(_parameters, else_branch_label_Body_value);
+      else_branch_label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return else_branch_label_value;
+    return else_branch_label_Body_value;
   }
   /** @apilevel internal */
-  private void then_branch_label_reset() {
-    then_branch_label_computed = null;
-    then_branch_label_value = null;
+  private void then_branch_label_Body_reset() {
+    then_branch_label_Body_computed = null;
+    then_branch_label_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle then_branch_label_computed = null;
-
+  protected java.util.Map then_branch_label_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt then_branch_label_value;
-
+  protected java.util.Map then_branch_label_Body_computed;
   /**
    * @attribute syn
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:117
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:154
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:117")
-  public soot.jimple.Stmt then_branch_label() {
-    ASTNode$State state = state();
-    if (then_branch_label_computed == ASTNode$State.NON_CYCLE || then_branch_label_computed == state().cycle()) {
-      return then_branch_label_value;
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:154")
+  public Body.Label then_branch_label(Body b) {
+    Object _parameters = b;
+    if (then_branch_label_Body_computed == null) then_branch_label_Body_computed = new java.util.HashMap(4);
+    if (then_branch_label_Body_values == null) then_branch_label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (then_branch_label_Body_values.containsKey(_parameters)
+        && then_branch_label_Body_computed.containsKey(_parameters)
+        && (then_branch_label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || then_branch_label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) then_branch_label_Body_values.get(_parameters);
     }
-    then_branch_label_value = newLabel();
+    Body.Label then_branch_label_Body_value = newLabel(b);
     if (state().inCircle()) {
-      then_branch_label_computed = state().cycle();
+      then_branch_label_Body_values.put(_parameters, then_branch_label_Body_value);
+      then_branch_label_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      then_branch_label_computed = ASTNode$State.NON_CYCLE;
+      then_branch_label_Body_values.put(_parameters, then_branch_label_Body_value);
+      then_branch_label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return then_branch_label_value;
+    return then_branch_label_Body_value;
   }
   /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
@@ -620,6 +618,11 @@ public class IfStmt extends Stmt implements Cloneable {
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -644,6 +647,11 @@ public class IfStmt extends Stmt implements Cloneable {
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -664,6 +672,11 @@ public class IfStmt extends Stmt implements Cloneable {
       return getParent().Define_reachable(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:49
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reachable
+   */
   protected boolean canDefine_reachable(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -684,6 +697,11 @@ public class IfStmt extends Stmt implements Cloneable {
       return getParent().Define_reportUnreachable(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/PreciseRethrow.jrag:280
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reportUnreachable
+   */
   protected boolean canDefine_reportUnreachable(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -704,39 +722,54 @@ public class IfStmt extends Stmt implements Cloneable {
       return getParent().Define_inhModifiedInScope(this, _callerNode, var);
     }
   }
-  protected boolean canDefine_inhModifiedInScope(ASTNode _callerNode, ASTNode _childNode, Variable var) {
-    return true;
-  }
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:48
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:30
    * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inhModifiedInScope
    */
-  public soot.jimple.Stmt Define_condition_false_label(ASTNode _callerNode, ASTNode _childNode) {
-    if (getConditionNoTransform() != null && _callerNode == getCondition()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:38
-      return else_branch_label();
-    }
-    else {
-      return getParent().Define_condition_false_label(this, _callerNode);
-    }
-  }
-  protected boolean canDefine_condition_false_label(ASTNode _callerNode, ASTNode _childNode) {
+  protected boolean canDefine_inhModifiedInScope(ASTNode _callerNode, ASTNode _childNode, Variable var) {
     return true;
   }
   /**
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:49
    * @apilevel internal
    */
-  public soot.jimple.Stmt Define_condition_true_label(ASTNode _callerNode, ASTNode _childNode) {
+  public Body.Label Define_condition_false_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
     if (getConditionNoTransform() != null && _callerNode == getCondition()) {
       // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:39
-      return then_branch_label();
+      return else_branch_label(b);
     }
     else {
-      return getParent().Define_condition_true_label(this, _callerNode);
+      return getParent().Define_condition_false_label(this, _callerNode, b);
     }
   }
-  protected boolean canDefine_condition_true_label(ASTNode _callerNode, ASTNode _childNode) {
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:49
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute condition_false_label
+   */
+  protected boolean canDefine_condition_false_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:50
+   * @apilevel internal
+   */
+  public Body.Label Define_condition_true_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
+    if (getConditionNoTransform() != null && _callerNode == getCondition()) {
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:40
+      return then_branch_label(b);
+    }
+    else {
+      return getParent().Define_condition_true_label(this, _callerNode, b);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:50
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute condition_true_label
+   */
+  protected boolean canDefine_condition_true_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
     return true;
   }
   /** @apilevel internal */
@@ -747,8 +780,9 @@ public class IfStmt extends Stmt implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:433
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:435
     if (!getCondition().type().isBoolean()) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -761,6 +795,7 @@ public class IfStmt extends Stmt implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!getCondition().type().isBoolean()) {

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,17 +38,11 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:229
+ * @astdecl MinusExpr : Unary;
  * @production MinusExpr : {@link Unary};
 
  */
 public class MinusExpr extends Unary implements Cloneable {
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:737
-   */
-  public soot.Value eval(Body b) {
-    return b.newNegExpr(asImmediate(b, getOperand().eval(b)), this);
-  }
   /**
    * @declaredat ASTNode:1
    */
@@ -66,24 +62,29 @@ public class MinusExpr extends Unary implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Operand"},
+    type = {"Expr"},
+    kind = {"Child"}
+  )
   public MinusExpr(Expr p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public boolean mayHaveRewrite() {
     return true;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -91,20 +92,20 @@ public class MinusExpr extends Unary implements Cloneable {
     type_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public MinusExpr clone() throws CloneNotSupportedException {
     MinusExpr node = (MinusExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public MinusExpr copy() {
     try {
@@ -124,7 +125,7 @@ public class MinusExpr extends Unary implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:66
    */
   @Deprecated
   public MinusExpr fullCopy() {
@@ -135,7 +136,7 @@ public class MinusExpr extends Unary implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:71
+   * @declaredat ASTNode:76
    */
   public MinusExpr treeCopyNoTransform() {
     MinusExpr tree = (MinusExpr) copy();
@@ -156,7 +157,7 @@ public class MinusExpr extends Unary implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:91
+   * @declaredat ASTNode:96
    */
   public MinusExpr treeCopy() {
     MinusExpr tree = (MinusExpr) copy();
@@ -172,7 +173,7 @@ public class MinusExpr extends Unary implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:105
+   * @declaredat ASTNode:110
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -228,10 +229,10 @@ public class MinusExpr extends Unary implements Cloneable {
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:306
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:385
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:306")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:385")
   public String printPreOp() {
     String printPreOp_value = "-";
     return printPreOp_value;
@@ -242,7 +243,7 @@ public class MinusExpr extends Unary implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -250,13 +251,13 @@ public class MinusExpr extends Unary implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = getOperand().type().unaryNumericPromotion();
@@ -264,10 +265,21 @@ public class MinusExpr extends Unary implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:659
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:659")
+  public UnopExpr eval(Body b) {
+    UnopExpr eval_Body_value = b.newNegExpr(getOperand().eval(b), this);
+    return eval_Body_value;
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {
@@ -319,8 +331,9 @@ public class MinusExpr extends Unary implements Cloneable {
     }
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:383
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:385
     if (!getOperand().type().isNumericType()) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -333,6 +346,7 @@ public class MinusExpr extends Unary implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!getOperand().type().isNumericType()) {
@@ -347,7 +361,7 @@ public class MinusExpr extends Unary implements Cloneable {
     rewrittenNode_cycle = null;
   }
 /** @apilevel internal */
-protected ASTNode$State.Cycle rewrittenNode_cycle = null;
+protected ASTState.Cycle rewrittenNode_cycle = null;
   /** @apilevel internal */
   protected boolean rewrittenNode_computed = false;
 
@@ -361,7 +375,7 @@ protected ASTNode$State.Cycle rewrittenNode_cycle = null;
     if (rewrittenNode_computed) {
       return rewrittenNode_value;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!rewrittenNode_initialized) {
       rewrittenNode_initialized = true;
       rewrittenNode_value = this;

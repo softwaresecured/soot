@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:149
+ * @astdecl FloatingPointType : NumericType;
  * @production FloatingPointType : {@link NumericType};
 
  */
@@ -61,6 +64,11 @@ public class FloatingPointType extends NumericType implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "SuperClass", "BodyDecl"},
+    type = {"Modifiers", "String", "Opt<Access>", "List<BodyDecl>"},
+    kind = {"Child", "Token", "Opt", "List"}
+  )
   public FloatingPointType(Modifiers p0, String p1, Opt<Access> p2, List<BodyDecl> p3) {
     setChild(p0, 0);
     setID(p1);
@@ -68,7 +76,7 @@ public class FloatingPointType extends NumericType implements Cloneable {
     setChild(p3, 2);
   }
   /**
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   public FloatingPointType(Modifiers p0, beaver.Symbol p1, Opt<Access> p2, List<BodyDecl> p3) {
     setChild(p0, 0);
@@ -77,39 +85,39 @@ public class FloatingPointType extends NumericType implements Cloneable {
     setChild(p3, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public FloatingPointType clone() throws CloneNotSupportedException {
     FloatingPointType node = (FloatingPointType) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:56
    */
   public FloatingPointType copy() {
     try {
@@ -129,7 +137,7 @@ public class FloatingPointType extends NumericType implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:70
+   * @declaredat ASTNode:75
    */
   @Deprecated
   public FloatingPointType fullCopy() {
@@ -140,7 +148,7 @@ public class FloatingPointType extends NumericType implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:80
+   * @declaredat ASTNode:85
    */
   public FloatingPointType treeCopyNoTransform() {
     FloatingPointType tree = (FloatingPointType) copy();
@@ -161,7 +169,7 @@ public class FloatingPointType extends NumericType implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:100
+   * @declaredat ASTNode:105
    */
   public FloatingPointType treeCopy() {
     FloatingPointType tree = (FloatingPointType) copy();
@@ -177,7 +185,7 @@ public class FloatingPointType extends NumericType implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:114
+   * @declaredat ASTNode:119
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((FloatingPointType) node).tokenString_ID);    

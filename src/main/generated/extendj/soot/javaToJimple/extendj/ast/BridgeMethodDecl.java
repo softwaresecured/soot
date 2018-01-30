@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:125
+ * @astdecl BridgeMethodDecl : MethodDecl;
  * @production BridgeMethodDecl : {@link MethodDecl};
 
  */
@@ -62,6 +65,11 @@ public class BridgeMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @declaredat ASTNode:16
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID", "Parameter", "Exception", "Block"},
+    type = {"Modifiers", "Access", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Block>"},
+    kind = {"Child", "Child", "Token", "List", "List", "Opt"}
+  )
   public BridgeMethodDecl(Modifiers p0, Access p1, String p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -71,7 +79,7 @@ public class BridgeMethodDecl extends MethodDecl implements Cloneable {
     setChild(p5, 4);
   }
   /**
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public BridgeMethodDecl(Modifiers p0, Access p1, beaver.Symbol p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5) {
     setChild(p0, 0);
@@ -82,40 +90,40 @@ public class BridgeMethodDecl extends MethodDecl implements Cloneable {
     setChild(p5, 4);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   protected int numChildren() {
     return 5;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     flags_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:52
+   * @declaredat ASTNode:57
    */
   public BridgeMethodDecl clone() throws CloneNotSupportedException {
     BridgeMethodDecl node = (BridgeMethodDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:57
+   * @declaredat ASTNode:62
    */
   public BridgeMethodDecl copy() {
     try {
@@ -135,7 +143,7 @@ public class BridgeMethodDecl extends MethodDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:76
+   * @declaredat ASTNode:81
    */
   @Deprecated
   public BridgeMethodDecl fullCopy() {
@@ -146,7 +154,7 @@ public class BridgeMethodDecl extends MethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:86
+   * @declaredat ASTNode:91
    */
   public BridgeMethodDecl treeCopyNoTransform() {
     BridgeMethodDecl tree = (BridgeMethodDecl) copy();
@@ -167,7 +175,7 @@ public class BridgeMethodDecl extends MethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:106
+   * @declaredat ASTNode:111
    */
   public BridgeMethodDecl treeCopy() {
     BridgeMethodDecl tree = (BridgeMethodDecl) copy();
@@ -183,7 +191,7 @@ public class BridgeMethodDecl extends MethodDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:120
+   * @declaredat ASTNode:125
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((BridgeMethodDecl) node).tokenString_ID);    
@@ -545,7 +553,7 @@ public class BridgeMethodDecl extends MethodDecl implements Cloneable {
     flags_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle flags_computed = null;
+  protected ASTState.Cycle flags_computed = null;
 
   /** @apilevel internal */
   protected int flags_value;
@@ -558,8 +566,8 @@ public class BridgeMethodDecl extends MethodDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Flags", declaredAt="/home/olivier/projects/extendj/java4/backend/Flags.jrag:60")
   public int flags() {
-    ASTNode$State state = state();
-    if (flags_computed == ASTNode$State.NON_CYCLE || flags_computed == state().cycle()) {
+    ASTState state = state();
+    if (flags_computed == ASTState.NON_CYCLE || flags_computed == state().cycle()) {
       return flags_value;
     }
     flags_value = flags_compute();
@@ -567,7 +575,7 @@ public class BridgeMethodDecl extends MethodDecl implements Cloneable {
       flags_computed = state().cycle();
     
     } else {
-      flags_computed = ASTNode$State.NON_CYCLE;
+      flags_computed = ASTState.NON_CYCLE;
     
     }
     return flags_value;

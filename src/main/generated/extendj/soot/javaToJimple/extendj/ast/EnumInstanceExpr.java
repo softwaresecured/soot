@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Enums.ast:5
+ * @astdecl EnumInstanceExpr : ClassInstanceExpr ::= Access Arg:Expr* [TypeDecl];
  * @production EnumInstanceExpr : {@link ClassInstanceExpr} ::= <span class="component">{@link Access}</span> <span class="component">Arg:{@link Expr}*</span> <span class="component">[{@link TypeDecl}]</span>;
 
  */
@@ -61,24 +64,29 @@ public class EnumInstanceExpr extends ClassInstanceExpr implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"TypeDecl"},
+    type = {"Opt<TypeDecl>"},
+    kind = {"Opt"}
+  )
   public EnumInstanceExpr(Opt<TypeDecl> p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -86,20 +94,20 @@ public class EnumInstanceExpr extends ClassInstanceExpr implements Cloneable {
     getArgList_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public EnumInstanceExpr clone() throws CloneNotSupportedException {
     EnumInstanceExpr node = (EnumInstanceExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public EnumInstanceExpr copy() {
     try {
@@ -119,7 +127,7 @@ public class EnumInstanceExpr extends ClassInstanceExpr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   @Deprecated
   public EnumInstanceExpr fullCopy() {
@@ -130,7 +138,7 @@ public class EnumInstanceExpr extends ClassInstanceExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:78
    */
   public EnumInstanceExpr treeCopyNoTransform() {
     EnumInstanceExpr tree = (EnumInstanceExpr) copy();
@@ -159,7 +167,7 @@ public class EnumInstanceExpr extends ClassInstanceExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:101
+   * @declaredat ASTNode:106
    */
   public EnumInstanceExpr treeCopy() {
     EnumInstanceExpr tree = (EnumInstanceExpr) copy();
@@ -183,7 +191,7 @@ public class EnumInstanceExpr extends ClassInstanceExpr implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:123
+   * @declaredat ASTNode:128
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -394,7 +402,7 @@ public class EnumInstanceExpr extends ClassInstanceExpr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:292")
   public Access getAccess() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getAccess_computed) {
       return (Access) getChild(getAccessChildPosition());
     }
@@ -430,7 +438,7 @@ public class EnumInstanceExpr extends ClassInstanceExpr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:296")
   public List<Expr> getArgList() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getArgList_computed) {
       return (List<Expr>) getChild(getArgListChildPosition());
     }

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:95
+ * @astdecl ArrayTypeWithSizeAccess : ArrayTypeAccess ::= Expr;
  * @production ArrayTypeWithSizeAccess : {@link ArrayTypeAccess} ::= <span class="component">{@link Expr}</span>;
 
  */
@@ -51,12 +54,21 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
     out.print("]");
   }
   /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:708
+   * @aspect PrettyPrintUtil
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:87
    */
-  public void addArraySize(Body b, ArrayList list) {
-    getAccess().addArraySize(b, list);
-    list.add(asImmediate(b, getExpr().eval(b)));
+  @Override public String toString() {
+    return String.format("%s[%s]",
+        getAccessNoTransform().toString(),
+        getExprNoTransform().toString());
+  }
+  /**
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:634
+   */
+  void evalArraySize(Body b, ArrayList<Value> list) {
+    getAccess().evalArraySize(b, list);
+    list.add(getExpr().eval(b));
   }
   /**
    * @declaredat ASTNode:1
@@ -77,45 +89,50 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Access", "Expr"},
+    type = {"Access", "Expr"},
+    kind = {"Child", "Child"}
+  )
   public ArrayTypeWithSizeAccess(Access p0, Expr p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     unassignedAfter_Variable_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public ArrayTypeWithSizeAccess clone() throws CloneNotSupportedException {
     ArrayTypeWithSizeAccess node = (ArrayTypeWithSizeAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public ArrayTypeWithSizeAccess copy() {
     try {
@@ -135,7 +152,7 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:66
    */
   @Deprecated
   public ArrayTypeWithSizeAccess fullCopy() {
@@ -146,7 +163,7 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:71
+   * @declaredat ASTNode:76
    */
   public ArrayTypeWithSizeAccess treeCopyNoTransform() {
     ArrayTypeWithSizeAccess tree = (ArrayTypeWithSizeAccess) copy();
@@ -167,7 +184,7 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:91
+   * @declaredat ASTNode:96
    */
   public ArrayTypeWithSizeAccess treeCopy() {
     ArrayTypeWithSizeAccess tree = (ArrayTypeWithSizeAccess) copy();
@@ -183,7 +200,7 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:105
+   * @declaredat ASTNode:110
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -279,27 +296,27 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = getExpr().unassignedAfter(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -311,7 +328,7 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = getExpr().unassignedAfter(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -333,6 +350,11 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
       return getParent().Define_isDest(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:34
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isDest
+   */
   protected boolean canDefine_isDest(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -349,6 +371,11 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
       return getParent().Define_isSource(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:44
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isSource
+   */
   protected boolean canDefine_isSource(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -365,6 +392,11 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -381,38 +413,53 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:89
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:116
    * @apilevel internal
    */
   public Collection<MethodDecl> Define_lookupMethod(ASTNode _callerNode, ASTNode _childNode, String name) {
     if (getExprNoTransform() != null && _callerNode == getExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:107
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:134
       return unqualifiedScope().lookupMethod(name);
     }
     else {
       return getParent().Define_lookupMethod(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:116
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupMethod
+   */
   protected boolean canDefine_lookupMethod(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:109
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
    * @apilevel internal
    */
   public boolean Define_hasPackage(ASTNode _callerNode, ASTNode _childNode, String packageName) {
     if (getExprNoTransform() != null && _callerNode == getExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:118
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:122
       return unqualifiedScope().hasPackage(packageName);
     }
     else {
       return getParent().Define_hasPackage(this, _callerNode, packageName);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute hasPackage
+   */
   protected boolean canDefine_hasPackage(ASTNode _callerNode, ASTNode _childNode, String packageName) {
     return true;
   }
@@ -422,13 +469,18 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
    */
   public SimpleSet<TypeDecl> Define_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     if (getExprNoTransform() != null && _callerNode == getExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:387
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:391
       return unqualifiedScope().lookupType(name);
     }
     else {
       return getParent().Define_lookupType(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -445,6 +497,11 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
       return getParent().Define_lookupVariable(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -461,86 +518,116 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getExprNoTransform() != null && _callerNode == getExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:379
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:563
       return false;
     }
     else {
       return getParent().Define_assignmentContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getExprNoTransform() != null && _callerNode == getExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:380
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:564
       return false;
     }
     else {
       return getParent().Define_invocationContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getExprNoTransform() != null && _callerNode == getExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:381
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:565
       return false;
     }
     else {
       return getParent().Define_castContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getExprNoTransform() != null && _callerNode == getExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:382
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:566
       return false;
     }
     else {
       return getParent().Define_stringContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getExprNoTransform() != null && _callerNode == getExpr()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:383
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:567
       return false;
     }
     else {
       return getParent().Define_numericContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -552,8 +639,9 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:732
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:734
     if (!getExpr().type().unaryNumericPromotion().isInt()) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -566,6 +654,7 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!getExpr().type().unaryNumericPromotion().isInt()) {

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Annotations.ast:8
+ * @astdecl ElementValuePair : ASTNode ::= <Name:String> ElementValue;
  * @production ElementValuePair : {@link ASTNode} ::= <span class="component">&lt;Name:String&gt;</span> <span class="component">{@link ElementValue}</span>;
 
  */
@@ -68,52 +71,57 @@ public class ElementValuePair extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Name", "ElementValue"},
+    type = {"String", "ElementValue"},
+    kind = {"Token", "Child"}
+  )
   public ElementValuePair(String p0, ElementValue p1) {
     setName(p0);
     setChild(p1, 0);
   }
   /**
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   public ElementValuePair(beaver.Symbol p0, ElementValue p1) {
     setName(p0);
     setChild(p1, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:22
+   * @declaredat ASTNode:27
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public boolean mayHaveRewrite() {
     return true;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     rewrittenNode_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public ElementValuePair clone() throws CloneNotSupportedException {
     ElementValuePair node = (ElementValuePair) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public ElementValuePair copy() {
     try {
@@ -133,7 +141,7 @@ public class ElementValuePair extends ASTNode<ASTNode> implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:65
+   * @declaredat ASTNode:70
    */
   @Deprecated
   public ElementValuePair fullCopy() {
@@ -144,7 +152,7 @@ public class ElementValuePair extends ASTNode<ASTNode> implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:75
+   * @declaredat ASTNode:80
    */
   public ElementValuePair treeCopyNoTransform() {
     ElementValuePair tree = (ElementValuePair) copy();
@@ -165,7 +173,7 @@ public class ElementValuePair extends ASTNode<ASTNode> implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:95
+   * @declaredat ASTNode:100
    */
   public ElementValuePair treeCopy() {
     ElementValuePair tree = (ElementValuePair) copy();
@@ -181,7 +189,7 @@ public class ElementValuePair extends ASTNode<ASTNode> implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:109
+   * @declaredat ASTNode:114
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_Name == ((ElementValuePair) node).tokenString_Name);    
@@ -262,10 +270,10 @@ public class ElementValuePair extends ASTNode<ASTNode> implements Cloneable {
   @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:634")
   public TypeDecl type() {
     {
-        Map<String, SimpleSet<MethodDecl>> methodMap = enclosingAnnotationDecl().localMethodsSignatureMap();
-        SimpleSet<MethodDecl> set = methodMap.get(getName() + "()");
-        if (set != null) {
-          return set.iterator().next().type();
+        SimpleSet<MethodDecl> set = enclosingAnnotationDecl()
+            .localMethodsSignature(getName() + "()");
+        if (set.isSingleton()) {
+          return set.singletonValue().type();
         } else {
           return unknownType();
         }
@@ -294,26 +302,31 @@ public class ElementValuePair extends ASTNode<ASTNode> implements Cloneable {
     return enclosingAnnotationDecl_value;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:713
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
    * @apilevel internal
    */
   public TypeDecl Define_declType(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return type();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declType
+   */
   protected boolean canDefine_declType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {
-    // Declared at /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:741
+    // Declared at /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:751
     if (type().isArrayDecl() && getElementValue() instanceof ElementConstantValue) {
       return rewriteRule0();
     }
     return super.rewriteTo();
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:741
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:751
    * @apilevel internal
    */
   private ElementValuePair rewriteRule0() {
@@ -323,14 +336,15 @@ public class ElementValuePair extends ASTNode<ASTNode> implements Cloneable {
     }  }
   /** @apilevel internal */
   public boolean canRewrite() {
-    // Declared at /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:741
+    // Declared at /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:751
     if (type().isArrayDecl() && getElementValue() instanceof ElementConstantValue) {
       return true;
     }
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:706
+    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:716
     if (!type().commensurateWith(getElementValue())) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -343,6 +357,7 @@ public class ElementValuePair extends ASTNode<ASTNode> implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!type().commensurateWith(getElementValue())) {
@@ -359,7 +374,7 @@ public class ElementValuePair extends ASTNode<ASTNode> implements Cloneable {
     rewrittenNode_cycle = null;
   }
 /** @apilevel internal */
-protected ASTNode$State.Cycle rewrittenNode_cycle = null;
+protected ASTState.Cycle rewrittenNode_cycle = null;
   /** @apilevel internal */
   protected boolean rewrittenNode_computed = false;
 
@@ -373,7 +388,7 @@ protected ASTNode$State.Cycle rewrittenNode_cycle = null;
     if (rewrittenNode_computed) {
       return rewrittenNode_value;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!rewrittenNode_initialized) {
       rewrittenNode_initialized = true;
       rewrittenNode_value = this;

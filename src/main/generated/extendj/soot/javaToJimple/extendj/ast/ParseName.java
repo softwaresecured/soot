@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,6 +42,7 @@ import soot.coffi.CoffiMethodSource;
  * mechanism.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:108
+ * @astdecl ParseName : Access;
  * @production ParseName : {@link Access};
 
  */
@@ -61,7 +64,7 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:72
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:113
    */
   @Override public String toString() {
     return name();
@@ -85,26 +88,26 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:438
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:258
    */
   private ArrayList<NamePart> nameParts = new ArrayList<NamePart>();
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:440
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:260
    */
   public ParseName(ArrayList<NamePart> nameParts) {
     this.nameParts.addAll(nameParts);
   }
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:444
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:264
    */
   public ParseName(Symbol name) {
     nameParts.add(new NamePart(name));
   }
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:456
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:276
    */
   public Access buildMethodAccess(List<Expr> arguments) {
     if (nameParts.isEmpty()) {
@@ -125,91 +128,104 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:508
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:328
    */
-  protected NamePart resolvePackageOrTypeName(NamePart qualifier, NamePart name) {
-    if (qualifier.isPackageQualifier()) {
-      if (!qualifier.hasType(this, name)) {
-        return new NamePart.Package(qualifier, name);
-      }
+  protected Access resolvePackageOrTypeName(Access qualifier, NamePart name) {
+    if (qualifier == null)
+      return lookupType(name.toString()).isEmpty() ? mkPkgName(name) : mkTypeName(name);
+
+    if (qualifier.isPackageAccess()) {
+      if (qualifier.qualifiedLookupType(name.toString()).isEmpty())
+        return mkPkgName(qualifier, name);
     }
-    return new NamePart.Type(qualifier, name);
+
+    return mkTypeName(qualifier, name);
   }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:518
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:340
    */
-  protected NamePart resolveAmbiguousName(NamePart qualifier, NamePart name) {
-    // "If the AmbiguousName is a simple name, consisting of a single Identifier: "
-    if (qualifier == NamePart.EMPTY) {
-      // If variable/param/field -> ExpressionName
+  protected Access resolveAmbiguousName(Access qualifier, NamePart name) {
+    if (qualifier == null) {
       SimpleSet<Variable> var = lookupVariable(name.toString());
-      if (!var.isEmpty()) return new NamePart.VarName(qualifier, name);
-
-      // TODO: If field based single-static-import/static-import-on-demand -> ExpressionName
-
-      // If top-level-class/top-level-interface/member-type -> TypeName
-      // If single-type-import/type-import-on-demand/single-static-import/static-import-on-demand
-      //  -> TypeName
-      // Otherwise, assume its a package.
-      return resolvePackageOrTypeName(qualifier, name);
+      if (!var.isEmpty()) return mkVarName(name);
+    } else {
+      TypeDecl qualType = qualifier.type();
+      if (qualType != null) {
+        SimpleSet<Variable> var = qualifier.keepAccessibleFields(qualType.memberFields(name.toString()));
+        if (!var.isEmpty()) return mkVarName(qualifier, name);
+      }
     }
 
-    // "If the AmbiguousName is a qualified name, consisting of a name, a ".", and an Identifier,
-    //  then the name to the left of the "." is first reclassified, for it is itself an
-    //  AmbiguousName."
+    return resolvePackageOrTypeName(qualifier, name);
+  }
+  /**
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:355
+   */
+  private VarAccess mkVarName(NamePart varName) {
+    VarAccess a = new VarAccess(varName.toString(), varName.start, varName.end);
+    a.setParent(getParent());
+    return a;
+  }
+  /**
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:361
+   */
+  private TypeAccess mkTypeName(NamePart typeName) {
+    TypeAccess a = new TypeAccess(typeName.toString(), typeName.start, typeName.end);
+    a.setParent(getParent());
+    return a;
+  }
+  /**
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:367
+   */
+  private PackageAccess mkPkgName(NamePart pkgName) {
+    PackageAccess a = new PackageAccess(pkgName.toString(), pkgName.start, pkgName.end);
+    a.setParent(getParent());
+    return a;
+  }
+  /**
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:373
+   */
+  private Access mkVarName(Access qualifier, NamePart varName)
+  { return mkDot(qualifier, mkVarName(varName)); }
+  /**
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:376
+   */
+  private Access mkTypeName(Access qualifier, NamePart typeName) {
+    TypeAccess access = new TypeAccess(
+      typeName.toString(),
+      qualifier.isPackageAccess() ? qualifier.getStart() : typeName.start,
+      typeName.end);
 
-    // "If the name to the left of the "." is reclassified as a PackageName"
-    if (qualifier instanceof NamePart.Package) {
-      // "If there is a package whose name is the name to the left of the "." and that package
-      //  contains a declaration of a type whose name is the same as the Identifier, then this
-      //  AmbiguousName is reclassified as a TypeName.
-      //  Otherwise, this AmbiguousName is reclassified as a PackageName."
-      return resolvePackageOrTypeName(qualifier, name);
-    }
+    if (qualifier.isPackageAccess())
+      access.setPackage(qualifier.packageName());
 
-    // "If the name to the left of the "." is reclassified as a TypeName, then: "
-    if (qualifier instanceof NamePart.Type) {
-      TypeDecl hostType = qualifier.lookupType(this);
-
-      // "If the Identifier is the name of a method or field of the type denoted by TypeName, this
-      //  AmbiguousName is reclassified as an ExpressionName."
-      SimpleSet<Variable> var   = hostType.memberFields(name.toString());
-      if (!var  .isEmpty()) return new NamePart.VarName(qualifier, name);
-
-      // "Otherwise, if the Identifier is the name of a member-type of the type denoted by TypeName,
-      //  this AmbiguousName is reclassified as a TypeName.""
-      SimpleSet<TypeDecl> type  = hostType.memberTypes (name.toString());
-      if (!type .isEmpty()) return new NamePart.Type   (qualifier, name);
-
-      // "Otherwise, a compile-time error occurs."
-      // TODO: Add problem-handling for this.
-      throw new RuntimeException("Welp.");
-    }
-
-    // "If the name to the left of the "." is reclassified as an ExpressionName, then let T be the
-    //  type of the expression denoted by ExpressionName."
-    if (qualifier instanceof NamePart.VarName) {
-      TypeDecl hostType = qualifier.lookupType(this);
-
-      // "If the Identifier is the name of a method or field of the type denoted by T, this
-      //  AmbiguousName is reclassified as an ExpressionName."
-      SimpleSet<Variable>     var     = hostType.memberFields (name.toString());
-      if (!var    .isEmpty()) return new NamePart.VarName(qualifier, name);
-      Collection<MethodDecl>  method  = hostType.memberMethods(name.toString());
-      if (!method .isEmpty()) return new NamePart.VarName(qualifier, name);
-
-      // "Otherwise, if the Identifier is the name of a member type (\u00a78.5, \u00a79.5) of the type denoted
-      //  by T, then this AmbiguousName is reclassified as a TypeName."
-      SimpleSet<TypeDecl>     type    = hostType.memberTypes   (name.toString());
-      if (!type   .isEmpty()) return new NamePart.Type(qualifier, name);
-
-      // "Otherwise, a compile-time error occurs."
-      // TODO: Add problem-handling for this.
-      throw new RuntimeException("Welp.");
-    }
-
-    throw new RuntimeException("the impossible has occurred in name disambiguation");
+    return mkDot(qualifier, access);
+  }
+  /**
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:388
+   */
+  private PackageAccess mkPkgName(Access qualifier, NamePart pkgName) {
+    assert qualifier.isPackageAccess();
+    PackageAccess a = new PackageAccess(qualifier.packageName() + "." + pkgName.toString()
+                                       ,qualifier.getStart(), pkgName.end);
+    a.setParent(getParent());
+    return a;
+  }
+  /**
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:396
+   */
+  private Dot mkDot(Expr lhs, Access rhs) {
+    Dot a = new Dot(lhs, rhs);
+    a.setParent(getParent());
+    return a;
   }
   /**
    * @declaredat ASTNode:1
@@ -336,10 +352,10 @@ public class ParseName extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:608
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:612
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:608")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:612")
   public SimpleSet<TypeDecl> qualifiedLookupType(String name) {
     SimpleSet<TypeDecl> qualifiedLookupType_String_value = emptySet();
     return qualifiedLookupType_String_value;
@@ -358,10 +374,10 @@ public class ParseName extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:493
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:313
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:493")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:313")
   public boolean isParseName() {
     boolean isParseName_value = true;
     return isParseName_value;
@@ -369,10 +385,10 @@ public class ParseName extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:497
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:317
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:497")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:317")
   public String name() {
     {
         StringBuilder sb = new StringBuilder();
@@ -385,67 +401,107 @@ public class ParseName extends Access implements Cloneable {
         return sb.toString();
       }
   }
-  /** @apilevel internal */
-  public ASTNode rewriteTo() {
-    // Declared at /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:592
-    return rewriteRule0();
+  /**
+   * Test if an expression contains an unresolved parse name.
+   * @attribute syn
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421")
+  public boolean containsParseName() {
+    boolean containsParseName_value = true;
+    return containsParseName_value;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:592
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    Value eval_Body_value = eval_fail_general();
+    return eval_Body_value;
+  }
+  /**
+   * A parse name can only be disambiguated if it is not qualified by an
+   * expression containing another unresolved parse name.
+   * @attribute inh
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:406
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:406")
+  public boolean canResolve() {
+    boolean canResolve_value = getParent().Define_canResolve(this, null);
+    return canResolve_value;
+  }
+  /** @apilevel internal */
+  public ASTNode rewriteTo() {
+    // Declared at /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:434
+    if (canResolve()) {
+      return rewriteRule0();
+    }
+    return super.rewriteTo();
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:434
    * @apilevel internal
    */
   private Access rewriteRule0() {
 {
-      NamePart name = NamePart.EMPTY;
+      Access lhs = null;
       switch (nameType()) {
         case PACKAGE_NAME:
-          for (NamePart next : nameParts) {
-            name = new NamePart.Package(name, next);
-          }
-          break;
-        case TYPE_NAME:
+          for (NamePart next : nameParts)
+            lhs = lhs == null ? mkPkgName(next) : mkPkgName(lhs, next);
+
+          return lhs;
+
+        case TYPE_NAME: {
           // The first part of the name is the package part.
-          for (int i = 0; i < nameParts.size() - 1; ++i) {
-            name = resolvePackageOrTypeName(name, nameParts.get(i));
-          }
+          for (int i = 0; i < nameParts.size() - 1; ++i)
+            lhs = resolvePackageOrTypeName(lhs, nameParts.get(i));
+
           // The rest of the name is the type name.
-          name = new NamePart.Type(name, nameParts.get(nameParts.size() - 1));
-          break;
-        case PACKAGE_OR_TYPE_NAME:
-          for (NamePart next : nameParts) {
-            name = resolvePackageOrTypeName(name, next);
-          }
-          break;
-        case AMBIGUOUS_NAME:
-          for (NamePart next : nameParts) {
-            name = resolveAmbiguousName(name, next);
-          }
-          break;
-        case EXPRESSION_NAME:
-          // The first part of the name is the package part.
-          for (int i = 0; i < nameParts.size() - 1; ++i) {
-            name = resolveAmbiguousName(name, nameParts.get(i));
-          }
-          name = new NamePart.VarName(name, nameParts.get(nameParts.size() - 1));
-          break;
-        case NOT_CLASSIFIED:
-        default:
-          throw new Error("Failure in name classification: unknown name type encountered");
-      }
-      Access result = null;
-      while (name != NamePart.EMPTY) {
-        if (result == null) {
-          result = name.buildAccess();
-        } else {
-          result = new Dot(name.buildAccess(), result);
+          NamePart last = nameParts.get(nameParts.size() - 1);
+          return lhs == null ? mkTypeName(last) : mkTypeName(lhs, last);
         }
-        name = name.pred;
+
+        case PACKAGE_OR_TYPE_NAME:
+          for (NamePart next : nameParts)
+            lhs = resolvePackageOrTypeName(lhs, next);
+
+          return lhs;
+
+        case AMBIGUOUS_NAME:
+          for (NamePart next : nameParts)
+            lhs = resolveAmbiguousName(lhs, next);
+
+          return lhs;
+
+        case EXPRESSION_NAME: {
+          // The first part of the name is the package part.
+          for (int i = 0; i < nameParts.size() - 1; ++i)
+            lhs = resolveAmbiguousName(lhs, nameParts.get(i));
+
+          NamePart last = nameParts.get(nameParts.size() - 1);
+          return lhs == null ? mkVarName(last) : mkVarName(lhs, last);
+        }
+
+        case NOT_CLASSIFIED: break;
       }
-      return result;
+
+      throw new Error("Failure in name classification: unknown name type encountered");
     }  }
   /** @apilevel internal */
   public boolean canRewrite() {
-    return true;
+    // Declared at /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:434
+    if (canResolve()) {
+      return true;
+    }
+    return false;
   }
   /** @apilevel internal */
   private void rewrittenNode_reset() {
@@ -455,7 +511,7 @@ public class ParseName extends Access implements Cloneable {
     rewrittenNode_cycle = null;
   }
 /** @apilevel internal */
-protected ASTNode$State.Cycle rewrittenNode_cycle = null;
+protected ASTState.Cycle rewrittenNode_cycle = null;
   /** @apilevel internal */
   protected boolean rewrittenNode_computed = false;
 
@@ -469,7 +525,7 @@ protected ASTNode$State.Cycle rewrittenNode_cycle = null;
     if (rewrittenNode_computed) {
       return rewrittenNode_value;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!rewrittenNode_initialized) {
       rewrittenNode_initialized = true;
       rewrittenNode_value = this;

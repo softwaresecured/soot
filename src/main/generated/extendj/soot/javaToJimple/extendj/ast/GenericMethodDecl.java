@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/GenericMethods.ast:1
+ * @astdecl GenericMethodDecl : MethodDecl ::= TypeParameter:TypeVariable*;
  * @production GenericMethodDecl : {@link MethodDecl} ::= <span class="component">TypeParameter:{@link TypeVariable}*</span>;
 
  */
@@ -76,7 +79,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1433
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1432
    */
   public BodyDecl signatureCopy() {
     return new GenericMethodDeclSubstituted(
@@ -91,7 +94,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1534
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1533
    */
   public BodyDecl erasedCopy() {
     return new GenericMethodDeclErased(
@@ -152,6 +155,20 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     }
   }
   /**
+   * @aspect PrettyPrintUtil5
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/PrettyPrintUtil.jrag:35
+   */
+  @Override public String toString() {
+    StringBuilder params = new StringBuilder();
+    for (TypeVariable var : getTypeParameterListNoTransform()) {
+      if (params.length() > 0) {
+        params.append(", ");
+      }
+      params.append(var.toString());
+    }
+    return String.format("<%s>%s", params.toString(), super.toString());
+  }
+  /**
    * @declaredat ASTNode:1
    */
   public GenericMethodDecl() {
@@ -174,6 +191,11 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID", "Parameter", "Exception", "Block", "TypeParameter"},
+    type = {"Modifiers", "Access", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Block>", "List<TypeVariable>"},
+    kind = {"Child", "Child", "Token", "List", "List", "Opt", "List"}
+  )
   public GenericMethodDecl(Modifiers p0, Access p1, String p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<TypeVariable> p6) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -184,7 +206,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     setChild(p6, 5);
   }
   /**
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   public GenericMethodDecl(Modifiers p0, Access p1, beaver.Symbol p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<TypeVariable> p6) {
     setChild(p0, 0);
@@ -196,20 +218,20 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     setChild(p6, 5);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   protected int numChildren() {
     return 6;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -223,20 +245,20 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     genericMethodLevel_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:58
+   * @declaredat ASTNode:63
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:62
+   * @declaredat ASTNode:67
    */
   public GenericMethodDecl clone() throws CloneNotSupportedException {
     GenericMethodDecl node = (GenericMethodDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:67
+   * @declaredat ASTNode:72
    */
   public GenericMethodDecl copy() {
     try {
@@ -256,7 +278,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:86
+   * @declaredat ASTNode:91
    */
   @Deprecated
   public GenericMethodDecl fullCopy() {
@@ -267,7 +289,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:96
+   * @declaredat ASTNode:101
    */
   public GenericMethodDecl treeCopyNoTransform() {
     GenericMethodDecl tree = (GenericMethodDecl) copy();
@@ -288,7 +310,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:116
+   * @declaredat ASTNode:121
    */
   public GenericMethodDecl treeCopy() {
     GenericMethodDecl tree = (GenericMethodDecl) copy();
@@ -304,7 +326,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:130
+   * @declaredat ASTNode:135
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((GenericMethodDecl) node).tokenString_ID);    
@@ -777,7 +799,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     rawMethodDecl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle rawMethodDecl_computed = null;
+  protected ASTState.Cycle rawMethodDecl_computed = null;
 
   /** @apilevel internal */
   protected ParMethodDecl rawMethodDecl_value;
@@ -790,8 +812,8 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="GenericMethods", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:49")
   public ParMethodDecl rawMethodDecl() {
-    ASTNode$State state = state();
-    if (rawMethodDecl_computed == ASTNode$State.NON_CYCLE || rawMethodDecl_computed == state().cycle()) {
+    ASTState state = state();
+    if (rawMethodDecl_computed == ASTState.NON_CYCLE || rawMethodDecl_computed == state().cycle()) {
       return rawMethodDecl_value;
     }
     rawMethodDecl_value = lookupParMethodDecl(Collections.<TypeDecl>emptyList());
@@ -799,7 +821,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
       rawMethodDecl_computed = state().cycle();
     
     } else {
-      rawMethodDecl_computed = ASTNode$State.NON_CYCLE;
+      rawMethodDecl_computed = ASTState.NON_CYCLE;
     
     }
     return rawMethodDecl_value;
@@ -807,10 +829,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   /** @apilevel internal */
   private void lookupParMethodDecl_Collection_TypeDecl__reset() {
     lookupParMethodDecl_Collection_TypeDecl__values = null;
-    lookupParMethodDecl_Collection_TypeDecl__list = null;
+    lookupParMethodDecl_Collection_TypeDecl__proxy = null;
   }
   /** @apilevel internal */
-  protected List lookupParMethodDecl_Collection_TypeDecl__list;
+  protected ASTNode lookupParMethodDecl_Collection_TypeDecl__proxy;
   /** @apilevel internal */
   protected java.util.Map lookupParMethodDecl_Collection_TypeDecl__values;
 
@@ -825,19 +847,22 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   public ParMethodDecl lookupParMethodDecl(Collection<TypeDecl> typeArguments) {
     Object _parameters = typeArguments;
     if (lookupParMethodDecl_Collection_TypeDecl__values == null) lookupParMethodDecl_Collection_TypeDecl__values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (lookupParMethodDecl_Collection_TypeDecl__values.containsKey(_parameters)) {
       return (ParMethodDecl) lookupParMethodDecl_Collection_TypeDecl__values.get(_parameters);
     }
     state().enterLazyAttribute();
     ParMethodDecl lookupParMethodDecl_Collection_TypeDecl__value = newParMethodDecl(typeArguments);
-    if (lookupParMethodDecl_Collection_TypeDecl__list == null) {
-      lookupParMethodDecl_Collection_TypeDecl__list = new List();
-      lookupParMethodDecl_Collection_TypeDecl__list.setParent(this);
+    if (lookupParMethodDecl_Collection_TypeDecl__proxy == null) {
+      lookupParMethodDecl_Collection_TypeDecl__proxy = new ASTNode();
+      lookupParMethodDecl_Collection_TypeDecl__proxy.setParent(this);
     }
-    lookupParMethodDecl_Collection_TypeDecl__list.add(lookupParMethodDecl_Collection_TypeDecl__value);
     if (lookupParMethodDecl_Collection_TypeDecl__value != null) {
-      lookupParMethodDecl_Collection_TypeDecl__value = (ParMethodDecl) lookupParMethodDecl_Collection_TypeDecl__list.getChild(lookupParMethodDecl_Collection_TypeDecl__list.numChildren - 1);
+      lookupParMethodDecl_Collection_TypeDecl__value.setParent(lookupParMethodDecl_Collection_TypeDecl__proxy);
+      if (lookupParMethodDecl_Collection_TypeDecl__value.mayHaveRewrite()) {
+        lookupParMethodDecl_Collection_TypeDecl__value = (ParMethodDecl) lookupParMethodDecl_Collection_TypeDecl__value.rewrittenNode();
+        lookupParMethodDecl_Collection_TypeDecl__value.setParent(lookupParMethodDecl_Collection_TypeDecl__proxy);
+      }
     }
     lookupParMethodDecl_Collection_TypeDecl__values.put(_parameters, lookupParMethodDecl_Collection_TypeDecl__value);
     state().leaveLazyAttribute();
@@ -863,10 +888,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1445
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1444
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1445")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1444")
   public GenericMethodDecl original() {
     GenericMethodDecl original_value = this;
     return original_value;
@@ -876,10 +901,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
    * substitued generic method or constructor.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:320
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:413
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:320")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:413")
   public boolean isGeneric() {
     boolean isGeneric_value = true;
     return isGeneric_value;
@@ -890,10 +915,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
    * @return the original generic declaration of this method.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:331
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:424
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:331")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:424")
   public GenericMethodDecl genericDecl() {
     GenericMethodDecl genericDecl_value = this;
     return genericDecl_value;
@@ -904,10 +929,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
    * @return type parameters for this declaration.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:355
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:448
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:355")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:448")
   public List<TypeVariable> typeParameters() {
     List<TypeVariable> typeParameters_value = getTypeParameterList();
     return typeParameters_value;
@@ -930,7 +955,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   }
   /** @apilevel internal */
   private void subsignatureTo_MethodDecl_reset() {
-    subsignatureTo_MethodDecl_computed = new java.util.HashMap(4);
+    subsignatureTo_MethodDecl_computed = null;
     subsignatureTo_MethodDecl_values = null;
   }
   /** @apilevel internal */
@@ -948,10 +973,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     Object _parameters = m;
     if (subsignatureTo_MethodDecl_computed == null) subsignatureTo_MethodDecl_computed = new java.util.HashMap(4);
     if (subsignatureTo_MethodDecl_values == null) subsignatureTo_MethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (subsignatureTo_MethodDecl_values.containsKey(_parameters) && subsignatureTo_MethodDecl_computed != null
+    ASTState state = state();
+    if (subsignatureTo_MethodDecl_values.containsKey(_parameters)
         && subsignatureTo_MethodDecl_computed.containsKey(_parameters)
-        && (subsignatureTo_MethodDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || subsignatureTo_MethodDecl_computed.get(_parameters) == state().cycle())) {
+        && (subsignatureTo_MethodDecl_computed.get(_parameters) == ASTState.NON_CYCLE || subsignatureTo_MethodDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) subsignatureTo_MethodDecl_values.get(_parameters);
     }
     boolean subsignatureTo_MethodDecl_value = subsignatureTo_compute(m);
@@ -961,7 +986,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     
     } else {
       subsignatureTo_MethodDecl_values.put(_parameters, subsignatureTo_MethodDecl_value);
-      subsignatureTo_MethodDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      subsignatureTo_MethodDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return subsignatureTo_MethodDecl_value;
@@ -981,7 +1006,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     }
   /** @apilevel internal */
   private void sameTypeParameters_GenericMethodDecl_reset() {
-    sameTypeParameters_GenericMethodDecl_computed = new java.util.HashMap(4);
+    sameTypeParameters_GenericMethodDecl_computed = null;
     sameTypeParameters_GenericMethodDecl_values = null;
   }
   /** @apilevel internal */
@@ -999,10 +1024,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     Object _parameters = gm;
     if (sameTypeParameters_GenericMethodDecl_computed == null) sameTypeParameters_GenericMethodDecl_computed = new java.util.HashMap(4);
     if (sameTypeParameters_GenericMethodDecl_values == null) sameTypeParameters_GenericMethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (sameTypeParameters_GenericMethodDecl_values.containsKey(_parameters) && sameTypeParameters_GenericMethodDecl_computed != null
+    ASTState state = state();
+    if (sameTypeParameters_GenericMethodDecl_values.containsKey(_parameters)
         && sameTypeParameters_GenericMethodDecl_computed.containsKey(_parameters)
-        && (sameTypeParameters_GenericMethodDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || sameTypeParameters_GenericMethodDecl_computed.get(_parameters) == state().cycle())) {
+        && (sameTypeParameters_GenericMethodDecl_computed.get(_parameters) == ASTState.NON_CYCLE || sameTypeParameters_GenericMethodDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) sameTypeParameters_GenericMethodDecl_values.get(_parameters);
     }
     boolean sameTypeParameters_GenericMethodDecl_value = sameTypeParameters_compute(gm);
@@ -1012,7 +1037,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     
     } else {
       sameTypeParameters_GenericMethodDecl_values.put(_parameters, sameTypeParameters_GenericMethodDecl_value);
-      sameTypeParameters_GenericMethodDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      sameTypeParameters_GenericMethodDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return sameTypeParameters_GenericMethodDecl_value;
@@ -1034,7 +1059,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     }
   /** @apilevel internal */
   private void sameFormalParameters_GenericMethodDecl_reset() {
-    sameFormalParameters_GenericMethodDecl_computed = new java.util.HashMap(4);
+    sameFormalParameters_GenericMethodDecl_computed = null;
     sameFormalParameters_GenericMethodDecl_values = null;
   }
   /** @apilevel internal */
@@ -1052,10 +1077,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     Object _parameters = gm;
     if (sameFormalParameters_GenericMethodDecl_computed == null) sameFormalParameters_GenericMethodDecl_computed = new java.util.HashMap(4);
     if (sameFormalParameters_GenericMethodDecl_values == null) sameFormalParameters_GenericMethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (sameFormalParameters_GenericMethodDecl_values.containsKey(_parameters) && sameFormalParameters_GenericMethodDecl_computed != null
+    ASTState state = state();
+    if (sameFormalParameters_GenericMethodDecl_values.containsKey(_parameters)
         && sameFormalParameters_GenericMethodDecl_computed.containsKey(_parameters)
-        && (sameFormalParameters_GenericMethodDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || sameFormalParameters_GenericMethodDecl_computed.get(_parameters) == state().cycle())) {
+        && (sameFormalParameters_GenericMethodDecl_computed.get(_parameters) == ASTState.NON_CYCLE || sameFormalParameters_GenericMethodDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) sameFormalParameters_GenericMethodDecl_values.get(_parameters);
     }
     boolean sameFormalParameters_GenericMethodDecl_value = sameFormalParameters_compute(gm);
@@ -1065,7 +1090,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     
     } else {
       sameFormalParameters_GenericMethodDecl_values.put(_parameters, sameFormalParameters_GenericMethodDecl_value);
-      sameFormalParameters_GenericMethodDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      sameFormalParameters_GenericMethodDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return sameFormalParameters_GenericMethodDecl_value;
@@ -1095,7 +1120,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     usesTypeVariable_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle usesTypeVariable_computed = null;
+  protected ASTState.Cycle usesTypeVariable_computed = null;
 
   /** @apilevel internal */
   protected boolean usesTypeVariable_value;
@@ -1103,13 +1128,13 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1315
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1311
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1315")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1311")
   public boolean usesTypeVariable() {
-    ASTNode$State state = state();
-    if (usesTypeVariable_computed == ASTNode$State.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {
+    ASTState state = state();
+    if (usesTypeVariable_computed == ASTState.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {
       return usesTypeVariable_value;
     }
     usesTypeVariable_value = super.usesTypeVariable() || getTypeParameterList().usesTypeVariable();
@@ -1117,7 +1142,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
       usesTypeVariable_computed = state().cycle();
     
     } else {
-      usesTypeVariable_computed = ASTNode$State.NON_CYCLE;
+      usesTypeVariable_computed = ASTState.NON_CYCLE;
     
     }
     return usesTypeVariable_value;
@@ -1127,7 +1152,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     typeVariableInReturn_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle typeVariableInReturn_computed = null;
+  protected ASTState.Cycle typeVariableInReturn_computed = null;
 
   /** @apilevel internal */
   protected boolean typeVariableInReturn_value;
@@ -1140,8 +1165,8 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:117")
   public boolean typeVariableInReturn() {
-    ASTNode$State state = state();
-    if (typeVariableInReturn_computed == ASTNode$State.NON_CYCLE || typeVariableInReturn_computed == state().cycle()) {
+    ASTState state = state();
+    if (typeVariableInReturn_computed == ASTState.NON_CYCLE || typeVariableInReturn_computed == state().cycle()) {
       return typeVariableInReturn_value;
     }
     typeVariableInReturn_value = typeVariableInReturn_compute();
@@ -1149,7 +1174,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
       typeVariableInReturn_computed = state().cycle();
     
     } else {
-      typeVariableInReturn_computed = ASTNode$State.NON_CYCLE;
+      typeVariableInReturn_computed = ASTState.NON_CYCLE;
     
     }
     return typeVariableInReturn_value;
@@ -1188,10 +1213,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:241
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:249
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:241")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:249")
   public boolean needsSignatureAttribute() {
     boolean needsSignatureAttribute_value = true;
     return needsSignatureAttribute_value;
@@ -1199,10 +1224,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:372
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:380
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:372")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:380")
   public String methodTypeSignature() {
     {
         StringBuilder buf = new StringBuilder();
@@ -1235,8 +1260,8 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="TypeVariablePositions", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeVariablePositions.jrag:31")
   public int genericMethodLevel() {
-    ASTNode$State state = state();
-    if (genericMethodLevel_computed == ASTNode$State.NON_CYCLE || genericMethodLevel_computed == state().cycle()) {
+    ASTState state = state();
+    if (genericMethodLevel_computed == ASTState.NON_CYCLE || genericMethodLevel_computed == state().cycle()) {
       return genericMethodLevel_value;
     }
     genericMethodLevel_value = getParent().Define_genericMethodLevel(this, null);
@@ -1244,7 +1269,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
       genericMethodLevel_computed = state().cycle();
     
     } else {
-      genericMethodLevel_computed = ASTNode$State.NON_CYCLE;
+      genericMethodLevel_computed = ASTState.NON_CYCLE;
     
     }
     return genericMethodLevel_value;
@@ -1254,7 +1279,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     genericMethodLevel_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle genericMethodLevel_computed = null;
+  protected ASTState.Cycle genericMethodLevel_computed = null;
 
   /** @apilevel internal */
   protected int genericMethodLevel_value;
@@ -1273,6 +1298,11 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
       return super.Define_nameType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1284,6 +1314,11 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return localLookupType(name).isEmpty() ? lookupType(name) : localLookupType(name);
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -1301,6 +1336,11 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
       return getParent().Define_typeVarPosition(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeVariablePositions.jrag:29
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute typeVarPosition
+   */
   protected boolean canDefine_typeVarPosition(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1318,6 +1358,11 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
       return getParent().Define_typeVarInMethod(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeVariablePositions.jrag:32
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute typeVarInMethod
+   */
   protected boolean canDefine_typeVarInMethod(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1339,6 +1384,11 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
       return getParent().Define_genericMethodLevel(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeVariablePositions.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute genericMethodLevel
+   */
   protected boolean canDefine_genericMethodLevel(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,13 +38,14 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:123
+ * @astdecl WildcardsCompilationUnit : CompilationUnit;
  * @production WildcardsCompilationUnit : {@link CompilationUnit};
 
  */
 public class WildcardsCompilationUnit extends CompilationUnit implements Cloneable {
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1778
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1777
    */
   public static LUBType createLUBType(Collection<TypeDecl> bounds) {
     List<Access> boundList = new List<Access>();
@@ -80,13 +83,18 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"PackageDecl", "ImportDecl", "TypeDecl"},
+    type = {"String", "List<ImportDecl>", "List<TypeDecl>"},
+    kind = {"Token", "List", "List"}
+  )
   public WildcardsCompilationUnit(String p0, List<ImportDecl> p1, List<TypeDecl> p2) {
     setPackageDecl(p0);
     setChild(p1, 0);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   public WildcardsCompilationUnit(beaver.Symbol p0, List<ImportDecl> p1, List<TypeDecl> p2) {
     setPackageDecl(p0);
@@ -94,20 +102,20 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -118,20 +126,20 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     lookupGLBType_Collection_TypeDecl__reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   public WildcardsCompilationUnit clone() throws CloneNotSupportedException {
     WildcardsCompilationUnit node = (WildcardsCompilationUnit) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:54
+   * @declaredat ASTNode:59
    */
   public WildcardsCompilationUnit copy() {
     try {
@@ -151,7 +159,7 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:78
    */
   @Deprecated
   public WildcardsCompilationUnit fullCopy() {
@@ -162,7 +170,7 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:83
+   * @declaredat ASTNode:88
    */
   public WildcardsCompilationUnit treeCopyNoTransform() {
     WildcardsCompilationUnit tree = (WildcardsCompilationUnit) copy();
@@ -183,7 +191,7 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:103
+   * @declaredat ASTNode:108
    */
   public WildcardsCompilationUnit treeCopy() {
     WildcardsCompilationUnit tree = (WildcardsCompilationUnit) copy();
@@ -199,7 +207,7 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:117
+   * @declaredat ASTNode:122
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_PackageDecl == ((WildcardsCompilationUnit) node).tokenString_PackageDecl);    
@@ -468,12 +476,12 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1737
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1736
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1737")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1736")
   public TypeDecl typeWildcard() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeWildcard_computed) {
       return typeWildcard_value;
     }
@@ -490,24 +498,24 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /** @apilevel internal */
   private void lookupWildcardExtends_TypeDecl_reset() {
     lookupWildcardExtends_TypeDecl_values = null;
-    lookupWildcardExtends_TypeDecl_list = null;
+    lookupWildcardExtends_TypeDecl_proxy = null;
   }
   /** @apilevel internal */
-  protected List lookupWildcardExtends_TypeDecl_list;
+  protected ASTNode lookupWildcardExtends_TypeDecl_proxy;
   /** @apilevel internal */
   protected java.util.Map lookupWildcardExtends_TypeDecl_values;
 
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1747
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1746
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1747")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1746")
   public TypeDecl lookupWildcardExtends(TypeDecl bound) {
     Object _parameters = bound;
     if (lookupWildcardExtends_TypeDecl_values == null) lookupWildcardExtends_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (lookupWildcardExtends_TypeDecl_values.containsKey(_parameters)) {
       return (TypeDecl) lookupWildcardExtends_TypeDecl_values.get(_parameters);
     }
@@ -517,13 +525,16 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
               "? extends " + bound.name(),
               new List(),
               bound.createBoundAccess());
-    if (lookupWildcardExtends_TypeDecl_list == null) {
-      lookupWildcardExtends_TypeDecl_list = new List();
-      lookupWildcardExtends_TypeDecl_list.setParent(this);
+    if (lookupWildcardExtends_TypeDecl_proxy == null) {
+      lookupWildcardExtends_TypeDecl_proxy = new ASTNode();
+      lookupWildcardExtends_TypeDecl_proxy.setParent(this);
     }
-    lookupWildcardExtends_TypeDecl_list.add(lookupWildcardExtends_TypeDecl_value);
     if (lookupWildcardExtends_TypeDecl_value != null) {
-      lookupWildcardExtends_TypeDecl_value = (TypeDecl) lookupWildcardExtends_TypeDecl_list.getChild(lookupWildcardExtends_TypeDecl_list.numChildren - 1);
+      lookupWildcardExtends_TypeDecl_value.setParent(lookupWildcardExtends_TypeDecl_proxy);
+      if (lookupWildcardExtends_TypeDecl_value.mayHaveRewrite()) {
+        lookupWildcardExtends_TypeDecl_value = (TypeDecl) lookupWildcardExtends_TypeDecl_value.rewrittenNode();
+        lookupWildcardExtends_TypeDecl_value.setParent(lookupWildcardExtends_TypeDecl_proxy);
+      }
     }
     lookupWildcardExtends_TypeDecl_values.put(_parameters, lookupWildcardExtends_TypeDecl_value);
     state().leaveLazyAttribute();
@@ -532,24 +543,24 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /** @apilevel internal */
   private void lookupWildcardSuper_TypeDecl_reset() {
     lookupWildcardSuper_TypeDecl_values = null;
-    lookupWildcardSuper_TypeDecl_list = null;
+    lookupWildcardSuper_TypeDecl_proxy = null;
   }
   /** @apilevel internal */
-  protected List lookupWildcardSuper_TypeDecl_list;
+  protected ASTNode lookupWildcardSuper_TypeDecl_proxy;
   /** @apilevel internal */
   protected java.util.Map lookupWildcardSuper_TypeDecl_values;
 
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1761
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1760
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1761")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1760")
   public TypeDecl lookupWildcardSuper(TypeDecl bound) {
     Object _parameters = bound;
     if (lookupWildcardSuper_TypeDecl_values == null) lookupWildcardSuper_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (lookupWildcardSuper_TypeDecl_values.containsKey(_parameters)) {
       return (TypeDecl) lookupWildcardSuper_TypeDecl_values.get(_parameters);
     }
@@ -559,13 +570,16 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
               "? super " + bound.name(),
               new List(),
               bound.createBoundAccess());
-    if (lookupWildcardSuper_TypeDecl_list == null) {
-      lookupWildcardSuper_TypeDecl_list = new List();
-      lookupWildcardSuper_TypeDecl_list.setParent(this);
+    if (lookupWildcardSuper_TypeDecl_proxy == null) {
+      lookupWildcardSuper_TypeDecl_proxy = new ASTNode();
+      lookupWildcardSuper_TypeDecl_proxy.setParent(this);
     }
-    lookupWildcardSuper_TypeDecl_list.add(lookupWildcardSuper_TypeDecl_value);
     if (lookupWildcardSuper_TypeDecl_value != null) {
-      lookupWildcardSuper_TypeDecl_value = (TypeDecl) lookupWildcardSuper_TypeDecl_list.getChild(lookupWildcardSuper_TypeDecl_list.numChildren - 1);
+      lookupWildcardSuper_TypeDecl_value.setParent(lookupWildcardSuper_TypeDecl_proxy);
+      if (lookupWildcardSuper_TypeDecl_value.mayHaveRewrite()) {
+        lookupWildcardSuper_TypeDecl_value = (TypeDecl) lookupWildcardSuper_TypeDecl_value.rewrittenNode();
+        lookupWildcardSuper_TypeDecl_value.setParent(lookupWildcardSuper_TypeDecl_proxy);
+      }
     }
     lookupWildcardSuper_TypeDecl_values.put(_parameters, lookupWildcardSuper_TypeDecl_value);
     state().leaveLazyAttribute();
@@ -574,36 +588,39 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /** @apilevel internal */
   private void lookupLUBType_Collection_TypeDecl__reset() {
     lookupLUBType_Collection_TypeDecl__values = null;
-    lookupLUBType_Collection_TypeDecl__list = null;
+    lookupLUBType_Collection_TypeDecl__proxy = null;
   }
   /** @apilevel internal */
-  protected List lookupLUBType_Collection_TypeDecl__list;
+  protected ASTNode lookupLUBType_Collection_TypeDecl__proxy;
   /** @apilevel internal */
   protected java.util.Map lookupLUBType_Collection_TypeDecl__values;
 
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1775
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1774
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1775")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1774")
   public LUBType lookupLUBType(Collection<TypeDecl> bounds) {
     Object _parameters = bounds;
     if (lookupLUBType_Collection_TypeDecl__values == null) lookupLUBType_Collection_TypeDecl__values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (lookupLUBType_Collection_TypeDecl__values.containsKey(_parameters)) {
       return (LUBType) lookupLUBType_Collection_TypeDecl__values.get(_parameters);
     }
     state().enterLazyAttribute();
     LUBType lookupLUBType_Collection_TypeDecl__value = createLUBType(bounds);
-    if (lookupLUBType_Collection_TypeDecl__list == null) {
-      lookupLUBType_Collection_TypeDecl__list = new List();
-      lookupLUBType_Collection_TypeDecl__list.setParent(this);
+    if (lookupLUBType_Collection_TypeDecl__proxy == null) {
+      lookupLUBType_Collection_TypeDecl__proxy = new ASTNode();
+      lookupLUBType_Collection_TypeDecl__proxy.setParent(this);
     }
-    lookupLUBType_Collection_TypeDecl__list.add(lookupLUBType_Collection_TypeDecl__value);
     if (lookupLUBType_Collection_TypeDecl__value != null) {
-      lookupLUBType_Collection_TypeDecl__value = (LUBType) lookupLUBType_Collection_TypeDecl__list.getChild(lookupLUBType_Collection_TypeDecl__list.numChildren - 1);
+      lookupLUBType_Collection_TypeDecl__value.setParent(lookupLUBType_Collection_TypeDecl__proxy);
+      if (lookupLUBType_Collection_TypeDecl__value.mayHaveRewrite()) {
+        lookupLUBType_Collection_TypeDecl__value = (LUBType) lookupLUBType_Collection_TypeDecl__value.rewrittenNode();
+        lookupLUBType_Collection_TypeDecl__value.setParent(lookupLUBType_Collection_TypeDecl__proxy);
+      }
     }
     lookupLUBType_Collection_TypeDecl__values.put(_parameters, lookupLUBType_Collection_TypeDecl__value);
     state().leaveLazyAttribute();
@@ -612,36 +629,39 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /** @apilevel internal */
   private void lookupGLBType_Collection_TypeDecl__reset() {
     lookupGLBType_Collection_TypeDecl__values = null;
-    lookupGLBType_Collection_TypeDecl__list = null;
+    lookupGLBType_Collection_TypeDecl__proxy = null;
   }
   /** @apilevel internal */
-  protected List lookupGLBType_Collection_TypeDecl__list;
+  protected ASTNode lookupGLBType_Collection_TypeDecl__proxy;
   /** @apilevel internal */
   protected java.util.Map lookupGLBType_Collection_TypeDecl__values;
 
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1819
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1818
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1819")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1818")
   public GLBType lookupGLBType(Collection<TypeDecl> bounds) {
     Object _parameters = bounds;
     if (lookupGLBType_Collection_TypeDecl__values == null) lookupGLBType_Collection_TypeDecl__values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (lookupGLBType_Collection_TypeDecl__values.containsKey(_parameters)) {
       return (GLBType) lookupGLBType_Collection_TypeDecl__values.get(_parameters);
     }
     state().enterLazyAttribute();
     GLBType lookupGLBType_Collection_TypeDecl__value = lookupGLBType_compute(bounds);
-    if (lookupGLBType_Collection_TypeDecl__list == null) {
-      lookupGLBType_Collection_TypeDecl__list = new List();
-      lookupGLBType_Collection_TypeDecl__list.setParent(this);
+    if (lookupGLBType_Collection_TypeDecl__proxy == null) {
+      lookupGLBType_Collection_TypeDecl__proxy = new ASTNode();
+      lookupGLBType_Collection_TypeDecl__proxy.setParent(this);
     }
-    lookupGLBType_Collection_TypeDecl__list.add(lookupGLBType_Collection_TypeDecl__value);
     if (lookupGLBType_Collection_TypeDecl__value != null) {
-      lookupGLBType_Collection_TypeDecl__value = (GLBType) lookupGLBType_Collection_TypeDecl__list.getChild(lookupGLBType_Collection_TypeDecl__list.numChildren - 1);
+      lookupGLBType_Collection_TypeDecl__value.setParent(lookupGLBType_Collection_TypeDecl__proxy);
+      if (lookupGLBType_Collection_TypeDecl__value.mayHaveRewrite()) {
+        lookupGLBType_Collection_TypeDecl__value = (GLBType) lookupGLBType_Collection_TypeDecl__value.rewrittenNode();
+        lookupGLBType_Collection_TypeDecl__value.setParent(lookupGLBType_Collection_TypeDecl__proxy);
+      }
     }
     lookupGLBType_Collection_TypeDecl__values.put(_parameters, lookupGLBType_Collection_TypeDecl__value);
     state().leaveLazyAttribute();

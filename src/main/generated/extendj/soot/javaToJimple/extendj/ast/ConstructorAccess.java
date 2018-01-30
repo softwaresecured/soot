@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /** A constructor invocation. 
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:87
+ * @astdecl ConstructorAccess : Access ::= <ID:String> Arg:Expr*;
  * @production ConstructorAccess : {@link Access} ::= <span class="component">&lt;ID:String&gt;</span> <span class="component">Arg:{@link Expr}*</span>;
 
  */
@@ -69,37 +72,6 @@ public class ConstructorAccess extends Access implements Cloneable {
     out.print(")");
   }
   /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:510
-   */
-  public soot.Value eval(Body b) {
-    //b.setLine(this);
-    Local                       base            = b.emitThis(hostType(), this); // this
-    ConstructorDecl             currCtor        = hostingCtorHack();
-    ConstructorDecl             delegatedCtor   = decl().erasedConstructor();
-    ArrayList<soot.Immediate>   list            = new ArrayList<>();
-    List<ParameterDeclaration>  paramsExplicit  = currCtor.getExplicitisedParameters();
-
-    if (delegatedCtor.needsEnclosing())
-      list.add(asImmediate(b, paramsExplicit.getChild(0).local));
-
-    if (delegatedCtor.needsSuperEnclosing()) {
-      TypeDecl superClass = ((ClassDecl)hostType()).superclass();
-      list.add(asImmediate(b, paramsExplicit.getChild(delegatedCtor.needsEnclosing() ? 1 : 0).local));
-    }
-
-    // args
-    for (int i = 0; i < getNumArg(); i++)
-      list.add(asImmediate(b,
-         getArg(i).type().emitCastTo(b, getArg(i), delegatedCtor.getParameter(i).type().erasure()))); // MethodInvocationConversion
-
-    for (ParameterDeclaration p : currCtor.getExplicitisedCaptureParameters().values()) {
-      list.add(asImmediate(b, p.local));
-    }
-
-    return b.newSpecialInvokeExpr(base, delegatedCtor.sootRef(), list, this);
-  }
-  /**
    * @declaredat ASTNode:1
    */
   public ConstructorAccess() {
@@ -119,32 +91,37 @@ public class ConstructorAccess extends Access implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Arg"},
+    type = {"String", "List<Expr>"},
+    kind = {"Token", "List"}
+  )
   public ConstructorAccess(String p0, List<Expr> p1) {
     setID(p0);
     setChild(p1, 0);
   }
   /**
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   public ConstructorAccess(beaver.Symbol p0, List<Expr> p1) {
     setID(p0);
     setChild(p1, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -154,22 +131,23 @@ public class ConstructorAccess extends Access implements Cloneable {
     type_reset();
     transformedVariableArity_reset();
     stmtCompatible_reset();
+    boundConstructor_ConstructorDecl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:49
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:53
    */
   public ConstructorAccess clone() throws CloneNotSupportedException {
     ConstructorAccess node = (ConstructorAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:52
+   * @declaredat ASTNode:58
    */
   public ConstructorAccess copy() {
     try {
@@ -189,7 +167,7 @@ public class ConstructorAccess extends Access implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:71
+   * @declaredat ASTNode:77
    */
   @Deprecated
   public ConstructorAccess fullCopy() {
@@ -200,7 +178,7 @@ public class ConstructorAccess extends Access implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:81
+   * @declaredat ASTNode:87
    */
   public ConstructorAccess treeCopyNoTransform() {
     ConstructorAccess tree = (ConstructorAccess) copy();
@@ -221,7 +199,7 @@ public class ConstructorAccess extends Access implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:101
+   * @declaredat ASTNode:107
    */
   public ConstructorAccess treeCopy() {
     ConstructorAccess tree = (ConstructorAccess) copy();
@@ -237,7 +215,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:115
+   * @declaredat ASTNode:121
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ConstructorAccess) node).tokenString_ID);    
@@ -429,27 +407,27 @@ public class ConstructorAccess extends Access implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = !v.isField();
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -461,7 +439,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = !v.isField();
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -507,7 +485,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     decls_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decls_computed = null;
+  protected ASTState.Cycle decls_computed = null;
 
   /** @apilevel internal */
   protected SimpleSet<ConstructorDecl> decls_value;
@@ -520,8 +498,8 @@ public class ConstructorAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstructScope", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupConstructor.jrag:94")
   public SimpleSet<ConstructorDecl> decls() {
-    ASTNode$State state = state();
-    if (decls_computed == ASTNode$State.NON_CYCLE || decls_computed == state().cycle()) {
+    ASTState state = state();
+    if (decls_computed == ASTState.NON_CYCLE || decls_computed == state().cycle()) {
       return decls_value;
     }
     decls_value = chooseConstructor(lookupConstructor(), getArgList());
@@ -529,7 +507,7 @@ public class ConstructorAccess extends Access implements Cloneable {
       decls_computed = state().cycle();
     
     } else {
-      decls_computed = ASTNode$State.NON_CYCLE;
+      decls_computed = ASTState.NON_CYCLE;
     
     }
     return decls_value;
@@ -540,7 +518,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     decl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decl_computed = null;
+  protected ASTState.Cycle decl_computed = null;
 
   /** @apilevel internal */
   protected ConstructorDecl decl_value;
@@ -553,8 +531,8 @@ public class ConstructorAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstructScope", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupConstructor.jrag:102")
   public ConstructorDecl decl() {
-    ASTNode$State state = state();
-    if (decl_computed == ASTNode$State.NON_CYCLE || decl_computed == state().cycle()) {
+    ASTState state = state();
+    if (decl_computed == ASTState.NON_CYCLE || decl_computed == state().cycle()) {
       return decl_value;
     }
     decl_value = decl_compute();
@@ -562,7 +540,7 @@ public class ConstructorAccess extends Access implements Cloneable {
       decl_computed = state().cycle();
     
     } else {
-      decl_computed = ASTNode$State.NON_CYCLE;
+      decl_computed = ASTState.NON_CYCLE;
     
     }
     return decl_value;
@@ -647,7 +625,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -655,13 +633,13 @@ public class ConstructorAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = decl().type();
@@ -669,7 +647,7 @@ public class ConstructorAccess extends Access implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -688,10 +666,10 @@ public class ConstructorAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:527
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:624
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:527")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:624")
   public int arity() {
     int arity_value = getNumArg();
     return arity_value;
@@ -734,7 +712,7 @@ public class ConstructorAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="VariableArityParametersCodegen", declaredAt="/home/olivier/projects/extendj/java5/backend/VariableArityParametersCodegen.jrag:111")
   public ConstructorAccess transformedVariableArity() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (transformedVariableArity_computed) {
       return transformedVariableArity_value;
     }
@@ -788,7 +766,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     stmtCompatible_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle stmtCompatible_computed = null;
+  protected ASTState.Cycle stmtCompatible_computed = null;
 
   /** @apilevel internal */
   protected boolean stmtCompatible_value;
@@ -796,13 +774,13 @@ public class ConstructorAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect StmtCompatible
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:142
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:146
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:142")
+  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:146")
   public boolean stmtCompatible() {
-    ASTNode$State state = state();
-    if (stmtCompatible_computed == ASTNode$State.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
+    ASTState state = state();
+    if (stmtCompatible_computed == ASTState.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
       return stmtCompatible_value;
     }
     stmtCompatible_value = true;
@@ -810,10 +788,168 @@ public class ConstructorAccess extends Access implements Cloneable {
       stmtCompatible_computed = state().cycle();
     
     } else {
-      stmtCompatible_computed = ASTNode$State.NON_CYCLE;
+      stmtCompatible_computed = ASTState.NON_CYCLE;
     
     }
     return stmtCompatible_value;
+  }
+  /** @apilevel internal */
+  private void boundConstructor_ConstructorDecl_reset() {
+    boundConstructor_ConstructorDecl_values = null;
+    boundConstructor_ConstructorDecl_proxy = null;
+  }
+  /** @apilevel internal */
+  protected ASTNode boundConstructor_ConstructorDecl_proxy;
+  /** @apilevel internal */
+  protected java.util.Map boundConstructor_ConstructorDecl_values;
+
+  /**
+   * @attribute syn
+   * @aspect MethodSignature18
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:56
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:56")
+  public ConstructorAccess boundConstructor(ConstructorDecl decl) {
+    Object _parameters = decl;
+    if (boundConstructor_ConstructorDecl_values == null) boundConstructor_ConstructorDecl_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (boundConstructor_ConstructorDecl_values.containsKey(_parameters)) {
+      return (ConstructorAccess) boundConstructor_ConstructorDecl_values.get(_parameters);
+    }
+    state().enterLazyAttribute();
+    ConstructorAccess boundConstructor_ConstructorDecl_value = new BoundConstructorAccess(getID(), getArgList().treeCopyNoTransform(), decl);
+    if (boundConstructor_ConstructorDecl_proxy == null) {
+      boundConstructor_ConstructorDecl_proxy = new ASTNode();
+      boundConstructor_ConstructorDecl_proxy.setParent(this);
+    }
+    if (boundConstructor_ConstructorDecl_value != null) {
+      boundConstructor_ConstructorDecl_value.setParent(boundConstructor_ConstructorDecl_proxy);
+      if (boundConstructor_ConstructorDecl_value.mayHaveRewrite()) {
+        boundConstructor_ConstructorDecl_value = (ConstructorAccess) boundConstructor_ConstructorDecl_value.rewrittenNode();
+        boundConstructor_ConstructorDecl_value.setParent(boundConstructor_ConstructorDecl_proxy);
+      }
+    }
+    boundConstructor_ConstructorDecl_values.put(_parameters, boundConstructor_ConstructorDecl_value);
+    state().leaveLazyAttribute();
+    return boundConstructor_ConstructorDecl_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect MethodSignature18
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1127
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1127")
+  public boolean applicableByStrictInvocation(Expr expr) {
+    {
+        ConstructorDecl decl = decl();
+        if (decl.getNumParameter() != getNumArg()) {
+          return false;
+        }
+        for (int i = 0; i < getNumArg(); i++) {
+          Expr arg = getArg(i);
+          if (!arg.pertinentToApplicability(expr, decl, i)) {
+            continue;
+          }
+          if (!arg.compatibleStrictContext(decl.getParameter(i).type())) {
+            return false;
+          }
+        }
+        return true;
+      }
+  }
+  /**
+   * @attribute syn
+   * @aspect MethodSignature18
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1144
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1144")
+  public boolean applicableByLooseInvocation(Expr expr) {
+    {
+        ConstructorDecl decl = decl();
+        if (decl.getNumParameter() != getNumArg()) {
+          return false;
+        }
+        for (int i = 0; i < getNumArg(); i++) {
+          Expr arg = getArg(i);
+          if (!arg.pertinentToApplicability(expr, decl, i)) {
+            continue;
+          }
+          if (!arg.compatibleLooseContext(decl.getParameter(i).type())) {
+            return false;
+          }
+        }
+        return true;
+      }
+  }
+  /**
+   * @attribute syn
+   * @aspect MethodSignature18
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1161
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1161")
+  public boolean applicableByVariableArityInvocation(Expr expr) {
+    {
+        ConstructorDecl decl = decl();
+        for (int i = 0; i < decl.getNumParameter() - 1; i++) {
+          Expr arg = getArg(i);
+          if (!arg.pertinentToApplicability(expr, decl, i)) {
+            continue;
+          }
+          if (!arg.compatibleLooseContext(decl.getParameter(i).type())) {
+            return false;
+          }
+        }
+        for (int i = decl.getNumParameter() - 1; i < getNumArg(); i++) {
+          Expr arg = getArg(i);
+          if (!arg.pertinentToApplicability(expr, decl, i)) {
+            continue;
+          }
+          if (!arg.compatibleLooseContext(decl.lastParameter().type().componentType())) {
+            return false;
+          }
+        }
+        return true;
+      }
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:447
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:447")
+  public SpecialInvokeExpr eval(Body b) {
+    {
+        //b.setLine(this);
+        Local                       base            = b.emitThis(hostType(), this); // this
+        ConstructorDecl             currCtor        = hostingCtorHack();
+        ConstructorDecl             delegatedCtor   = decl().erasedConstructor();
+        ArrayList<Immediate>        params_soot     = new ArrayList<>();
+        List<ParameterDeclaration>  params          = currCtor.getExplicitisedParameters();
+    
+        if (delegatedCtor.needsEnclosing())
+          params_soot.add(b.local(params.getChild(0)));
+    
+        if (delegatedCtor.needsSuperEnclosing()) {
+          TypeDecl superClass = ((ClassDecl)hostType()).superclass();
+          params_soot.add(b.local(params.getChild(delegatedCtor.needsEnclosing() ? 1 : 0)));
+        }
+    
+        // args
+        for (int i = 0; i < getNumArg(); i++) {
+          TypeDecl erased = delegatedCtor.getParameter(i).type().erasure();
+          params_soot.add(b.asImmediate(getArg(i).evalAndCast(b, erased))); // MethodInvocationConversion
+        }
+    
+        for (ParameterDeclaration p : currCtor.getExplicitisedCaptureParameters().values())
+          params_soot.add(b.local(p));
+    
+        return b.newSpecialInvokeExpr(base, delegatedCtor.sootRef(), params_soot, this);
+      }
   }
   /**
    * @attribute syn
@@ -860,12 +996,12 @@ public class ConstructorAccess extends Access implements Cloneable {
     return unknownConstructor_value;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:89
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:116
    * @apilevel internal
    */
   public Collection<MethodDecl> Define_lookupMethod(ASTNode _callerNode, ASTNode _childNode, String name) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:103
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:130
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return unqualifiedScope().lookupMethod(name);
     }
@@ -873,16 +1009,21 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_lookupMethod(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:116
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupMethod
+   */
   protected boolean canDefine_lookupMethod(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:109
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
    * @apilevel internal
    */
   public boolean Define_hasPackage(ASTNode _callerNode, ASTNode _childNode, String packageName) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:112
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:116
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return unqualifiedScope().hasPackage(packageName);
     }
@@ -890,6 +1031,11 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_hasPackage(this, _callerNode, packageName);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute hasPackage
+   */
   protected boolean canDefine_hasPackage(ASTNode _callerNode, ASTNode _childNode, String packageName) {
     return true;
   }
@@ -899,7 +1045,7 @@ public class ConstructorAccess extends Access implements Cloneable {
    */
   public SimpleSet<TypeDecl> Define_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:383
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:387
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return unqualifiedScope().lookupType(name);
     }
@@ -907,6 +1053,11 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_lookupType(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -924,6 +1075,11 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_lookupVariable(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -941,6 +1097,11 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -952,16 +1113,21 @@ public class ConstructorAccess extends Access implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return unqualifiedScope().methodHost();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:33
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute methodHost
+   */
   protected boolean canDefine_methodHost(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:188
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:204
    * @apilevel internal
    */
   public boolean Define_inExplicitConstructorInvocation(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:191
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:207
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return true;
     }
@@ -969,16 +1135,21 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_inExplicitConstructorInvocation(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:204
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inExplicitConstructorInvocation
+   */
   protected boolean canDefine_inExplicitConstructorInvocation(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:196
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:212
    * @apilevel internal
    */
   public TypeDecl Define_enclosingExplicitConstructorHostType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:200
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:216
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return hostType();
     }
@@ -986,6 +1157,11 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_enclosingExplicitConstructorHostType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:212
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosingExplicitConstructorHostType
+   */
   protected boolean canDefine_enclosingExplicitConstructorHostType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -995,7 +1171,7 @@ public class ConstructorAccess extends Access implements Cloneable {
    */
   public TypeDecl Define_targetType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:100
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:118
       int i = _callerNode.getIndexOfChild(_childNode);
       {
           ConstructorDecl decl = decl();
@@ -1014,16 +1190,21 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_targetType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
   protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:355
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:539
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -1031,16 +1212,21 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_assignmentContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:356
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:540
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return true;
     }
@@ -1048,16 +1234,21 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_invocationContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:357
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:541
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -1065,16 +1256,21 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_castContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:358
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:542
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -1082,16 +1278,21 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_stringContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:359
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:543
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -1099,6 +1300,11 @@ public class ConstructorAccess extends Access implements Cloneable {
       return getParent().Define_numericContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1110,6 +1316,7 @@ public class ConstructorAccess extends Access implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java4/frontend/ExceptionHandling.jrag:150
     {
@@ -1129,7 +1336,7 @@ public class ConstructorAccess extends Access implements Cloneable {
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:516
+    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:513
     if (decl().isDeprecated()
               && !withinDeprecatedAnnotation()
               && hostType().topLevelType() != decl().hostType().topLevelType()
@@ -1145,6 +1352,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_accessors(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:105
     if (decl().isPrivate() && type() != hostType()) {
@@ -1160,6 +1368,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     }
     super.collect_contributors_TypeDecl_accessors(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_signatureDependencies(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/soot8/backend/ResolverDependencies.jrag:36
     if (sootSigDepType().sootDependencyNeeded()) {
@@ -1174,6 +1383,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_signatureDependencies(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_nestedTypes(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
 
 
@@ -1186,6 +1396,7 @@ public class ConstructorAccess extends Access implements Cloneable {
     }
   }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : exceptionHandlingProblems()) {
@@ -1201,16 +1412,18 @@ public class ConstructorAccess extends Access implements Cloneable {
       collection.add(warning(decl().signature() + " in " + decl().hostType().typeName() + " has been deprecated"));
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_accessors(HashSet<BodyDecl> collection) {
     super.contributeTo_TypeDecl_accessors(collection);
     if (decl().isPrivate() && type() != hostType()) {
       collection.add(decl().createAccessor());
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_signatureDependencies(HashSet<Type> collection) {
     super.contributeTo_CompilationUnit_signatureDependencies(collection);
     if (sootSigDepType().sootDependencyNeeded()) {
-      collection.add(sootSigDepType().getSootType());
+      collection.add(sootSigDepType().sootType());
     }
   }
 }

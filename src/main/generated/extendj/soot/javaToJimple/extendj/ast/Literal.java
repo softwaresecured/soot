@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +39,7 @@ import soot.coffi.CoffiMethodSource;
  * The abstract base class for all literals.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Literals.ast:4
+ * @astdecl Literal : PrimaryExpr ::= <LITERAL:String>;
  * @production Literal : {@link PrimaryExpr} ::= <span class="component">&lt;LITERAL:String&gt;</span>;
 
  */
@@ -64,7 +67,7 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:76
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:117
    */
   @Override public String toString() {
     return getLITERAL();
@@ -74,10 +77,10 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
    * @param s string to escape
    * @return escaped string literal
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:319
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:398
    */
   protected static String escape(String s) {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     for (int i=0; i < s.length(); i++) {
       switch(s.charAt(i)) {
         case '\b':
@@ -117,10 +120,10 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:359
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:438
    */
   protected static String asEscape(int value) {
-    StringBuffer s = new StringBuffer("\\u");
+    StringBuilder s = new StringBuilder("\\u");
     String hex = Integer.toHexString(value);
     for (int i = 0; i < 4-hex.length(); i++) {
       s.append("0");
@@ -128,11 +131,6 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
     s.append(hex);
     return s.toString();
   }
-  /**
-   * @aspect Java7Literals
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:899
-   */
-  protected Constant constant = null;
   /**
    * @declaredat ASTNode:1
    */
@@ -151,43 +149,48 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"LITERAL"},
+    type = {"String"},
+    kind = {"Token"}
+  )
   public Literal(String p0) {
     setLITERAL(p0);
   }
   /**
-   * @declaredat ASTNode:15
+   * @declaredat ASTNode:20
    */
   public Literal(beaver.Symbol p0) {
     setLITERAL(p0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     constant_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public Literal clone() throws CloneNotSupportedException {
     Literal node = (Literal) super.clone();
@@ -199,7 +202,7 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   @Deprecated
   public abstract Literal fullCopy();
@@ -208,7 +211,7 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:57
+   * @declaredat ASTNode:62
    */
   public abstract Literal treeCopyNoTransform();
   /**
@@ -217,7 +220,7 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:65
+   * @declaredat ASTNode:70
    */
   public abstract Literal treeCopy();
   /**
@@ -260,7 +263,7 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
   }
   /**
    * @aspect Java7Literals
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:906
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:905
    */
    
   public static Literal buildDoubleLiteral(double value) {
@@ -268,7 +271,7 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
   }
   /**
    * @aspect Java7Literals
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:916
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:917
    */
    
   public static Literal buildFloatLiteral(float value) {
@@ -276,7 +279,7 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
   }
   /**
    * @aspect Java7Literals
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:926
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:929
    */
    
   public static Literal buildIntegerLiteral(int value) {
@@ -284,19 +287,27 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
   }
   /**
    * @aspect Java7Literals
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:936
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:941
    */
    
   public static Literal buildLongLiteral(long value) {
     return new LongLiteral("0x"+Long.toHexString(value), Constant.create(value));
   }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:53
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:53")
+  public abstract soot.jimple.Constant eval(Body b);
   /** @apilevel internal */
   private void constant_reset() {
     constant_computed = null;
     constant_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle constant_computed = null;
+  protected ASTState.Cycle constant_computed = null;
 
   /** @apilevel internal */
   protected Constant constant_value;
@@ -309,8 +320,8 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstantExpression", declaredAt="/home/olivier/projects/extendj/java4/frontend/ConstantExpression.jrag:38")
   public Constant constant() {
-    ASTNode$State state = state();
-    if (constant_computed == ASTNode$State.NON_CYCLE || constant_computed == state().cycle()) {
+    ASTState state = state();
+    if (constant_computed == ASTState.NON_CYCLE || constant_computed == state().cycle()) {
       return constant_value;
     }
     constant_value = constant_compute();
@@ -318,7 +329,7 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
       constant_computed = state().cycle();
     
     } else {
-      constant_computed = ASTNode$State.NON_CYCLE;
+      constant_computed = ASTState.NON_CYCLE;
     
     }
     return constant_value;

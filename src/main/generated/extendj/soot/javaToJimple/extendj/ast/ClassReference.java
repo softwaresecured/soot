@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/ConstructorReference.ast:3
+ * @astdecl ClassReference : ConstructorReference ::= TypeArgument:Access*;
  * @production ClassReference : {@link ConstructorReference} ::= <span class="component">TypeArgument:{@link Access}*</span>;
 
  */
@@ -60,6 +63,20 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     out.print("new");
   }
   /**
+   * @aspect PrettyPrintUtil8
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/PrettyPrintUtil.jadd:87
+   */
+  @Override public String toString() {
+    StringBuilder params = new StringBuilder();
+    for (Access arg : getTypeArgumentListNoTransform()) {
+      if (params.length() > 0) {
+        params.append(", ");
+      }
+      params.append(arg.toString());
+    }
+    return String.format("%s::<%s>new", getTypeAccessNoTransform().toString(), params.toString());
+  }
+  /**
    * @declaredat ASTNode:1
    */
   public ClassReference() {
@@ -79,25 +96,30 @@ public class ClassReference extends ConstructorReference implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"TypeAccess", "TypeArgument"},
+    type = {"Access", "List<Access>"},
+    kind = {"Child", "List"}
+  )
   public ClassReference(Access p0, List<Access> p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -108,23 +130,24 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     exactCompileTimeDeclaration_reset();
     isExact_reset();
     potentiallyCompatible_TypeDecl_BodyDecl_reset();
+    targetInterface_reset();
     toBlock_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:47
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:51
    */
   public ClassReference clone() throws CloneNotSupportedException {
     ClassReference node = (ClassReference) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:56
    */
   public ClassReference copy() {
     try {
@@ -144,7 +167,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:69
+   * @declaredat ASTNode:75
    */
   @Deprecated
   public ClassReference fullCopy() {
@@ -155,7 +178,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:79
+   * @declaredat ASTNode:85
    */
   public ClassReference treeCopyNoTransform() {
     ClassReference tree = (ClassReference) copy();
@@ -176,7 +199,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:99
+   * @declaredat ASTNode:105
    */
   public ClassReference treeCopy() {
     ClassReference tree = (ClassReference) copy();
@@ -192,7 +215,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:113
+   * @declaredat ASTNode:119
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -335,7 +358,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
   }
   /** @apilevel internal */
   private void targetConstructor_FunctionDescriptor_reset() {
-    targetConstructor_FunctionDescriptor_computed = new java.util.HashMap(4);
+    targetConstructor_FunctionDescriptor_computed = null;
     targetConstructor_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -353,10 +376,10 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     Object _parameters = fd;
     if (targetConstructor_FunctionDescriptor_computed == null) targetConstructor_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (targetConstructor_FunctionDescriptor_values == null) targetConstructor_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (targetConstructor_FunctionDescriptor_values.containsKey(_parameters) && targetConstructor_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (targetConstructor_FunctionDescriptor_values.containsKey(_parameters)
         && targetConstructor_FunctionDescriptor_computed.containsKey(_parameters)
-        && (targetConstructor_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || targetConstructor_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (targetConstructor_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || targetConstructor_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (ConstructorDecl) targetConstructor_FunctionDescriptor_values.get(_parameters);
     }
     ConstructorDecl targetConstructor_FunctionDescriptor_value = syntheticInstanceExpr(fd).decl();
@@ -366,7 +389,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     
     } else {
       targetConstructor_FunctionDescriptor_values.put(_parameters, targetConstructor_FunctionDescriptor_value);
-      targetConstructor_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      targetConstructor_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return targetConstructor_FunctionDescriptor_value;
@@ -374,10 +397,10 @@ public class ClassReference extends ConstructorReference implements Cloneable {
   /** @apilevel internal */
   private void syntheticInstanceExpr_FunctionDescriptor_reset() {
     syntheticInstanceExpr_FunctionDescriptor_values = null;
-    syntheticInstanceExpr_FunctionDescriptor_list = null;
+    syntheticInstanceExpr_FunctionDescriptor_proxy = null;
   }
   /** @apilevel internal */
-  protected List syntheticInstanceExpr_FunctionDescriptor_list;
+  protected ASTNode syntheticInstanceExpr_FunctionDescriptor_proxy;
   /** @apilevel internal */
   protected java.util.Map syntheticInstanceExpr_FunctionDescriptor_values;
 
@@ -391,19 +414,22 @@ public class ClassReference extends ConstructorReference implements Cloneable {
   public ClassInstanceExpr syntheticInstanceExpr(FunctionDescriptor fd) {
     Object _parameters = fd;
     if (syntheticInstanceExpr_FunctionDescriptor_values == null) syntheticInstanceExpr_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (syntheticInstanceExpr_FunctionDescriptor_values.containsKey(_parameters)) {
       return (ClassInstanceExpr) syntheticInstanceExpr_FunctionDescriptor_values.get(_parameters);
     }
     state().enterLazyAttribute();
     ClassInstanceExpr syntheticInstanceExpr_FunctionDescriptor_value = syntheticInstanceExpr_compute(fd);
-    if (syntheticInstanceExpr_FunctionDescriptor_list == null) {
-      syntheticInstanceExpr_FunctionDescriptor_list = new List();
-      syntheticInstanceExpr_FunctionDescriptor_list.setParent(this);
+    if (syntheticInstanceExpr_FunctionDescriptor_proxy == null) {
+      syntheticInstanceExpr_FunctionDescriptor_proxy = new ASTNode();
+      syntheticInstanceExpr_FunctionDescriptor_proxy.setParent(this);
     }
-    syntheticInstanceExpr_FunctionDescriptor_list.add(syntheticInstanceExpr_FunctionDescriptor_value);
     if (syntheticInstanceExpr_FunctionDescriptor_value != null) {
-      syntheticInstanceExpr_FunctionDescriptor_value = (ClassInstanceExpr) syntheticInstanceExpr_FunctionDescriptor_list.getChild(syntheticInstanceExpr_FunctionDescriptor_list.numChildren - 1);
+      syntheticInstanceExpr_FunctionDescriptor_value.setParent(syntheticInstanceExpr_FunctionDescriptor_proxy);
+      if (syntheticInstanceExpr_FunctionDescriptor_value.mayHaveRewrite()) {
+        syntheticInstanceExpr_FunctionDescriptor_value = (ClassInstanceExpr) syntheticInstanceExpr_FunctionDescriptor_value.rewrittenNode();
+        syntheticInstanceExpr_FunctionDescriptor_value.setParent(syntheticInstanceExpr_FunctionDescriptor_proxy);
+      }
     }
     syntheticInstanceExpr_FunctionDescriptor_values.put(_parameters, syntheticInstanceExpr_FunctionDescriptor_value);
     state().leaveLazyAttribute();
@@ -444,7 +470,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     }
   /** @apilevel internal */
   private void congruentTo_FunctionDescriptor_reset() {
-    congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
+    congruentTo_FunctionDescriptor_computed = null;
     congruentTo_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -462,10 +488,10 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     Object _parameters = fd;
     if (congruentTo_FunctionDescriptor_computed == null) congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (congruentTo_FunctionDescriptor_values == null) congruentTo_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters) && congruentTo_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters)
         && congruentTo_FunctionDescriptor_computed.containsKey(_parameters)
-        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (Boolean) congruentTo_FunctionDescriptor_values.get(_parameters);
     }
     boolean congruentTo_FunctionDescriptor_value = congruentTo_compute(fd);
@@ -475,7 +501,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     
     } else {
       congruentTo_FunctionDescriptor_values.put(_parameters, congruentTo_FunctionDescriptor_value);
-      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return congruentTo_FunctionDescriptor_value;
@@ -502,7 +528,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     }
   /** @apilevel internal */
   private void potentiallyApplicableConstructors_FunctionDescriptor_reset() {
-    potentiallyApplicableConstructors_FunctionDescriptor_computed = new java.util.HashMap(4);
+    potentiallyApplicableConstructors_FunctionDescriptor_computed = null;
     potentiallyApplicableConstructors_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -522,10 +548,10 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     Object _parameters = fd;
     if (potentiallyApplicableConstructors_FunctionDescriptor_computed == null) potentiallyApplicableConstructors_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (potentiallyApplicableConstructors_FunctionDescriptor_values == null) potentiallyApplicableConstructors_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (potentiallyApplicableConstructors_FunctionDescriptor_values.containsKey(_parameters) && potentiallyApplicableConstructors_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (potentiallyApplicableConstructors_FunctionDescriptor_values.containsKey(_parameters)
         && potentiallyApplicableConstructors_FunctionDescriptor_computed.containsKey(_parameters)
-        && (potentiallyApplicableConstructors_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || potentiallyApplicableConstructors_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (potentiallyApplicableConstructors_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || potentiallyApplicableConstructors_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (java.util.List<ConstructorDecl>) potentiallyApplicableConstructors_FunctionDescriptor_values.get(_parameters);
     }
     java.util.List<ConstructorDecl> potentiallyApplicableConstructors_FunctionDescriptor_value = potentiallyApplicableConstructors_compute(fd);
@@ -535,7 +561,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     
     } else {
       potentiallyApplicableConstructors_FunctionDescriptor_values.put(_parameters, potentiallyApplicableConstructors_FunctionDescriptor_value);
-      potentiallyApplicableConstructors_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      potentiallyApplicableConstructors_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return potentiallyApplicableConstructors_FunctionDescriptor_value;
@@ -577,7 +603,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     exactCompileTimeDeclaration_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle exactCompileTimeDeclaration_computed = null;
+  protected ASTState.Cycle exactCompileTimeDeclaration_computed = null;
 
   /** @apilevel internal */
   protected ConstructorDecl exactCompileTimeDeclaration_value;
@@ -590,8 +616,8 @@ public class ClassReference extends ConstructorReference implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstructorReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/ConstructorReference.jrag:155")
   public ConstructorDecl exactCompileTimeDeclaration() {
-    ASTNode$State state = state();
-    if (exactCompileTimeDeclaration_computed == ASTNode$State.NON_CYCLE || exactCompileTimeDeclaration_computed == state().cycle()) {
+    ASTState state = state();
+    if (exactCompileTimeDeclaration_computed == ASTState.NON_CYCLE || exactCompileTimeDeclaration_computed == state().cycle()) {
       return exactCompileTimeDeclaration_value;
     }
     exactCompileTimeDeclaration_value = exactCompileTimeDeclaration_compute();
@@ -599,7 +625,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
       exactCompileTimeDeclaration_computed = state().cycle();
     
     } else {
-      exactCompileTimeDeclaration_computed = ASTNode$State.NON_CYCLE;
+      exactCompileTimeDeclaration_computed = ASTState.NON_CYCLE;
     
     }
     return exactCompileTimeDeclaration_value;
@@ -615,16 +641,16 @@ public class ClassReference extends ConstructorReference implements Cloneable {
       TypeDecl classType = getTypeAccess().type();
       Collection<ConstructorDecl> col = classType.constructors();
       ArrayList<ConstructorDecl> applicable = new ArrayList<ConstructorDecl>();
-      int foundCompatible = 0;
       ConstructorDecl latestDecl = null;
-  
       for (ConstructorDecl decl : col) {
         if (decl.accessibleFrom(hostType())) {
-          foundCompatible++;
+          if (latestDecl != null) {
+            return unknownConstructor();
+          }
           latestDecl = decl;
         }
       }
-      if (foundCompatible != 1) {
+      if (latestDecl == null) {
         return unknownConstructor();
       }
       if (latestDecl.isVariableArity()) {
@@ -645,7 +671,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     isExact_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isExact_computed = null;
+  protected ASTState.Cycle isExact_computed = null;
 
   /** @apilevel internal */
   protected boolean isExact_value;
@@ -658,8 +684,8 @@ public class ClassReference extends ConstructorReference implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstructorReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/ConstructorReference.jrag:153")
   public boolean isExact() {
-    ASTNode$State state = state();
-    if (isExact_computed == ASTNode$State.NON_CYCLE || isExact_computed == state().cycle()) {
+    ASTState state = state();
+    if (isExact_computed == ASTState.NON_CYCLE || isExact_computed == state().cycle()) {
       return isExact_value;
     }
     isExact_value = exactCompileTimeDeclaration() != unknownConstructor();
@@ -667,14 +693,14 @@ public class ClassReference extends ConstructorReference implements Cloneable {
       isExact_computed = state().cycle();
     
     } else {
-      isExact_computed = ASTNode$State.NON_CYCLE;
+      isExact_computed = ASTState.NON_CYCLE;
     
     }
     return isExact_value;
   }
   /** @apilevel internal */
   private void potentiallyCompatible_TypeDecl_BodyDecl_reset() {
-    potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
+    potentiallyCompatible_TypeDecl_BodyDecl_computed = null;
     potentiallyCompatible_TypeDecl_BodyDecl_values = null;
   }
   /** @apilevel internal */
@@ -684,20 +710,20 @@ public class ClassReference extends ConstructorReference implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544")
   public boolean potentiallyCompatible(TypeDecl type, BodyDecl candidateDecl) {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(type);
     _parameters.add(candidateDecl);
     if (potentiallyCompatible_TypeDecl_BodyDecl_computed == null) potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
     if (potentiallyCompatible_TypeDecl_BodyDecl_values == null) potentiallyCompatible_TypeDecl_BodyDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters) && potentiallyCompatible_TypeDecl_BodyDecl_computed != null
+    ASTState state = state();
+    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters)
         && potentiallyCompatible_TypeDecl_BodyDecl_computed.containsKey(_parameters)
-        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
+        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTState.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) potentiallyCompatible_TypeDecl_BodyDecl_values.get(_parameters);
     }
     boolean potentiallyCompatible_TypeDecl_BodyDecl_value = potentiallyCompatible_compute(type, candidateDecl);
@@ -707,7 +733,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     
     } else {
       potentiallyCompatible_TypeDecl_BodyDecl_values.put(_parameters, potentiallyCompatible_TypeDecl_BodyDecl_value);
-      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return potentiallyCompatible_TypeDecl_BodyDecl_value;
@@ -754,12 +780,87 @@ public class ClassReference extends ConstructorReference implements Cloneable {
       }
   }
   /** @apilevel internal */
+  private void targetInterface_reset() {
+    targetInterface_computed = null;
+    targetInterface_value = null;
+  }
+  /** @apilevel internal */
+  protected ASTState.Cycle targetInterface_computed = null;
+
+  /** @apilevel internal */
+  protected InterfaceDecl targetInterface_value;
+
+  /**
+   * @attribute syn
+   * @aspect TargetType
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:280
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:280")
+  public InterfaceDecl targetInterface() {
+    ASTState state = state();
+    if (targetInterface_computed == ASTState.NON_CYCLE || targetInterface_computed == state().cycle()) {
+      return targetInterface_value;
+    }
+    targetInterface_value = targetInterface_compute();
+    if (state().inCircle()) {
+      targetInterface_computed = state().cycle();
+    
+    } else {
+      targetInterface_computed = ASTState.NON_CYCLE;
+    
+    }
+    return targetInterface_value;
+  }
+  /** @apilevel internal */
+  private InterfaceDecl targetInterface_compute() {
+      if (targetType().isNull()) {
+        return null;
+      } else if (!(targetType() instanceof InterfaceDecl)) {
+        return null;
+      } else {
+        InterfaceDecl iDecl = (InterfaceDecl) targetType();
+        FunctionDescriptor fd = iDecl.functionDescriptor();
+        ConstructorDecl unknown = unknownConstructor();
+        ConstructorDecl target = targetConstructor(fd);
+        if (target != unknown) {
+          InterfaceDecl iface = (InterfaceDecl) iDecl.original();
+          MethodDecl method = iface.functionDescriptor().method.get();
+          TypeDecl returnType = method.type();
+          if (!returnType.isVoid() && returnType.involvesTypeParameters()) {
+            Constraints constraints = new Constraints();
+            GenericInterfaceDecl genericInterface = (GenericInterfaceDecl) iface;
+            for (TypeVariable var : genericInterface.getTypeParameters()) {
+              constraints.addTypeVariable(var);
+            }
+            TypeDecl ret = target.hostType();
+            if (ret.isPrimitiveType()) {
+              ret = ret.boxed();
+            }
+            constraints.convertibleFrom(ret, returnType);
+            constraints.resolveEqualityConstraints();
+            constraints.resolveSupertypeConstraints();
+            constraints.resolveSubtypeConstraints();
+            Parameterization parameterization = ((ParInterfaceDecl) iDecl).getParameterization();
+            java.util.List<TypeDecl> args = new ArrayList<TypeDecl>(constraints.typeArguments());
+            for (int i = 0; i < args.size(); ++i) {
+              if (args.get(i) == null) {
+                args.set(i, parameterization.args.get(i));
+              }
+            }
+            iDecl = (InterfaceDecl) genericInterface.lookupParTypeDecl(args);
+          }
+        }
+        return iDecl;
+      }
+    }
+  /** @apilevel internal */
   private void toBlock_reset() {
     toBlock_computed = null;
     toBlock_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle toBlock_computed = null;
+  protected ASTState.Cycle toBlock_computed = null;
 
   /** @apilevel internal */
   protected Block toBlock_value;
@@ -772,8 +873,8 @@ public class ClassReference extends ConstructorReference implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstructorReferenceToClass", declaredAt="/home/olivier/projects/extendj/java8/backend/ConstructorReferenceToClass.jrag:97")
   public Block toBlock() {
-    ASTNode$State state = state();
-    if (toBlock_computed == ASTNode$State.NON_CYCLE || toBlock_computed == state().cycle()) {
+    ASTState state = state();
+    if (toBlock_computed == ASTState.NON_CYCLE || toBlock_computed == state().cycle()) {
       return toBlock_value;
     }
     toBlock_value = toBlock_compute();
@@ -781,7 +882,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
       toBlock_computed = state().cycle();
     
     } else {
-      toBlock_computed = ASTNode$State.NON_CYCLE;
+      toBlock_computed = ASTState.NON_CYCLE;
     
     }
     return toBlock_value;
@@ -832,6 +933,11 @@ public class ClassReference extends ConstructorReference implements Cloneable {
       return super.Define_nameType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -855,6 +961,11 @@ public class ClassReference extends ConstructorReference implements Cloneable {
       return getParent().Define_targetType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
   protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -866,6 +977,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java8/frontend/NameCheck.jrag:520
     {
@@ -878,6 +990,7 @@ public class ClassReference extends ConstructorReference implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : nameProblems()) {

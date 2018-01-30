@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:110
+ * @astdecl ClassInstanceExpr : Access ::= Access Arg:Expr* [TypeDecl];
  * @production ClassInstanceExpr : {@link Access} ::= <span class="component">{@link Access}</span> <span class="component">Arg:{@link Expr}*</span> <span class="component">[{@link TypeDecl}]</span>;
 
  */
@@ -61,7 +64,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   }
   /**
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:594
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:598
    */
   public SimpleSet<TypeDecl> keepInnerClasses(SimpleSet<TypeDecl> types) {
     SimpleSet<TypeDecl> result = emptySet();
@@ -113,7 +116,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   }
   /**
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:601
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:603
    */
   public void typeCheckEnclosingInstance(Collection<Problem> problems) {
     TypeDecl C = type();
@@ -178,7 +181,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   }
   /**
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:693
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:695
    */
   public void typeCheckAnonymousSuperclassEnclosingInstance(
       Collection<Problem> problems) {
@@ -220,92 +223,38 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:596
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:535
    */
-  private soot.Value emitLocalEnclosing(Body b, TypeDecl localClass) {
-    if(!localClass.inStaticContext()) {
-      return emitThis(b, localClass.enclosingType());
-    }
-    throw new Error("Not implemented");
+  private Local emitLocalEnclosing(Body b, TypeDecl local_class) {
+    if (local_class.inStaticContext()) throw new Error("Not implemented");
+
+    return emitThis(b, local_class.enclosingType());
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:603
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:541
    */
-  private soot.Value emitInnerMemberEnclosing(Body b, TypeDecl innerClass) {
-    if(hasPrevExpr()) {
-      Local base = asLocal(b, prevExpr().eval(b));
+  private Local emitInnerMemberEnclosing(Body b, TypeDecl innerClass) {
+    if (hasPrevExpr()) {
+      Local base = b.asLocal(prevExpr().eval(b));
       //b.setLine(this);
       b.add(b.newInvokeStmt(
         b.newVirtualInvokeExpr(
           base,
           Scene.v().getMethod("<java.lang.Object: java.lang.Class getClass()>").makeRef(),
-          Collections.<Value>emptyList(),
+          Collections.emptyList(),
           this
         ),
         this
       ));
       return base;
     }
-    else {
-      TypeDecl enclosing = hostType();
-      while(!enclosing.hasType(innerClass.name()))
-        enclosing = enclosing.enclosingType();
-      return emitThis(b, enclosing);
-    }
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:628
-   */
-  public soot.Value eval(Body b) {
-    if (transformed() != this) return transformed().eval(b);
 
-    Local                     local = asLocal(b, b.newNewExpr(type().sootRef(), this));
-    ArrayList<soot.Immediate> list  = new ArrayList<>();
+    TypeDecl enclosing = hostType();
+    while (!enclosing.hasType(innerClass.name()))
+      enclosing = enclosing.enclosingType();
 
-     // 15.9.2 first part
-    if (type().isAnonymous() && type().needsEnclosing())
-      list.add(asImmediate(b, b.emitThis(hostType(), this)));
-
-    // 15.9.2 second part
-    TypeDecl S = type().isAnonymous() ? ((ClassDecl)type()).superclass() : type();
-    if (S.isLocalClass()) {
-      if (!type().inStaticContext())
-        list.add(asImmediate(b, emitLocalEnclosing(b, S)));
-    } else {
-      if (S.isInnerType())
-        list.add(asImmediate(b, emitInnerMemberEnclosing(b, S)));
-    }
-
-    for (int i = 0; i < getNumArg(); i++)
-      list.add(asImmediate(b, getArg(i).type().emitCastTo(b, getArg(i), decl().getParameter(i).type()))); // MethodInvocationConversion
-
-    // captured variables
-    for (Variable v : TypeDecl.variablesOrderByName(decl().hostType().enclosingVariables()))
-      list.add(asImmediate(b, enclosingVariableAccess(v).eval(b)));
-
-    //assert !((decl().isPrivate() && type() != hostType()));
-    // if(decl().isPrivate() && type() != hostType()) {
-    //   list.add(asImmediate(b, soot.jimple.NullConstant.v()));
-    //   //b.setLine(this);
-    //   b.add(
-    //     b.newInvokeStmt(
-    //       b.newSpecialInvokeExpr(local, decl().createAccessor().sootRef(), list, this),
-    //       this
-    //     )
-    //   );
-    //   return local;
-    // }
-
-    //b.setLine(this);
-    b.add(
-      b.newInvokeStmt(
-        b.newSpecialInvokeExpr(local, decl().sootRef(), list, this),
-        this
-      )
-    );
-    return local;
+    return emitThis(b, enclosing);
   }
   /**
    * @declaredat ASTNode:1
@@ -328,26 +277,31 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Access", "Arg", "TypeDecl"},
+    type = {"Access", "List<Expr>", "Opt<TypeDecl>"},
+    kind = {"Child", "List", "Opt"}
+  )
   public ClassInstanceExpr(Access p0, List<Expr> p1, Opt<TypeDecl> p2) {
     setChild(p0, 0);
     setChild(p1, 1);
     setChild(p2, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -362,6 +316,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     type_reset();
     transformedVariableArity_reset();
     stmtCompatible_reset();
+    boundConstructor_ConstructorDecl_reset();
     compatibleStrictContext_TypeDecl_reset();
     compatibleLooseContext_TypeDecl_reset();
     isBooleanExpression_reset();
@@ -370,20 +325,20 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     enclosingVariableAccess_Variable_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:52
+   * @declaredat ASTNode:58
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:56
+   * @declaredat ASTNode:62
    */
   public ClassInstanceExpr clone() throws CloneNotSupportedException {
     ClassInstanceExpr node = (ClassInstanceExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:67
    */
   public ClassInstanceExpr copy() {
     try {
@@ -403,7 +358,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:80
+   * @declaredat ASTNode:86
    */
   @Deprecated
   public ClassInstanceExpr fullCopy() {
@@ -414,7 +369,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:90
+   * @declaredat ASTNode:96
    */
   public ClassInstanceExpr treeCopyNoTransform() {
     ClassInstanceExpr tree = (ClassInstanceExpr) copy();
@@ -435,7 +390,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:110
+   * @declaredat ASTNode:116
    */
   public ClassInstanceExpr treeCopy() {
     ClassInstanceExpr tree = (ClassInstanceExpr) copy();
@@ -451,7 +406,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:124
+   * @declaredat ASTNode:130
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -717,27 +672,27 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public boolean assignedAfterInstance(Variable v) {
     Object _parameters = v;
     if (assignedAfterInstance_Variable_values == null) assignedAfterInstance_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfterInstance_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfterInstance_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfterInstance_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfterInstance_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfterInstance_Variable_value = assignedAfterInstance_compute(v);
-        if (new_assignedAfterInstance_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfterInstance_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfterInstance_Variable_value;
         }
@@ -749,7 +704,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfterInstance_Variable_value = assignedAfterInstance_compute(v);
-      if (new_assignedAfterInstance_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfterInstance_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfterInstance_Variable_value;
       }
@@ -788,27 +743,27 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     _parameters.add(i);
     _parameters.add(v);
     if (computeDAbefore_int_Variable_values == null) computeDAbefore_int_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (computeDAbefore_int_Variable_values.containsKey(_parameters)) {
       Object _cache = computeDAbefore_int_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       computeDAbefore_int_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_computeDAbefore_int_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_computeDAbefore_int_Variable_value = i == 0 ? assignedBefore(v) : getArg(i-1).assignedAfter(v);
-        if (new_computeDAbefore_int_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_computeDAbefore_int_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_computeDAbefore_int_Variable_value;
         }
@@ -820,7 +775,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_computeDAbefore_int_Variable_value = i == 0 ? assignedBefore(v) : getArg(i-1).assignedAfter(v);
-      if (new_computeDAbefore_int_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_computeDAbefore_int_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_computeDAbefore_int_Variable_value;
       }
@@ -839,27 +794,27 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public boolean unassignedAfterInstance(Variable v) {
     Object _parameters = v;
     if (unassignedAfterInstance_Variable_values == null) unassignedAfterInstance_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterInstance_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterInstance_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterInstance_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterInstance_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterInstance_Variable_value = unassignedAfterInstance_compute(v);
-        if (new_unassignedAfterInstance_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterInstance_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterInstance_Variable_value;
         }
@@ -871,7 +826,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterInstance_Variable_value = unassignedAfterInstance_compute(v);
-      if (new_unassignedAfterInstance_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterInstance_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterInstance_Variable_value;
       }
@@ -898,27 +853,27 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = unassignedAfterInstance(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -930,7 +885,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = unassignedAfterInstance(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -951,27 +906,27 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     _parameters.add(i);
     _parameters.add(v);
     if (computeDUbefore_int_Variable_values == null) computeDUbefore_int_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (computeDUbefore_int_Variable_values.containsKey(_parameters)) {
       Object _cache = computeDUbefore_int_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       computeDUbefore_int_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_computeDUbefore_int_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_computeDUbefore_int_Variable_value = i == 0 ? unassignedBefore(v) : getArg(i-1).unassignedAfter(v);
-        if (new_computeDUbefore_int_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_computeDUbefore_int_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_computeDUbefore_int_Variable_value;
         }
@@ -983,7 +938,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_computeDUbefore_int_Variable_value = i == 0 ? unassignedBefore(v) : getArg(i-1).unassignedAfter(v);
-      if (new_computeDUbefore_int_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_computeDUbefore_int_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_computeDUbefore_int_Variable_value;
       }
@@ -1031,7 +986,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     decls_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decls_computed = null;
+  protected ASTState.Cycle decls_computed = null;
 
   /** @apilevel internal */
   protected SimpleSet<ConstructorDecl> decls_value;
@@ -1044,8 +999,8 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstructScope", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupConstructor.jrag:112")
   public SimpleSet<ConstructorDecl> decls() {
-    ASTNode$State state = state();
-    if (decls_computed == ASTNode$State.NON_CYCLE || decls_computed == state().cycle()) {
+    ASTState state = state();
+    if (decls_computed == ASTState.NON_CYCLE || decls_computed == state().cycle()) {
       return decls_value;
     }
     decls_value = decls_compute();
@@ -1053,7 +1008,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       decls_computed = state().cycle();
     
     } else {
-      decls_computed = ASTNode$State.NON_CYCLE;
+      decls_computed = ASTState.NON_CYCLE;
     
     }
     return decls_value;
@@ -1069,7 +1024,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     decl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decl_computed = null;
+  protected ASTState.Cycle decl_computed = null;
 
   /** @apilevel internal */
   protected ConstructorDecl decl_value;
@@ -1082,8 +1037,8 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstructScope", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupConstructor.jrag:117")
   public ConstructorDecl decl() {
-    ASTNode$State state = state();
-    if (decl_computed == ASTNode$State.NON_CYCLE || decl_computed == state().cycle()) {
+    ASTState state = state();
+    if (decl_computed == ASTState.NON_CYCLE || decl_computed == state().cycle()) {
       return decl_value;
     }
     decl_value = decl_compute();
@@ -1091,7 +1046,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       decl_computed = state().cycle();
     
     } else {
-      decl_computed = ASTNode$State.NON_CYCLE;
+      decl_computed = ASTState.NON_CYCLE;
     
     }
     return decl_value;
@@ -1108,10 +1063,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:608
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:612
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:608")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:612")
   public SimpleSet<TypeDecl> qualifiedLookupType(String name) {
     {
         SimpleSet<TypeDecl> result = keepAccessibleTypes(type().memberTypes(name));
@@ -1126,7 +1081,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   }
   /** @apilevel internal */
   private void localLookupType_String_reset() {
-    localLookupType_String_computed = new java.util.HashMap(4);
+    localLookupType_String_computed = null;
     localLookupType_String_values = null;
   }
   /** @apilevel internal */
@@ -1136,18 +1091,18 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:647
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:651
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:647")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:651")
   public SimpleSet<TypeDecl> localLookupType(String name) {
     Object _parameters = name;
     if (localLookupType_String_computed == null) localLookupType_String_computed = new java.util.HashMap(4);
     if (localLookupType_String_values == null) localLookupType_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (localLookupType_String_values.containsKey(_parameters) && localLookupType_String_computed != null
+    ASTState state = state();
+    if (localLookupType_String_values.containsKey(_parameters)
         && localLookupType_String_computed.containsKey(_parameters)
-        && (localLookupType_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || localLookupType_String_computed.get(_parameters) == state().cycle())) {
+        && (localLookupType_String_computed.get(_parameters) == ASTState.NON_CYCLE || localLookupType_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<TypeDecl>) localLookupType_String_values.get(_parameters);
     }
     SimpleSet<TypeDecl> localLookupType_String_value = hasTypeDecl() && getTypeDecl().name().equals(name)
@@ -1159,7 +1114,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     
     } else {
       localLookupType_String_values.put(_parameters, localLookupType_String_value);
-      localLookupType_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      localLookupType_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return localLookupType_String_value;
@@ -1201,10 +1156,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
    * @return <code>true</code> if there is any printable body decl
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:216
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:216")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:295")
   public boolean hasPrintableBodyDecl() {
     {
         TypeDecl decl = getTypeDecl();
@@ -1224,13 +1179,25 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:231
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:310
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:231")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:310")
   public List<BodyDecl> bodyDecls() {
     List<BodyDecl> bodyDecls_value = getTypeDecl().getBodyDeclList();
     return bodyDecls_value;
+  }
+  /**
+   * Test if an expression contains an unresolved parse name.
+   * @attribute syn
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421")
+  public boolean containsParseName() {
+    boolean containsParseName_value = getAccess().containsParseName();
+    return containsParseName_value;
   }
   /**
    * Defines the expected kind of name for the left hand side in a qualified
@@ -1251,7 +1218,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -1259,13 +1226,13 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = hasTypeDecl() ? getTypeDecl() : getAccess().type();
@@ -1273,7 +1240,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -1281,10 +1248,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:581
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:583
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:581")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:583")
   public Collection<Problem> typeProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -1309,10 +1276,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:690
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:692
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:690")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:692")
   public boolean noEnclosingInstance() {
     boolean noEnclosingInstance_value = isQualified() ? qualifier().staticContextQualifier() : inStaticContext();
     return noEnclosingInstance_value;
@@ -1344,10 +1311,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:528
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:625
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:528")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:625")
   public int arity() {
     int arity_value = getNumArg();
     return arity_value;
@@ -1390,7 +1357,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="VariableArityParametersCodegen", declaredAt="/home/olivier/projects/extendj/java5/backend/VariableArityParametersCodegen.jrag:79")
   public ClassInstanceExpr transformedVariableArity() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (transformedVariableArity_computed) {
       return transformedVariableArity_value;
     }
@@ -1450,7 +1417,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     stmtCompatible_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle stmtCompatible_computed = null;
+  protected ASTState.Cycle stmtCompatible_computed = null;
 
   /** @apilevel internal */
   protected boolean stmtCompatible_value;
@@ -1458,13 +1425,13 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect StmtCompatible
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:143
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:147
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:143")
+  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:147")
   public boolean stmtCompatible() {
-    ASTNode$State state = state();
-    if (stmtCompatible_computed == ASTNode$State.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
+    ASTState state = state();
+    if (stmtCompatible_computed == ASTState.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
       return stmtCompatible_value;
     }
     stmtCompatible_value = true;
@@ -1472,14 +1439,55 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       stmtCompatible_computed = state().cycle();
     
     } else {
-      stmtCompatible_computed = ASTNode$State.NON_CYCLE;
+      stmtCompatible_computed = ASTState.NON_CYCLE;
     
     }
     return stmtCompatible_value;
   }
   /** @apilevel internal */
+  private void boundConstructor_ConstructorDecl_reset() {
+    boundConstructor_ConstructorDecl_values = null;
+    boundConstructor_ConstructorDecl_proxy = null;
+  }
+  /** @apilevel internal */
+  protected ASTNode boundConstructor_ConstructorDecl_proxy;
+  /** @apilevel internal */
+  protected java.util.Map boundConstructor_ConstructorDecl_values;
+
+  /**
+   * @attribute syn
+   * @aspect MethodSignature18
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:56
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:56")
+  public ConstructorAccess boundConstructor(ConstructorDecl decl) {
+    Object _parameters = decl;
+    if (boundConstructor_ConstructorDecl_values == null) boundConstructor_ConstructorDecl_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (boundConstructor_ConstructorDecl_values.containsKey(_parameters)) {
+      return (ConstructorAccess) boundConstructor_ConstructorDecl_values.get(_parameters);
+    }
+    state().enterLazyAttribute();
+    ConstructorAccess boundConstructor_ConstructorDecl_value = new BoundConstructorAccess(getAccess().type().name(), getArgList().treeCopyNoTransform(), decl);
+    if (boundConstructor_ConstructorDecl_proxy == null) {
+      boundConstructor_ConstructorDecl_proxy = new ASTNode();
+      boundConstructor_ConstructorDecl_proxy.setParent(this);
+    }
+    if (boundConstructor_ConstructorDecl_value != null) {
+      boundConstructor_ConstructorDecl_value.setParent(boundConstructor_ConstructorDecl_proxy);
+      if (boundConstructor_ConstructorDecl_value.mayHaveRewrite()) {
+        boundConstructor_ConstructorDecl_value = (ConstructorAccess) boundConstructor_ConstructorDecl_value.rewrittenNode();
+        boundConstructor_ConstructorDecl_value.setParent(boundConstructor_ConstructorDecl_proxy);
+      }
+    }
+    boundConstructor_ConstructorDecl_values.put(_parameters, boundConstructor_ConstructorDecl_value);
+    state().leaveLazyAttribute();
+    return boundConstructor_ConstructorDecl_value;
+  }
+  /** @apilevel internal */
   private void compatibleStrictContext_TypeDecl_reset() {
-    compatibleStrictContext_TypeDecl_computed = new java.util.HashMap(4);
+    compatibleStrictContext_TypeDecl_computed = null;
     compatibleStrictContext_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1489,18 +1497,18 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /** Used to compute compatibility during phase 1 of overload resolution. 
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:50
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:91
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:50")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:91")
   public boolean compatibleStrictContext(TypeDecl type) {
     Object _parameters = type;
     if (compatibleStrictContext_TypeDecl_computed == null) compatibleStrictContext_TypeDecl_computed = new java.util.HashMap(4);
     if (compatibleStrictContext_TypeDecl_values == null) compatibleStrictContext_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (compatibleStrictContext_TypeDecl_values.containsKey(_parameters) && compatibleStrictContext_TypeDecl_computed != null
+    ASTState state = state();
+    if (compatibleStrictContext_TypeDecl_values.containsKey(_parameters)
         && compatibleStrictContext_TypeDecl_computed.containsKey(_parameters)
-        && (compatibleStrictContext_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || compatibleStrictContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (compatibleStrictContext_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || compatibleStrictContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) compatibleStrictContext_TypeDecl_values.get(_parameters);
     }
     boolean compatibleStrictContext_TypeDecl_value = isPolyExpression()
@@ -1512,14 +1520,14 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     
     } else {
       compatibleStrictContext_TypeDecl_values.put(_parameters, compatibleStrictContext_TypeDecl_value);
-      compatibleStrictContext_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      compatibleStrictContext_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return compatibleStrictContext_TypeDecl_value;
   }
   /** @apilevel internal */
   private void compatibleLooseContext_TypeDecl_reset() {
-    compatibleLooseContext_TypeDecl_computed = new java.util.HashMap(4);
+    compatibleLooseContext_TypeDecl_computed = null;
     compatibleLooseContext_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1529,18 +1537,18 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:94
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:135
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:94")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:135")
   public boolean compatibleLooseContext(TypeDecl type) {
     Object _parameters = type;
     if (compatibleLooseContext_TypeDecl_computed == null) compatibleLooseContext_TypeDecl_computed = new java.util.HashMap(4);
     if (compatibleLooseContext_TypeDecl_values == null) compatibleLooseContext_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (compatibleLooseContext_TypeDecl_values.containsKey(_parameters) && compatibleLooseContext_TypeDecl_computed != null
+    ASTState state = state();
+    if (compatibleLooseContext_TypeDecl_values.containsKey(_parameters)
         && compatibleLooseContext_TypeDecl_computed.containsKey(_parameters)
-        && (compatibleLooseContext_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || compatibleLooseContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (compatibleLooseContext_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || compatibleLooseContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) compatibleLooseContext_TypeDecl_values.get(_parameters);
     }
     boolean compatibleLooseContext_TypeDecl_value = isPolyExpression()
@@ -1552,7 +1560,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     
     } else {
       compatibleLooseContext_TypeDecl_values.put(_parameters, compatibleLooseContext_TypeDecl_value);
-      compatibleLooseContext_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      compatibleLooseContext_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return compatibleLooseContext_TypeDecl_value;
@@ -1562,7 +1570,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     isBooleanExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isBooleanExpression_computed = null;
+  protected ASTState.Cycle isBooleanExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isBooleanExpression_value;
@@ -1575,8 +1583,8 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:29")
   public boolean isBooleanExpression() {
-    ASTNode$State state = state();
-    if (isBooleanExpression_computed == ASTNode$State.NON_CYCLE || isBooleanExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isBooleanExpression_computed == ASTState.NON_CYCLE || isBooleanExpression_computed == state().cycle()) {
       return isBooleanExpression_value;
     }
     isBooleanExpression_value = isBooleanExpression_compute();
@@ -1584,7 +1592,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       isBooleanExpression_computed = state().cycle();
     
     } else {
-      isBooleanExpression_computed = ASTNode$State.NON_CYCLE;
+      isBooleanExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isBooleanExpression_value;
@@ -1602,7 +1610,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     isPolyExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isPolyExpression_computed = null;
+  protected ASTState.Cycle isPolyExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isPolyExpression_value;
@@ -1615,8 +1623,8 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:86")
   public boolean isPolyExpression() {
-    ASTNode$State state = state();
-    if (isPolyExpression_computed == ASTNode$State.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isPolyExpression_computed == ASTState.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
       return isPolyExpression_value;
     }
     isPolyExpression_value = (getAccess() instanceof DiamondAccess) && (assignmentContext() || invocationContext());
@@ -1624,14 +1632,14 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       isPolyExpression_computed = state().cycle();
     
     } else {
-      isPolyExpression_computed = ASTNode$State.NON_CYCLE;
+      isPolyExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isPolyExpression_value;
   }
   /** @apilevel internal */
   private void assignConversionTo_TypeDecl_reset() {
-    assignConversionTo_TypeDecl_computed = new java.util.HashMap(4);
+    assignConversionTo_TypeDecl_computed = null;
     assignConversionTo_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1649,10 +1657,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     Object _parameters = type;
     if (assignConversionTo_TypeDecl_computed == null) assignConversionTo_TypeDecl_computed = new java.util.HashMap(4);
     if (assignConversionTo_TypeDecl_values == null) assignConversionTo_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (assignConversionTo_TypeDecl_values.containsKey(_parameters) && assignConversionTo_TypeDecl_computed != null
+    ASTState state = state();
+    if (assignConversionTo_TypeDecl_values.containsKey(_parameters)
         && assignConversionTo_TypeDecl_computed.containsKey(_parameters)
-        && (assignConversionTo_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || assignConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (assignConversionTo_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || assignConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) assignConversionTo_TypeDecl_values.get(_parameters);
     }
     boolean assignConversionTo_TypeDecl_value = assignConversionTo_compute(type);
@@ -1662,7 +1670,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     
     } else {
       assignConversionTo_TypeDecl_values.put(_parameters, assignConversionTo_TypeDecl_value);
-      assignConversionTo_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      assignConversionTo_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return assignConversionTo_TypeDecl_value;
@@ -1679,40 +1687,98 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /** @apilevel internal */
   private void enclosingVariableAccess_Variable_reset() {
     enclosingVariableAccess_Variable_values = null;
-    enclosingVariableAccess_Variable_list = null;
+    enclosingVariableAccess_Variable_proxy = null;
   }
   /** @apilevel internal */
-  protected List enclosingVariableAccess_Variable_list;
+  protected ASTNode enclosingVariableAccess_Variable_proxy;
   /** @apilevel internal */
   protected java.util.Map enclosingVariableAccess_Variable_values;
 
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:626
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:564
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:626")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:564")
   public VarAccess enclosingVariableAccess(Variable v) {
     Object _parameters = v;
     if (enclosingVariableAccess_Variable_values == null) enclosingVariableAccess_Variable_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (enclosingVariableAccess_Variable_values.containsKey(_parameters)) {
       return (VarAccess) enclosingVariableAccess_Variable_values.get(_parameters);
     }
     state().enterLazyAttribute();
     VarAccess enclosingVariableAccess_Variable_value = new VarAccess(v.name());
-    if (enclosingVariableAccess_Variable_list == null) {
-      enclosingVariableAccess_Variable_list = new List();
-      enclosingVariableAccess_Variable_list.setParent(this);
+    if (enclosingVariableAccess_Variable_proxy == null) {
+      enclosingVariableAccess_Variable_proxy = new ASTNode();
+      enclosingVariableAccess_Variable_proxy.setParent(this);
     }
-    enclosingVariableAccess_Variable_list.add(enclosingVariableAccess_Variable_value);
     if (enclosingVariableAccess_Variable_value != null) {
-      enclosingVariableAccess_Variable_value = (VarAccess) enclosingVariableAccess_Variable_list.getChild(enclosingVariableAccess_Variable_list.numChildren - 1);
+      enclosingVariableAccess_Variable_value.setParent(enclosingVariableAccess_Variable_proxy);
+      if (enclosingVariableAccess_Variable_value.mayHaveRewrite()) {
+        enclosingVariableAccess_Variable_value = (VarAccess) enclosingVariableAccess_Variable_value.rewrittenNode();
+        enclosingVariableAccess_Variable_value.setParent(enclosingVariableAccess_Variable_proxy);
+      }
     }
     enclosingVariableAccess_Variable_values.put(_parameters, enclosingVariableAccess_Variable_value);
     state().leaveLazyAttribute();
     return enclosingVariableAccess_Variable_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:566
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:566")
+  public Local eval(Body b) {
+    {
+        if (transformed() != this) return transformed().eval(b);
+    
+        Local             instance  = b.asLocal(b.newNewExpr(type().sootRef(), this));
+        ArrayList<Value>  params    = new ArrayList<>();
+    
+         // 15.9.2 first part
+        if (type().isAnonymous() && type().needsEnclosing())
+          params.add(b.emitThis(hostType(), this));
+    
+        // 15.9.2 second part
+        TypeDecl S = type().isAnonymous() ? ((ClassDecl)type()).superclass() : type();
+        if (S.isLocalClass()) {
+          if (!type().inStaticContext())
+            params.add(emitLocalEnclosing(b, S));
+        } else {
+          if (S.isInnerType())
+            params.add(emitInnerMemberEnclosing(b, S));
+        }
+    
+        for (int i = 0; i < getNumArg(); i++)
+          params.add(getArg(i).evalAndCast(b, decl().getParameter(i).type())); // MethodInvocationConversion
+    
+        // captured variables
+        for (Variable v : TypeDecl.variablesOrderByName(decl().hostType().enclosingVariables()))
+          params.add(enclosingVariableAccess(v).eval(b));
+    
+        //assert !((decl().isPrivate() && type() != hostType()));
+        // if(decl().isPrivate() && type() != hostType()) {
+        //   list.add(soot.jimple.NullConstant.v());
+        //   //b.setLine(this);
+        //   b.add(
+        //     b.newInvokeStmt(
+        //       b.newSpecialInvokeExpr(local, decl().createAccessor().sootRef(), list, this),
+        //       this
+        //     )
+        //   );
+        //   return local;
+        // }
+    
+        //b.setLine(this);
+        b.add(b.newInvokeStmt(
+          b.newSpecialInvokeExpr(instance, decl().sootRef(), params, this),
+          this));
+        return instance;
+      }
   }
   /**
    * @attribute syn
@@ -1761,10 +1827,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute inh
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:665
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:667
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:665")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:667")
   public TypeDecl enclosingInstance() {
     TypeDecl enclosingInstance_value = getParent().Define_enclosingInstance(this, null);
     return enclosingInstance_value;
@@ -1772,10 +1838,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute inh
    * @aspect TypeHierarchyCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:187
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:203
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:187")
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:203")
   public boolean inExplicitConstructorInvocation() {
     boolean inExplicitConstructorInvocation_value = getParent().Define_inExplicitConstructorInvocation(this, null);
     return inExplicitConstructorInvocation_value;
@@ -1793,6 +1859,11 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_superType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/AnonymousClasses.jrag:33
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute superType
+   */
   protected boolean canDefine_superType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1816,6 +1887,11 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_constructorDecl(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/AnonymousClasses.jrag:39
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute constructorDecl
+   */
   protected boolean canDefine_constructorDecl(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1837,6 +1913,11 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -1854,16 +1935,21 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:109
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
    * @apilevel internal
    */
   public boolean Define_hasPackage(ASTNode _callerNode, ASTNode _childNode, String packageName) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:120
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:124
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return unqualifiedScope().hasPackage(packageName);
     }
@@ -1871,6 +1957,11 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_hasPackage(this, _callerNode, packageName);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute hasPackage
+   */
   protected boolean canDefine_hasPackage(ASTNode _callerNode, ASTNode _childNode, String packageName) {
     return true;
   }
@@ -1880,7 +1971,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
    */
   public SimpleSet<TypeDecl> Define_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     if (_callerNode == getTypeDeclOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:582
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:586
       {
           SimpleSet<TypeDecl> result = localLookupType(name);
           if (!result.isEmpty()) {
@@ -1894,7 +1985,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
         }
     }
     else if (getAccessNoTransform() != null && _callerNode == getAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:574
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:578
       {
           SimpleSet<TypeDecl> result = lookupType(name);
           if (result.isSingleton() && isQualified()) {
@@ -1904,7 +1995,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
         }
     }
     else if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:390
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:394
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return unqualifiedScope().lookupType(name);
     }
@@ -1912,6 +2003,11 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_lookupType(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -1929,6 +2025,11 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_lookupVariable(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -1954,38 +2055,53 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:232
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:231
    * @apilevel internal
    */
   public boolean Define_isAnonymous(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getTypeDeclOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:233
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:232
       return true;
     }
     else {
       return getParent().Define_isAnonymous(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isAnonymous
+   */
   protected boolean canDefine_isAnonymous(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:588
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:584
    * @apilevel internal
    */
   public boolean Define_isMemberType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getTypeDeclOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:592
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:588
       return false;
     }
     else {
       return getParent().Define_isMemberType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:584
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isMemberType
+   */
   protected boolean canDefine_isMemberType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1995,23 +2111,28 @@ public class ClassInstanceExpr extends Access implements Cloneable {
    */
   public TypeDecl Define_hostType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getTypeDeclOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:647
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:643
       return hostType();
     }
     else {
       return getParent().Define_hostType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:76
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute hostType
+   */
   protected boolean canDefine_hostType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:207
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
    * @apilevel internal
    */
   public boolean Define_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getTypeDeclOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:221
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:237
       return isQualified() ?
             qualifier().staticContextQualifier() : inStaticContext();
     }
@@ -2019,6 +2140,11 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_inStaticContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inStaticContext
+   */
   protected boolean canDefine_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2030,38 +2156,53 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return this;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/backend/InnerClasses.jrag:435
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute classInstanceExpression
+   */
   protected boolean canDefine_classInstanceExpression(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:94
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:106
    * @apilevel internal
    */
   public ClassInstanceExpr Define_getClassInstanceExpr(ASTNode _callerNode, ASTNode _childNode) {
     if (getAccessNoTransform() != null && _callerNode == getAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:95
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:107
       return this;
     }
     else {
       return getParent().Define_getClassInstanceExpr(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:106
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute getClassInstanceExpr
+   */
   protected boolean canDefine_getClassInstanceExpr(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:429
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:307
    * @apilevel internal
    */
   public boolean Define_isAnonymousDecl(ASTNode _callerNode, ASTNode _childNode) {
     if (getAccessNoTransform() != null && _callerNode == getAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:434
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:312
       return hasTypeDecl();
     }
     else {
       return getParent().Define_isAnonymousDecl(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:307
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isAnonymousDecl
+   */
   protected boolean canDefine_isAnonymousDecl(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2071,7 +2212,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
    */
   public TypeDecl Define_targetType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:113
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:131
       int i = _callerNode.getIndexOfChild(_childNode);
       {
           ConstructorDecl decl = decl();
@@ -2090,6 +2231,11 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_targetType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
   protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2099,23 +2245,28 @@ public class ClassInstanceExpr extends Access implements Cloneable {
    */
   public TypeDecl Define_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
     if (getAccessNoTransform() != null && _callerNode == getAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:204
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:388
       return targetType();
     }
     else {
       return getParent().Define_assignConvertedType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:69
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignConvertedType
+   */
   protected boolean canDefine_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:343
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:527
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -2123,16 +2274,21 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_assignmentContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:344
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:528
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return true;
     }
@@ -2140,16 +2296,21 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_invocationContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:345
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:529
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -2157,16 +2318,21 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_castContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:346
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:530
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -2174,16 +2340,21 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_stringContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:347
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:531
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -2191,6 +2362,11 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       return getParent().Define_numericContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2202,6 +2378,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java4/frontend/AccessControl.jrag:171
     {
@@ -2230,7 +2407,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:579
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:581
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -2239,7 +2416,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:524
+    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:521
     if (decl().isDeprecated()
               && !withinDeprecatedAnnotation()
               && hostType().topLevelType() != decl().hostType().topLevelType()
@@ -2255,6 +2432,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_accessors(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:111
     if (decl().isPrivate() && type() != hostType()) {
@@ -2270,6 +2448,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     super.collect_contributors_TypeDecl_accessors(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_typesConstructed(TypeDecl _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/jimple8/backend/ScopeCapture.jrag:91
     {
@@ -2282,6 +2461,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     super.collect_contributors_TypeDecl_typesConstructed(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_signatureDependencies(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/soot8/backend/ResolverDependencies.jrag:31
     if (sootSigDepType().sootDependencyNeeded()) {
@@ -2296,6 +2476,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_signatureDependencies(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_nestedTypes(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
 
 
@@ -2308,6 +2489,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
     }
   }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : accessControlProblems()) {
@@ -2329,20 +2511,23 @@ public class ClassInstanceExpr extends Access implements Cloneable {
       collection.add(warning(decl().signature() + " in " + decl().hostType().typeName() + " has been deprecated"));
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_accessors(HashSet<BodyDecl> collection) {
     super.contributeTo_TypeDecl_accessors(collection);
     if (decl().isPrivate() && type() != hostType()) {
       collection.add(decl().createAccessor());
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_typesConstructed(HashSet<ClassDecl> collection) {
     super.contributeTo_TypeDecl_typesConstructed(collection);
     collection.add((ClassDecl)type());
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_signatureDependencies(HashSet<Type> collection) {
     super.contributeTo_CompilationUnit_signatureDependencies(collection);
     if (sootSigDepType().sootDependencyNeeded()) {
-      collection.add(sootSigDepType().getSootType());
+      collection.add(sootSigDepType().sootType());
     }
   }
 }

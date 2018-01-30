@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:82
+ * @astdecl GenericConstructorDeclErased : GenericConstructorDecl ::= <Original:GenericConstructorDecl>;
  * @production GenericConstructorDeclErased : {@link GenericConstructorDecl} ::= <span class="component">&lt;Original:GenericConstructorDecl&gt;</span>;
 
  */
@@ -63,6 +66,11 @@ public class GenericConstructorDeclErased extends GenericConstructorDecl impleme
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "Parameter", "Exception", "ParsedConstructorInvocation", "Block", "TypeParameter", "Original"},
+    type = {"Modifiers", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Stmt>", "Block", "List<TypeVariable>", "GenericConstructorDecl"},
+    kind = {"Child", "Token", "List", "List", "Opt", "Child", "List", "Token"}
+  )
   public GenericConstructorDeclErased(Modifiers p0, String p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, List<TypeVariable> p6, GenericConstructorDecl p7) {
     setChild(p0, 0);
     setID(p1);
@@ -74,7 +82,7 @@ public class GenericConstructorDeclErased extends GenericConstructorDecl impleme
     setOriginal(p7);
   }
   /**
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public GenericConstructorDeclErased(Modifiers p0, beaver.Symbol p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, List<TypeVariable> p6, GenericConstructorDecl p7) {
     setChild(p0, 0);
@@ -87,40 +95,40 @@ public class GenericConstructorDeclErased extends GenericConstructorDecl impleme
     setOriginal(p7);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   protected int numChildren() {
     return 6;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     lookupParConstructorDecl_Collection_TypeDecl__reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:58
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:57
+   * @declaredat ASTNode:62
    */
   public GenericConstructorDeclErased clone() throws CloneNotSupportedException {
     GenericConstructorDeclErased node = (GenericConstructorDeclErased) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:62
+   * @declaredat ASTNode:67
    */
   public GenericConstructorDeclErased copy() {
     try {
@@ -140,7 +148,7 @@ public class GenericConstructorDeclErased extends GenericConstructorDecl impleme
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:81
+   * @declaredat ASTNode:86
    */
   @Deprecated
   public GenericConstructorDeclErased fullCopy() {
@@ -151,7 +159,7 @@ public class GenericConstructorDeclErased extends GenericConstructorDecl impleme
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:91
+   * @declaredat ASTNode:96
    */
   public GenericConstructorDeclErased treeCopyNoTransform() {
     GenericConstructorDeclErased tree = (GenericConstructorDeclErased) copy();
@@ -177,7 +185,7 @@ public class GenericConstructorDeclErased extends GenericConstructorDecl impleme
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:116
+   * @declaredat ASTNode:121
    */
   public GenericConstructorDeclErased treeCopy() {
     GenericConstructorDeclErased tree = (GenericConstructorDeclErased) copy();
@@ -198,7 +206,7 @@ public class GenericConstructorDeclErased extends GenericConstructorDecl impleme
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:135
+   * @declaredat ASTNode:140
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((GenericConstructorDeclErased) node).tokenString_ID) && (tokenGenericConstructorDecl_Original == ((GenericConstructorDeclErased) node).tokenGenericConstructorDecl_Original);    
@@ -705,10 +713,10 @@ public class GenericConstructorDeclErased extends GenericConstructorDecl impleme
   /** @apilevel internal */
   private void lookupParConstructorDecl_Collection_TypeDecl__reset() {
     lookupParConstructorDecl_Collection_TypeDecl__values = null;
-    lookupParConstructorDecl_Collection_TypeDecl__list = null;
+    lookupParConstructorDecl_Collection_TypeDecl__proxy = null;
   }
   /** @apilevel internal */
-  protected List lookupParConstructorDecl_Collection_TypeDecl__list;
+  protected ASTNode lookupParConstructorDecl_Collection_TypeDecl__proxy;
   /** @apilevel internal */
   protected java.util.Map lookupParConstructorDecl_Collection_TypeDecl__values;
 
@@ -722,19 +730,22 @@ public class GenericConstructorDeclErased extends GenericConstructorDecl impleme
   public ParConstructorDecl lookupParConstructorDecl(Collection<TypeDecl> typeArguments) {
     Object _parameters = typeArguments;
     if (lookupParConstructorDecl_Collection_TypeDecl__values == null) lookupParConstructorDecl_Collection_TypeDecl__values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (lookupParConstructorDecl_Collection_TypeDecl__values.containsKey(_parameters)) {
       return (ParConstructorDecl) lookupParConstructorDecl_Collection_TypeDecl__values.get(_parameters);
     }
     state().enterLazyAttribute();
     ParConstructorDecl lookupParConstructorDecl_Collection_TypeDecl__value = newParConstructorDecl(Collections.<TypeDecl>emptyList());
-    if (lookupParConstructorDecl_Collection_TypeDecl__list == null) {
-      lookupParConstructorDecl_Collection_TypeDecl__list = new List();
-      lookupParConstructorDecl_Collection_TypeDecl__list.setParent(this);
+    if (lookupParConstructorDecl_Collection_TypeDecl__proxy == null) {
+      lookupParConstructorDecl_Collection_TypeDecl__proxy = new ASTNode();
+      lookupParConstructorDecl_Collection_TypeDecl__proxy.setParent(this);
     }
-    lookupParConstructorDecl_Collection_TypeDecl__list.add(lookupParConstructorDecl_Collection_TypeDecl__value);
     if (lookupParConstructorDecl_Collection_TypeDecl__value != null) {
-      lookupParConstructorDecl_Collection_TypeDecl__value = (ParConstructorDecl) lookupParConstructorDecl_Collection_TypeDecl__list.getChild(lookupParConstructorDecl_Collection_TypeDecl__list.numChildren - 1);
+      lookupParConstructorDecl_Collection_TypeDecl__value.setParent(lookupParConstructorDecl_Collection_TypeDecl__proxy);
+      if (lookupParConstructorDecl_Collection_TypeDecl__value.mayHaveRewrite()) {
+        lookupParConstructorDecl_Collection_TypeDecl__value = (ParConstructorDecl) lookupParConstructorDecl_Collection_TypeDecl__value.rewrittenNode();
+        lookupParConstructorDecl_Collection_TypeDecl__value.setParent(lookupParConstructorDecl_Collection_TypeDecl__proxy);
+      }
     }
     lookupParConstructorDecl_Collection_TypeDecl__values.put(_parameters, lookupParConstructorDecl_Collection_TypeDecl__value);
     state().leaveLazyAttribute();

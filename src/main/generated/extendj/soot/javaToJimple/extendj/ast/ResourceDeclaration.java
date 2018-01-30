@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +39,7 @@ import soot.coffi.CoffiMethodSource;
  * A resource declaration in a try with resources statement.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java7/grammar/TryWithResources.ast:9
+ * @astdecl ResourceDeclaration : VariableDeclarator ::= ResourceModifiers ResourceType:Access;
  * @production ResourceDeclaration : {@link VariableDeclarator} ::= <span class="component">{@link ResourceModifiers}</span> <span class="component">ResourceType:{@link Access}</span>;
 
  */
@@ -76,6 +79,11 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Dims", "Init", "ResourceModifiers", "ResourceType"},
+    type = {"String", "List<Dims>", "Opt<Expr>", "ResourceModifiers", "Access"},
+    kind = {"Token", "List", "Opt", "Child", "Child"}
+  )
   public ResourceDeclaration(String p0, List<Dims> p1, Opt<Expr> p2, ResourceModifiers p3, Access p4) {
     setID(p0);
     setChild(p1, 0);
@@ -84,7 +92,7 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
     setChild(p4, 3);
   }
   /**
-   * @declaredat ASTNode:22
+   * @declaredat ASTNode:27
    */
   public ResourceDeclaration(beaver.Symbol p0, List<Dims> p1, Opt<Expr> p2, ResourceModifiers p3, Access p4) {
     setID(p0);
@@ -94,41 +102,42 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
     setChild(p4, 3);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   protected int numChildren() {
     return 4;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public void flushAttrCache() {
     super.flushAttrCache();
+    closeAccess_reset();
     getModifiers_reset();
     getTypeAccess_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:52
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:56
    */
   public ResourceDeclaration clone() throws CloneNotSupportedException {
     ResourceDeclaration node = (ResourceDeclaration) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:55
+   * @declaredat ASTNode:61
    */
   public ResourceDeclaration copy() {
     try {
@@ -148,7 +157,7 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:80
    */
   @Deprecated
   public ResourceDeclaration fullCopy() {
@@ -159,7 +168,7 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:84
+   * @declaredat ASTNode:90
    */
   public ResourceDeclaration treeCopyNoTransform() {
     ResourceDeclaration tree = (ResourceDeclaration) copy();
@@ -185,7 +194,7 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:109
+   * @declaredat ASTNode:115
    */
   public ResourceDeclaration treeCopy() {
     ResourceDeclaration tree = (ResourceDeclaration) copy();
@@ -206,7 +215,7 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:128
+   * @declaredat ASTNode:134
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ResourceDeclaration) node).tokenString_ID);    
@@ -491,12 +500,47 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
       }
   }
   /** @apilevel internal */
+  private void closeAccess_reset() {
+    closeAccess_computed = false;
+    
+    closeAccess_value = null;
+  }
+  /** @apilevel internal */
+  protected boolean closeAccess_computed = false;
+
+  /** @apilevel internal */
+  protected MethodAccess closeAccess_value;
+
+  /**
+   * A synthetic method access to the resource closing method.
+   * 
+   * <p>This is used to find the actual close method. This is needed for precise
+   * exception analysis.
+   * @attribute syn
+   * @aspect TryWithResources
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:247
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:247")
+  public MethodAccess closeAccess() {
+    ASTState state = state();
+    if (closeAccess_computed) {
+      return closeAccess_value;
+    }
+    state().enterLazyAttribute();
+    closeAccess_value = new MethodAccess("close", new List<Expr>());
+    closeAccess_value.setParent(this);
+    closeAccess_computed = true;
+    state().leaveLazyAttribute();
+    return closeAccess_value;
+  }
+  /** @apilevel internal */
   private void getModifiers_reset() {
     getModifiers_computed = null;
     getModifiers_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle getModifiers_computed = null;
+  protected ASTState.Cycle getModifiers_computed = null;
 
   /** @apilevel internal */
   protected Modifiers getModifiers_value;
@@ -509,8 +553,8 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="VariableDeclarationTransformation", declaredAt="/home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:130")
   public Modifiers getModifiers() {
-    ASTNode$State state = state();
-    if (getModifiers_computed == ASTNode$State.NON_CYCLE || getModifiers_computed == state().cycle()) {
+    ASTState state = state();
+    if (getModifiers_computed == ASTState.NON_CYCLE || getModifiers_computed == state().cycle()) {
       return getModifiers_value;
     }
     getModifiers_value = getResourceModifiers();
@@ -518,7 +562,7 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
       getModifiers_computed = state().cycle();
     
     } else {
-      getModifiers_computed = ASTNode$State.NON_CYCLE;
+      getModifiers_computed = ASTState.NON_CYCLE;
     
     }
     return getModifiers_value;
@@ -538,12 +582,12 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
   /**
    * @attribute syn nta
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:306
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:300
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:306")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:300")
   public Access getTypeAccess() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getTypeAccess_computed) {
       return (Access) getChild(getTypeAccessChildPosition());
     }
@@ -573,7 +617,7 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
    */
   public NameType Define_nameType(ASTNode _callerNode, ASTNode _childNode) {
     if (getResourceTypeNoTransform() != null && _callerNode == getResourceType()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:316
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:310
       return NameType.TYPE_NAME;
     }
     else if (getTypeAccessNoTransform() != null && _callerNode == getTypeAccess()) {
@@ -584,22 +628,74 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
       return super.Define_nameType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:436
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:116
+   * @apilevel internal
+   */
+  public Collection<MethodDecl> Define_lookupMethod(ASTNode _callerNode, ASTNode _childNode, String name) {
+    if (_callerNode == closeAccess_value) {
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:251
+      return getResourceType().type().memberMethods(name);
+    }
+    else {
+      return getParent().Define_lookupMethod(this, _callerNode, name);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:116
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupMethod
+   */
+  protected boolean canDefine_lookupMethod(ASTNode _callerNode, ASTNode _childNode, String name) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
+   * @apilevel internal
+   */
+  public boolean Define_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
+    if (_callerNode == closeAccess_value) {
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:256
+      return false;
+    }
+    else {
+      return getParent().Define_inStaticContext(this, _callerNode);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inStaticContext
+   */
+  protected boolean canDefine_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
    * @apilevel internal
    */
   public boolean Define_mayBeFinal(ASTNode _callerNode, ASTNode _childNode) {
     if (getResourceModifiersNoTransform() != null && _callerNode == getResourceModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:314
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:308
       return true;
     }
     else {
       return getParent().Define_mayBeFinal(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeFinal
+   */
   protected boolean canDefine_mayBeFinal(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -611,6 +707,7 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:42
     {
@@ -621,7 +718,7 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:214
+    // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:194
     if (resourcePreviouslyDeclared(name())) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -634,6 +731,7 @@ public class ResourceDeclaration extends VariableDeclarator implements Cloneable
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : typeProblems()) {

@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -79,29 +81,12 @@ import soot.coffi.CoffiMethodSource;
       if (method.hasValue()) {
         MethodDecl targetMethod = method.get();
         StringBuilder str = new StringBuilder();
-        if (targetMethod.isGeneric()) {
-          GenericMethodDecl genericMethod = targetMethod.genericDecl();
-          str.append("<" + genericMethod.getTypeParameter(0).prettyPrint());
-          for (int i = 1; i < genericMethod.getNumTypeParameter(); i++) {
-            str.append(", " + genericMethod.getTypeParameter(i).prettyPrint());
-          }
-          str.append("> ");
-        }
-        str.append("(");
-        if (targetMethod.getNumParameter() > 0) {
-          str.append(targetMethod.getParameter(0).type().typeName());
-          for (int i = 1; i < targetMethod.getNumParameter(); i++) {
-            str.append(", " + targetMethod.getParameter(i).type().typeName());
-          }
-        }
-        str.append(")->");
-        str.append(targetMethod.type().typeName());
-
+        str.append(targetMethod.toString());
         str.append(" throws ");
         if (throwsList.size() > 0) {
           str.append(throwsList.get(0).typeName());
           for (int i = 1; i < throwsList.size(); i++) {
-            str.append(", " + throwsList.get(i).typeName());
+            str.append(", " + throwsList.get(i).toString());
           }
         }
         return str.toString();

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -41,6 +43,7 @@ import soot.coffi.CoffiMethodSource;
  * stand-in method to find the diamond type arguments.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java7/grammar/Diamond.ast:13
+ * @astdecl StandInMethodDecl : GenericMethodDecl;
  * @production StandInMethodDecl : {@link GenericMethodDecl};
 
  */
@@ -104,6 +107,11 @@ public class StandInMethodDecl extends GenericMethodDecl implements Cloneable {
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID", "Parameter", "Exception", "Block", "TypeParameter"},
+    type = {"Modifiers", "Access", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Block>", "List<TypeVariable>"},
+    kind = {"Child", "Child", "Token", "List", "List", "Opt", "List"}
+  )
   public StandInMethodDecl(Modifiers p0, Access p1, String p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<TypeVariable> p6) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -114,7 +122,7 @@ public class StandInMethodDecl extends GenericMethodDecl implements Cloneable {
     setChild(p6, 5);
   }
   /**
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   public StandInMethodDecl(Modifiers p0, Access p1, beaver.Symbol p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<TypeVariable> p6) {
     setChild(p0, 0);
@@ -126,39 +134,39 @@ public class StandInMethodDecl extends GenericMethodDecl implements Cloneable {
     setChild(p6, 5);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   protected int numChildren() {
     return 6;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:54
+   * @declaredat ASTNode:59
    */
   public StandInMethodDecl clone() throws CloneNotSupportedException {
     StandInMethodDecl node = (StandInMethodDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   public StandInMethodDecl copy() {
     try {
@@ -178,7 +186,7 @@ public class StandInMethodDecl extends GenericMethodDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:78
+   * @declaredat ASTNode:83
    */
   @Deprecated
   public StandInMethodDecl fullCopy() {
@@ -189,7 +197,7 @@ public class StandInMethodDecl extends GenericMethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:88
+   * @declaredat ASTNode:93
    */
   public StandInMethodDecl treeCopyNoTransform() {
     StandInMethodDecl tree = (StandInMethodDecl) copy();
@@ -210,7 +218,7 @@ public class StandInMethodDecl extends GenericMethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:108
+   * @declaredat ASTNode:113
    */
   public StandInMethodDecl treeCopy() {
     StandInMethodDecl tree = (StandInMethodDecl) copy();
@@ -226,7 +234,7 @@ public class StandInMethodDecl extends GenericMethodDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:122
+   * @declaredat ASTNode:127
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((StandInMethodDecl) node).tokenString_ID);    

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,13 +38,14 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:171
+ * @astdecl Declarator : ASTNode ::= TypeAccess:Access <ID:String> Dims* [Init:Expr];
  * @production Declarator : {@link ASTNode} ::= <span class="component">TypeAccess:{@link Access}</span> <span class="component">&lt;ID:String&gt;</span> <span class="component">{@link Dims}*</span> <span class="component">[Init:{@link Expr}]</span>;
 
  */
 public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, SimpleSet<Variable>, Variable {
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:321
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:322
    */
   @Override
   public int size() {
@@ -50,7 +53,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:326
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:327
    */
   @Override
   public boolean isEmpty() {
@@ -58,7 +61,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:331
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:332
    */
   @Override
   public SimpleSet<Variable> add(Variable o) {
@@ -66,7 +69,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:336
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:337
    */
   @Override
   public boolean contains(Object o) {
@@ -74,7 +77,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:341
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:342
    */
   @Override
   public boolean isSingleton() {
@@ -82,7 +85,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:346
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:347
    */
   @Override
   public boolean isSingleton(Variable o) {
@@ -90,7 +93,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:351
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:352
    */
   @Override
   public Variable singletonValue() {
@@ -98,7 +101,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:356
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:357
    */
   @Override
   public boolean equals(Object o) {
@@ -106,7 +109,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:361
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:362
    */
   @Override
   public Iterator<Variable> iterator() {
@@ -123,6 +126,26 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       out.print(" = ");
       out.print(getInit());
     }
+  }
+  /**
+   * @aspect PrettyPrintUtil
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:101
+   */
+  @Override public String toString() {
+    return getID();
+  }
+  /**
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:344
+   */
+  public void jimpleEmit(Body b) {
+    //b.setLine(this);
+    if (!hasInit()) return;
+
+    b.add(b.newAssignStmt(
+      b.local(this),
+      getInit().evalAndCast(b, type()),
+      this));
   }
   /**
    * @declaredat ASTNode:1
@@ -145,13 +168,18 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Dims", "Init"},
+    type = {"String", "List<Dims>", "Opt<Expr>"},
+    kind = {"Token", "List", "Opt"}
+  )
   public Declarator(String p0, List<Dims> p1, Opt<Expr> p2) {
     setID(p0);
     setChild(p1, 0);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   public Declarator(beaver.Symbol p0, List<Dims> p1, Opt<Expr> p2) {
     setID(p0);
@@ -159,20 +187,20 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -185,13 +213,13 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     declarationType_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:52
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:56
    */
   public Declarator clone() throws CloneNotSupportedException {
     Declarator node = (Declarator) super.clone();
@@ -203,7 +231,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:62
+   * @declaredat ASTNode:67
    */
   @Deprecated
   public abstract Declarator fullCopy();
@@ -212,7 +240,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:70
+   * @declaredat ASTNode:75
    */
   public abstract Declarator treeCopyNoTransform();
   /**
@@ -221,7 +249,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:78
+   * @declaredat ASTNode:83
    */
   public abstract Declarator treeCopy();
   /**
@@ -495,27 +523,27 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   public boolean assignedAfter(Variable v) {
     Object _parameters = v;
     if (assignedAfter_Variable_values == null) assignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfter_Variable_value = assignedAfter_compute(v);
-        if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfter_Variable_value;
         }
@@ -527,7 +555,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfter_Variable_value = assignedAfter_compute(v);
-      if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfter_Variable_value;
       }
@@ -554,27 +582,27 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = unassignedAfter_compute(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -586,7 +614,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = unassignedAfter_compute(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -606,10 +634,10 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:254
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:252
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:254")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:252")
   public boolean isSynthetic() {
     boolean isSynthetic_value = getModifiers().isSynthetic();
     return isSynthetic_value;
@@ -617,10 +645,10 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:275
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:273
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:275")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:273")
   public boolean isPublic() {
     boolean isPublic_value = false;
     return isPublic_value;
@@ -628,10 +656,10 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:243
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:322
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:243")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:322")
   public boolean hasModifiers() {
     boolean hasModifiers_value = getModifiers().getNumModifier() > 0;
     return hasModifiers_value;
@@ -639,10 +667,10 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:271
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:270
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:271")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:270")
   public TypeDecl type() {
     TypeDecl type_value = getTypeAccess().type();
     return type_value;
@@ -653,7 +681,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     getModifiers_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle getModifiers_computed = null;
+  protected ASTState.Cycle getModifiers_computed = null;
 
   /** @apilevel internal */
   protected Modifiers getModifiers_value;
@@ -666,8 +694,8 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="VariableDeclarationTransformation", declaredAt="/home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:130")
   public Modifiers getModifiers() {
-    ASTNode$State state = state();
-    if (getModifiers_computed == ASTNode$State.NON_CYCLE || getModifiers_computed == state().cycle()) {
+    ASTState state = state();
+    if (getModifiers_computed == ASTState.NON_CYCLE || getModifiers_computed == state().cycle()) {
       return getModifiers_value;
     }
     getModifiers_value = declarationModifiers();
@@ -675,7 +703,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       getModifiers_computed = state().cycle();
     
     } else {
-      getModifiers_computed = ASTNode$State.NON_CYCLE;
+      getModifiers_computed = ASTState.NON_CYCLE;
     
     }
     return getModifiers_value;
@@ -700,7 +728,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="VariableDeclarationTransformation", declaredAt="/home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:140")
   public Access getTypeAccess() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getTypeAccess_computed) {
       return (Access) getChild(getTypeAccessChildPosition());
     }
@@ -718,7 +746,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     throwTypes_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle throwTypes_computed = null;
+  protected ASTState.Cycle throwTypes_computed = null;
 
   /** @apilevel internal */
   protected Collection<TypeDecl> throwTypes_value;
@@ -731,8 +759,8 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PreciseRethrow", declaredAt="/home/olivier/projects/extendj/java7/frontend/PreciseRethrow.jrag:41")
   public Collection<TypeDecl> throwTypes() {
-    ASTNode$State state = state();
-    if (throwTypes_computed == ASTNode$State.NON_CYCLE || throwTypes_computed == state().cycle()) {
+    ASTState state = state();
+    if (throwTypes_computed == ASTState.NON_CYCLE || throwTypes_computed == state().cycle()) {
       return throwTypes_value;
     }
     throwTypes_value = throwTypes_compute();
@@ -740,7 +768,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       throwTypes_computed = state().cycle();
     
     } else {
-      throwTypes_computed = ASTNode$State.NON_CYCLE;
+      throwTypes_computed = ASTState.NON_CYCLE;
     
     }
     return throwTypes_value;
@@ -776,10 +804,10 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:278
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:278")
   public boolean isProtected() {
     boolean isProtected_value = getModifiers().isProtected();
     return isProtected_value;
@@ -787,13 +815,24 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280")
   public boolean isPrivate() {
     boolean isPrivate_value = getModifiers().isPrivate();
     return isPrivate_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:74
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:74")
+  public soot.Type sootType() {
+    soot.Type sootType_value = type().sootType();
+    return sootType_value;
   }
   /**
    * @attribute syn
@@ -842,10 +881,10 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:659
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:655
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:659")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:655")
   public TypeDecl hostType() {
     TypeDecl hostType_value = getParent().Define_hostType(this, null);
     return hostType_value;
@@ -858,8 +897,8 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="VariableDeclarationTransformation", declaredAt="/home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:133")
   public Modifiers declarationModifiers() {
-    ASTNode$State state = state();
-    if (declarationModifiers_computed == ASTNode$State.NON_CYCLE || declarationModifiers_computed == state().cycle()) {
+    ASTState state = state();
+    if (declarationModifiers_computed == ASTState.NON_CYCLE || declarationModifiers_computed == state().cycle()) {
       return declarationModifiers_value;
     }
     declarationModifiers_value = getParent().Define_declarationModifiers(this, null);
@@ -867,7 +906,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       declarationModifiers_computed = state().cycle();
     
     } else {
-      declarationModifiers_computed = ASTNode$State.NON_CYCLE;
+      declarationModifiers_computed = ASTState.NON_CYCLE;
     
     }
     return declarationModifiers_value;
@@ -878,7 +917,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     declarationModifiers_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle declarationModifiers_computed = null;
+  protected ASTState.Cycle declarationModifiers_computed = null;
 
   /** @apilevel internal */
   protected Modifiers declarationModifiers_value;
@@ -891,8 +930,8 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="VariableDeclarationTransformation", declaredAt="/home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:144")
   public Access declarationType() {
-    ASTNode$State state = state();
-    if (declarationType_computed == ASTNode$State.NON_CYCLE || declarationType_computed == state().cycle()) {
+    ASTState state = state();
+    if (declarationType_computed == ASTState.NON_CYCLE || declarationType_computed == state().cycle()) {
       return declarationType_value;
     }
     declarationType_value = getParent().Define_declarationType(this, null);
@@ -900,7 +939,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       declarationType_computed = state().cycle();
     
     } else {
-      declarationType_computed = ASTNode$State.NON_CYCLE;
+      declarationType_computed = ASTState.NON_CYCLE;
     
     }
     return declarationType_value;
@@ -911,7 +950,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     declarationType_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle declarationType_computed = null;
+  protected ASTState.Cycle declarationType_computed = null;
 
   /** @apilevel internal */
   protected Access declarationType_value;
@@ -930,10 +969,10 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:641
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:637
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:641")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:637")
   public String hostPackage() {
     String hostPackage_value = getParent().Define_hostPackage(this, null);
     return hostPackage_value;
@@ -941,10 +980,10 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384")
   public FieldDecl fieldDecl() {
     FieldDecl fieldDecl_value = getParent().Define_fieldDecl(this, null);
     return fieldDecl_value;
@@ -962,6 +1001,11 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       return getParent().Define_isSource(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:44
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isSource
+   */
   protected boolean canDefine_isSource(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -978,6 +1022,11 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -994,6 +1043,11 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -1005,6 +1059,11 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:86
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isLeftChildOfDot
+   */
   protected boolean canDefine_isLeftChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1016,6 +1075,11 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:101
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isRightChildOfDot
+   */
   protected boolean canDefine_isRightChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1027,6 +1091,11 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     int childIndex = this.getIndexOfChild(_callerNode);
     return prevExprError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:118
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute prevExpr
+   */
   protected boolean canDefine_prevExpr(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1038,6 +1107,11 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     int childIndex = this.getIndexOfChild(_callerNode);
     return nextAccessError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:142
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nextAccess
+   */
   protected boolean canDefine_nextAccess(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1054,22 +1128,32 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:713
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
    * @apilevel internal
    */
   public TypeDecl Define_declType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:282
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:281
       return type();
     }
     else {
       return getParent().Define_declType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declType
+   */
   protected boolean canDefine_declType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1086,6 +1170,11 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       return getParent().Define_expectedType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/backend/InnerClasses.jrag:104
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute expectedType
+   */
   protected boolean canDefine_expectedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1102,6 +1191,11 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
       return getParent().Define_assignConvertedType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:69
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignConvertedType
+   */
   protected boolean canDefine_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1111,93 +1205,123 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
    */
   public TypeDecl Define_targetType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:40
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:41
       return getTypeAccess().type();
     }
     else {
       return getParent().Define_targetType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
   protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:373
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:557
       return true;
     }
     else {
       return getParent().Define_assignmentContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:374
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:558
       return false;
     }
     else {
       return getParent().Define_invocationContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:375
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:559
       return false;
     }
     else {
       return getParent().Define_castContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:376
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:560
       return false;
     }
     else {
       return getParent().Define_stringContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:377
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:561
       return false;
     }
     else {
       return getParent().Define_numericContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1209,6 +1333,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java7/frontend/UncheckedConversion.jrag:41
     if (hasInit() && !suppressWarnings("unchecked")) {
@@ -1223,6 +1348,7 @@ public abstract class Declarator extends ASTNode<ASTNode> implements Cloneable, 
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (hasInit() && !suppressWarnings("unchecked")) {

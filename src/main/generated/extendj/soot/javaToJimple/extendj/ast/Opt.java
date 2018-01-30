@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,13 +37,14 @@ import beaver.*;
 import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
+ * @astdecl Opt : ASTNode;
  * @production Opt : {@link ASTNode};
 
  */
 public class Opt<T extends ASTNode> extends ASTNode<T> implements Cloneable {
   /** Pretty-print Opt nodes only if they are not empty. 
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:84
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:163
    */
   public void prettyPrint(PrettyPrinter out) {
     if (getNumChild() > 0) {
@@ -172,10 +175,10 @@ public class Opt<T extends ASTNode> extends ASTNode<T> implements Cloneable {
   /**
    * @attribute syn
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:21
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:24
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:21")
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:24")
   public boolean definesLabel() {
     boolean definesLabel_value = getParent().definesLabel();
     return definesLabel_value;

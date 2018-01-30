@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:291
+ * @astdecl Block : Stmt ::= Stmt*;
  * @production Block : {@link Stmt} ::= <span class="component">{@link Stmt}*</span>;
 
  */
@@ -61,11 +64,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   }
   /**
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:16
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:19
    */
-  public void jimplify2(Body b) {
+  public void jimpleEmit(Body b) {
     for(int i = 0; i < getNumStmt(); i++)
-      getStmt(i).jimplify2(b);
+      getStmt(i).jimpleEmit(b);
   }
   /**
    * @declaredat ASTNode:1
@@ -87,24 +90,29 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Stmt"},
+    type = {"List<Stmt>"},
+    kind = {"List"}
+  )
   public Block(List<Stmt> p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -118,20 +126,20 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     lookupVariable_String_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public Block clone() throws CloneNotSupportedException {
     Block node = (Block) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   public Block copy() {
     try {
@@ -151,7 +159,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:68
+   * @declaredat ASTNode:73
    */
   @Deprecated
   public Block fullCopy() {
@@ -162,7 +170,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:78
+   * @declaredat ASTNode:83
    */
   public Block treeCopyNoTransform() {
     Block tree = (Block) copy();
@@ -183,7 +191,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:98
+   * @declaredat ASTNode:103
    */
   public Block treeCopy() {
     Block tree = (Block) copy();
@@ -199,7 +207,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:112
+   * @declaredat ASTNode:117
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -335,27 +343,27 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public boolean assignedAfterReturn(Variable v) {
     Object _parameters = v;
     if (assignedAfterReturn_Variable_values == null) assignedAfterReturn_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfterReturn_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfterReturn_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfterReturn_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfterReturn_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfterReturn_Variable_value = assignedAfterReturn_compute(v);
-        if (new_assignedAfterReturn_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfterReturn_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfterReturn_Variable_value;
         }
@@ -367,7 +375,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfterReturn_Variable_value = assignedAfterReturn_compute(v);
-      if (new_assignedAfterReturn_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfterReturn_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfterReturn_Variable_value;
       }
@@ -400,27 +408,27 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public boolean assignedAfter(Variable v) {
     Object _parameters = v;
     if (assignedAfter_Variable_values == null) assignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfter_Variable_value = getNumStmt() == 0 ? assignedBefore(v) : getStmt(getNumStmt()-1).assignedAfter(v);
-        if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfter_Variable_value;
         }
@@ -432,7 +440,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfter_Variable_value = getNumStmt() == 0 ? assignedBefore(v) : getStmt(getNumStmt()-1).assignedAfter(v);
-      if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfter_Variable_value;
       }
@@ -462,27 +470,27 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public boolean unassignedAfterReturn(Variable v) {
     Object _parameters = v;
     if (unassignedAfterReturn_Variable_values == null) unassignedAfterReturn_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterReturn_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterReturn_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterReturn_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterReturn_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterReturn_Variable_value = unassignedAfterReturn_compute(v);
-        if (new_unassignedAfterReturn_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterReturn_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterReturn_Variable_value;
         }
@@ -494,7 +502,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterReturn_Variable_value = unassignedAfterReturn_compute(v);
-      if (new_unassignedAfterReturn_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterReturn_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterReturn_Variable_value;
       }
@@ -527,27 +535,27 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = getNumStmt() == 0 ? unassignedBefore(v) : getStmt(getNumStmt() - 1).unassignedAfter(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -559,7 +567,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = getNumStmt() == 0 ? unassignedBefore(v) : getStmt(getNumStmt() - 1).unassignedAfter(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -570,7 +578,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   }
   /** @apilevel internal */
   private void localVariableDeclaration_String_reset() {
-    localVariableDeclaration_String_computed = new java.util.HashMap(4);
+    localVariableDeclaration_String_computed = null;
     localVariableDeclaration_String_values = null;
   }
   /** @apilevel internal */
@@ -588,10 +596,10 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     Object _parameters = name;
     if (localVariableDeclaration_String_computed == null) localVariableDeclaration_String_computed = new java.util.HashMap(4);
     if (localVariableDeclaration_String_values == null) localVariableDeclaration_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (localVariableDeclaration_String_values.containsKey(_parameters) && localVariableDeclaration_String_computed != null
+    ASTState state = state();
+    if (localVariableDeclaration_String_values.containsKey(_parameters)
         && localVariableDeclaration_String_computed.containsKey(_parameters)
-        && (localVariableDeclaration_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || localVariableDeclaration_String_computed.get(_parameters) == state().cycle())) {
+        && (localVariableDeclaration_String_computed.get(_parameters) == ASTState.NON_CYCLE || localVariableDeclaration_String_computed.get(_parameters) == state().cycle())) {
       return (VariableDeclarator) localVariableDeclaration_String_values.get(_parameters);
     }
     VariableDeclarator localVariableDeclaration_String_value = localVariableDeclaration_compute(name);
@@ -601,7 +609,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     
     } else {
       localVariableDeclaration_String_values.put(_parameters, localVariableDeclaration_String_value);
-      localVariableDeclaration_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      localVariableDeclaration_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return localVariableDeclaration_String_value;
@@ -619,10 +627,10 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:211
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:290
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:211")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:290")
   public boolean hasStmts() {
     boolean hasStmts_value = getNumStmt() > 0;
     return hasStmts_value;
@@ -632,7 +640,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     canCompleteNormally_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle canCompleteNormally_computed = null;
+  protected ASTState.Cycle canCompleteNormally_computed = null;
 
   /** @apilevel internal */
   protected boolean canCompleteNormally_value;
@@ -645,8 +653,8 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="UnreachableStatements", declaredAt="/home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:50")
   public boolean canCompleteNormally() {
-    ASTNode$State state = state();
-    if (canCompleteNormally_computed == ASTNode$State.NON_CYCLE || canCompleteNormally_computed == state().cycle()) {
+    ASTState state = state();
+    if (canCompleteNormally_computed == ASTState.NON_CYCLE || canCompleteNormally_computed == state().cycle()) {
       return canCompleteNormally_value;
     }
     canCompleteNormally_value = getNumStmt() == 0
@@ -656,7 +664,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       canCompleteNormally_computed = state().cycle();
     
     } else {
-      canCompleteNormally_computed = ASTNode$State.NON_CYCLE;
+      canCompleteNormally_computed = ASTState.NON_CYCLE;
     
     }
     return canCompleteNormally_value;
@@ -681,18 +689,18 @@ public class Block extends Stmt implements Cloneable, VariableScope {
   /**
    * @attribute inh
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:396
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:400
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:396")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:400")
   public SimpleSet<TypeDecl> lookupType(String name) {
     Object _parameters = name;
     if (lookupType_String_computed == null) lookupType_String_computed = new java.util.HashMap(4);
     if (lookupType_String_values == null) lookupType_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (lookupType_String_values.containsKey(_parameters) && lookupType_String_computed != null
+    ASTState state = state();
+    if (lookupType_String_values.containsKey(_parameters)
         && lookupType_String_computed.containsKey(_parameters)
-        && (lookupType_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || lookupType_String_computed.get(_parameters) == state().cycle())) {
+        && (lookupType_String_computed.get(_parameters) == ASTState.NON_CYCLE || lookupType_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<TypeDecl>) lookupType_String_values.get(_parameters);
     }
     SimpleSet<TypeDecl> lookupType_String_value = getParent().Define_lookupType(this, null, name);
@@ -702,14 +710,14 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     
     } else {
       lookupType_String_values.put(_parameters, lookupType_String_value);
-      lookupType_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      lookupType_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return lookupType_String_value;
   }
   /** @apilevel internal */
   private void lookupType_String_reset() {
-    lookupType_String_computed = new java.util.HashMap(4);
+    lookupType_String_computed = null;
     lookupType_String_values = null;
   }
   /** @apilevel internal */
@@ -727,10 +735,10 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     Object _parameters = name;
     if (lookupVariable_String_computed == null) lookupVariable_String_computed = new java.util.HashMap(4);
     if (lookupVariable_String_values == null) lookupVariable_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (lookupVariable_String_values.containsKey(_parameters) && lookupVariable_String_computed != null
+    ASTState state = state();
+    if (lookupVariable_String_values.containsKey(_parameters)
         && lookupVariable_String_computed.containsKey(_parameters)
-        && (lookupVariable_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || lookupVariable_String_computed.get(_parameters) == state().cycle())) {
+        && (lookupVariable_String_computed.get(_parameters) == ASTState.NON_CYCLE || lookupVariable_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<Variable>) lookupVariable_String_values.get(_parameters);
     }
     SimpleSet<Variable> lookupVariable_String_value = getParent().Define_lookupVariable(this, null, name);
@@ -740,14 +748,14 @@ public class Block extends Stmt implements Cloneable, VariableScope {
     
     } else {
       lookupVariable_String_values.put(_parameters, lookupVariable_String_value);
-      lookupVariable_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      lookupVariable_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return lookupVariable_String_value;
   }
   /** @apilevel internal */
   private void lookupVariable_String_reset() {
-    lookupVariable_String_computed = new java.util.HashMap(4);
+    lookupVariable_String_computed = null;
     lookupVariable_String_values = null;
   }
   /** @apilevel internal */
@@ -790,6 +798,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_blockIndex(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DeclareBeforeUse.jrag:35
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute blockIndex
+   */
   protected boolean canDefine_blockIndex(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -807,6 +820,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_isIncOrDec(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:66
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isIncOrDec
+   */
   protected boolean canDefine_isIncOrDec(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -824,6 +842,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -841,6 +864,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -850,7 +878,7 @@ public class Block extends Stmt implements Cloneable, VariableScope {
    */
   public SimpleSet<TypeDecl> Define_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     if (_callerNode == getStmtListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:558
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:562
       int index = _callerNode.getIndexOfChild(_childNode);
       {
           SimpleSet<TypeDecl> result = emptySet();
@@ -872,6 +900,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_lookupType(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -896,6 +929,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_lookupVariable(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -913,6 +951,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_outerScope(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/NameCheck.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute outerScope
+   */
   protected boolean canDefine_outerScope(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -945,6 +988,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_otherLocalClassDecls(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/NameCheck.jrag:680
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute otherLocalClassDecls
+   */
   protected boolean canDefine_otherLocalClassDecls(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -962,6 +1010,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -981,6 +1034,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_reachable(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:49
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reachable
+   */
   protected boolean canDefine_reachable(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -998,17 +1056,27 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_reportUnreachable(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/PreciseRethrow.jrag:280
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reportUnreachable
+   */
   protected boolean canDefine_reportUnreachable(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:426
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:519
    * @apilevel internal
    */
   public Block Define_enclosingBlock(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return this;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:519
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosingBlock
+   */
   protected boolean canDefine_enclosingBlock(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1026,6 +1094,11 @@ public class Block extends Stmt implements Cloneable, VariableScope {
       return getParent().Define_inhModifiedInScope(this, _callerNode, var);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inhModifiedInScope
+   */
   protected boolean canDefine_inhModifiedInScope(ASTNode _callerNode, ASTNode _childNode, Variable var) {
     return true;
   }

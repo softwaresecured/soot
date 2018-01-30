@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,27 +38,28 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/GenericMethods.ast:10
+ * @astdecl ParConstructorDecl : ConstructorDecl ::= TypeArgument:Access* <GenericConstructorDecl:GenericConstructorDecl> TypeParameter:TypeVariable* <Parameterization:Parameterization>;
  * @production ParConstructorDecl : {@link ConstructorDecl} ::= <span class="component">TypeArgument:{@link Access}*</span> <span class="component">&lt;GenericConstructorDecl:GenericConstructorDecl&gt;</span> <span class="component">TypeParameter:{@link TypeVariable}*</span> <span class="component">&lt;Parameterization:Parameterization&gt;</span>;
 
  */
 public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1266
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1262
    */
   public boolean isRawType() {
     return false;
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1282
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1278
    */
   public int numTypeParameter() {
     return genericConstructorDecl().original().getNumTypeParameter();
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1290
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1286
    */
   public TypeVariable typeParameter(int index) {
     return genericConstructorDecl().original().getTypeParameter(index);
@@ -85,6 +88,11 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
   /**
    * @declaredat ASTNode:18
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "Parameter", "Exception", "ParsedConstructorInvocation", "Block", "TypeArgument", "GenericConstructorDecl", "TypeParameter", "Parameterization"},
+    type = {"Modifiers", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Stmt>", "Block", "List<Access>", "GenericConstructorDecl", "List<TypeVariable>", "Parameterization"},
+    kind = {"Child", "Token", "List", "List", "Opt", "Child", "List", "Token", "List", "Token"}
+  )
   public ParConstructorDecl(Modifiers p0, String p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, List<Access> p6, GenericConstructorDecl p7, List<TypeVariable> p8, Parameterization p9) {
     setChild(p0, 0);
     setID(p1);
@@ -98,7 +106,7 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
     setParameterization(p9);
   }
   /**
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   public ParConstructorDecl(Modifiers p0, beaver.Symbol p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, List<Access> p6, GenericConstructorDecl p7, List<TypeVariable> p8, Parameterization p9) {
     setChild(p0, 0);
@@ -113,20 +121,20 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
     setParameterization(p9);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   protected int numChildren() {
     return 7;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:58
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -134,20 +142,20 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
     sourceConstructorDecl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   public ParConstructorDecl clone() throws CloneNotSupportedException {
     ParConstructorDecl node = (ParConstructorDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:68
+   * @declaredat ASTNode:73
    */
   public ParConstructorDecl copy() {
     try {
@@ -167,7 +175,7 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:87
+   * @declaredat ASTNode:92
    */
   @Deprecated
   public ParConstructorDecl fullCopy() {
@@ -178,7 +186,7 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:97
+   * @declaredat ASTNode:102
    */
   public ParConstructorDecl treeCopyNoTransform() {
     ParConstructorDecl tree = (ParConstructorDecl) copy();
@@ -204,7 +212,7 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:122
+   * @declaredat ASTNode:127
    */
   public ParConstructorDecl treeCopy() {
     ParConstructorDecl tree = (ParConstructorDecl) copy();
@@ -225,7 +233,7 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:141
+   * @declaredat ASTNode:146
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ParConstructorDecl) node).tokenString_ID) && (tokenGenericConstructorDecl_GenericConstructorDecl == ((ParConstructorDecl) node).tokenGenericConstructorDecl_GenericConstructorDecl) && (tokenParameterization_Parameterization == ((ParConstructorDecl) node).tokenParameterization_Parameterization);    
@@ -865,7 +873,7 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
     genericConstructorDecl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle genericConstructorDecl_computed = null;
+  protected ASTState.Cycle genericConstructorDecl_computed = null;
 
   /** @apilevel internal */
   protected GenericConstructorDecl genericConstructorDecl_value;
@@ -878,8 +886,8 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="GenericMethods", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:54")
   public GenericConstructorDecl genericConstructorDecl() {
-    ASTNode$State state = state();
-    if (genericConstructorDecl_computed == ASTNode$State.NON_CYCLE || genericConstructorDecl_computed == state().cycle()) {
+    ASTState state = state();
+    if (genericConstructorDecl_computed == ASTState.NON_CYCLE || genericConstructorDecl_computed == state().cycle()) {
       return genericConstructorDecl_value;
     }
     genericConstructorDecl_value = getGenericConstructorDecl();
@@ -887,7 +895,7 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
       genericConstructorDecl_computed = state().cycle();
     
     } else {
-      genericConstructorDecl_computed = ASTNode$State.NON_CYCLE;
+      genericConstructorDecl_computed = ASTState.NON_CYCLE;
     
     }
     return genericConstructorDecl_value;
@@ -898,7 +906,7 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
     sourceConstructorDecl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle sourceConstructorDecl_computed = null;
+  protected ASTState.Cycle sourceConstructorDecl_computed = null;
 
   /** @apilevel internal */
   protected ConstructorDecl sourceConstructorDecl_value;
@@ -906,13 +914,13 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1891
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1890
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1891")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1890")
   public ConstructorDecl sourceConstructorDecl() {
-    ASTNode$State state = state();
-    if (sourceConstructorDecl_computed == ASTNode$State.NON_CYCLE || sourceConstructorDecl_computed == state().cycle()) {
+    ASTState state = state();
+    if (sourceConstructorDecl_computed == ASTState.NON_CYCLE || sourceConstructorDecl_computed == state().cycle()) {
       return sourceConstructorDecl_value;
     }
     sourceConstructorDecl_value = genericConstructorDecl().original().sourceConstructorDecl();
@@ -920,7 +928,7 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
       sourceConstructorDecl_computed = state().cycle();
     
     } else {
-      sourceConstructorDecl_computed = ASTNode$State.NON_CYCLE;
+      sourceConstructorDecl_computed = ASTState.NON_CYCLE;
     
     }
     return sourceConstructorDecl_value;
@@ -939,6 +947,11 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
         return lookupType(name);
       }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }

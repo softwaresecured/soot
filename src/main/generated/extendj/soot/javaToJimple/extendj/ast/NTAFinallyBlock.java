@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -39,6 +41,7 @@ import soot.coffi.CoffiMethodSource;
  * recursive AST.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/NTAFinally.ast:6
+ * @astdecl NTAFinallyBlock : Block;
  * @production NTAFinallyBlock : {@link Block};
 
  */
@@ -75,43 +78,48 @@ public class NTAFinallyBlock extends Block implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Stmt"},
+    type = {"List<Stmt>"},
+    kind = {"List"}
+  )
   public NTAFinallyBlock(List<Stmt> p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public NTAFinallyBlock clone() throws CloneNotSupportedException {
     NTAFinallyBlock node = (NTAFinallyBlock) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public NTAFinallyBlock copy() {
     try {
@@ -131,7 +139,7 @@ public class NTAFinallyBlock extends Block implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:60
+   * @declaredat ASTNode:65
    */
   @Deprecated
   public NTAFinallyBlock fullCopy() {
@@ -142,7 +150,7 @@ public class NTAFinallyBlock extends Block implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:70
+   * @declaredat ASTNode:75
    */
   public NTAFinallyBlock treeCopyNoTransform() {
     NTAFinallyBlock tree = (NTAFinallyBlock) copy();
@@ -163,7 +171,7 @@ public class NTAFinallyBlock extends Block implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:90
+   * @declaredat ASTNode:95
    */
   public NTAFinallyBlock treeCopy() {
     NTAFinallyBlock tree = (NTAFinallyBlock) copy();
@@ -179,7 +187,7 @@ public class NTAFinallyBlock extends Block implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:104
+   * @declaredat ASTNode:109
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -302,6 +310,11 @@ public class NTAFinallyBlock extends Block implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return origin.enclosingFinally(branch);
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:273
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosingFinally
+   */
   protected boolean canDefine_enclosingFinally(ASTNode _callerNode, ASTNode _childNode, Stmt branch) {
     return true;
   }

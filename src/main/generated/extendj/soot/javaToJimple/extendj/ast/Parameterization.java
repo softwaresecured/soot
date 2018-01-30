@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,7 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast class
  * @aspect LookupParTypeDecl
- * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1063
+ * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1055
  */
 public class Parameterization extends java.lang.Object {
   
@@ -119,12 +121,16 @@ public class Parameterization extends java.lang.Object {
     @Override public String toString() {
       StringBuilder str = new StringBuilder();
       str.append("[");
-      for (TypeVariable var : params) {
-        if (str.length() > 1) {
-          str.append(",");
+      if (isRaw) {
+        str.append("raw");
+      } else {
+        for (TypeVariable var : params) {
+          if (str.length() > 1) {
+            str.append(", ");
+          }
+          TypeDecl arg = typeMap.get(var.name()).arg;
+          str.append(var.name()).append("=").append(arg.typeName());
         }
-        TypeDecl arg = typeMap.get(var.name()).arg;
-        str.append(var.name()).append("=").append(arg.typeName());
       }
       str.append("]");
       return str.toString();

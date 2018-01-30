@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:240
+ * @astdecl Binary : Expr ::= LeftOperand:Expr RightOperand:Expr;
  * @production Binary : {@link Expr} ::= <span class="component">LeftOperand:{@link Expr}</span> <span class="component">RightOperand:{@link Expr}</span>;
 
  */
@@ -53,42 +56,19 @@ public abstract class Binary extends Expr implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:823
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:733
    */
-  public soot.Value eval(Body b) {
-    return asLocal(b, emitOperation(b,
-      getLeftOperand().type().emitCastTo(b,  // Binary numeric promotion
-        getLeftOperand(),
-        type()
-      ),
-      getRightOperand().type().emitCastTo(b, // Binary numeric promotion
-        getRightOperand(),
-        type()
-      )
-    ));
-  }
+  protected Value emitShiftExpr(Body b)
+  { return eval(b, type(), typeInt()); }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:836
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:736
    */
-  public soot.Value emitShiftExpr(Body b) {
-    return asLocal(b, emitOperation(b,
-      getLeftOperand().type().emitCastTo(b,  // Binary numeric promotion
-        getLeftOperand(),
-        type()
-      ),
-      getRightOperand().type().emitCastTo(b,
-        getRightOperand(),
-        typeInt()
-      )
-    ));
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:853
-   */
-  public soot.Value emitOperation(Body b, soot.Value left, soot.Value right) {
-    throw new Error("emitOperation not implemented in " + getClass().getName());
+  protected Value eval(Body b, TypeDecl lhs, TypeDecl rhs) {
+    return emitOperation(b,
+       getLeftOperand().evalAndCast(b, lhs),  // Binary numeric promotion
+      getRightOperand().evalAndCast(b, rhs)   // Binary numeric promotion
+    );
   }
   /**
    * @declaredat ASTNode:1
@@ -109,25 +89,30 @@ public abstract class Binary extends Expr implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"LeftOperand", "RightOperand"},
+    type = {"Expr", "Expr"},
+    kind = {"Child", "Child"}
+  )
   public Binary(Expr p0, Expr p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -137,13 +122,13 @@ public abstract class Binary extends Expr implements Cloneable {
     unassignedAfter_Variable_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public Binary clone() throws CloneNotSupportedException {
     Binary node = (Binary) super.clone();
@@ -155,7 +140,7 @@ public abstract class Binary extends Expr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:56
    */
   @Deprecated
   public abstract Binary fullCopy();
@@ -164,7 +149,7 @@ public abstract class Binary extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   public abstract Binary treeCopyNoTransform();
   /**
@@ -173,7 +158,7 @@ public abstract class Binary extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:67
+   * @declaredat ASTNode:72
    */
   public abstract Binary treeCopy();
   /**
@@ -253,13 +238,13 @@ public abstract class Binary extends Expr implements Cloneable {
   /** The operator string used for pretty printing this expression. 
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:266
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:345
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:266")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:345")
   public abstract String printOp();
 /** @apilevel internal */
-protected ASTNode$State.Cycle isConstant_cycle = null;
+protected ASTState.Cycle isConstant_cycle = null;
   /** @apilevel internal */
   private void isConstant_reset() {
     isConstant_computed = false;
@@ -279,7 +264,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     if (isConstant_computed) {
       return isConstant_value;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!isConstant_initialized) {
       isConstant_initialized = true;
       isConstant_value = false;
@@ -289,7 +274,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       do {
         isConstant_cycle = state.nextCycle();
         boolean new_isConstant_value = getLeftOperand().isConstant() && getRightOperand().isConstant();
-        if (new_isConstant_value != isConstant_value) {
+        if (isConstant_value != new_isConstant_value) {
           state.setChangeInCycle();
         }
         isConstant_value = new_isConstant_value;
@@ -300,7 +285,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     } else if (isConstant_cycle != state.cycle()) {
       isConstant_cycle = state.cycle();
       boolean new_isConstant_value = getLeftOperand().isConstant() && getRightOperand().isConstant();
-      if (new_isConstant_value != isConstant_value) {
+      if (isConstant_value != new_isConstant_value) {
         state.setChangeInCycle();
       }
       isConstant_value = new_isConstant_value;
@@ -357,27 +342,27 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   public boolean assignedAfterTrue(Variable v) {
     Object _parameters = v;
     if (assignedAfterTrue_Variable_values == null) assignedAfterTrue_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfterTrue_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfterTrue_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfterTrue_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfterTrue_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfterTrue_Variable_value = isFalse() || getRightOperand().assignedAfter(v);
-        if (new_assignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfterTrue_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfterTrue_Variable_value;
         }
@@ -389,7 +374,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfterTrue_Variable_value = isFalse() || getRightOperand().assignedAfter(v);
-      if (new_assignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfterTrue_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfterTrue_Variable_value;
       }
@@ -408,27 +393,27 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   public boolean assignedAfterFalse(Variable v) {
     Object _parameters = v;
     if (assignedAfterFalse_Variable_values == null) assignedAfterFalse_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfterFalse_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfterFalse_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfterFalse_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfterFalse_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfterFalse_Variable_value = isTrue() || getRightOperand().assignedAfter(v);
-        if (new_assignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfterFalse_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfterFalse_Variable_value;
         }
@@ -440,7 +425,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfterFalse_Variable_value = isTrue() || getRightOperand().assignedAfter(v);
-      if (new_assignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfterFalse_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfterFalse_Variable_value;
       }
@@ -470,27 +455,27 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = getRightOperand().unassignedAfter(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -502,7 +487,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = getRightOperand().unassignedAfter(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -510,6 +495,18 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     } else {
       return (Boolean) _value.value;
     }
+  }
+  /**
+   * Test if an expression contains an unresolved parse name.
+   * @attribute syn
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421")
+  public boolean containsParseName() {
+    boolean containsParseName_value = getLeftOperand().containsParseName() || getRightOperand().containsParseName();
+    return containsParseName_value;
   }
   /**
    * @attribute syn
@@ -521,6 +518,27 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   public boolean modifiedInScope(Variable var) {
     boolean modifiedInScope_Variable_value = getLeftOperand().modifiedInScope(var) || getRightOperand().modifiedInScope(var);
     return modifiedInScope_Variable_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    Value eval_Body_value = eval(b, type(), type());
+    return eval_Body_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:743
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:743")
+  public Value emitOperation(Body b, Value l, Value r) {
+    { throw new Error("emitOperation not implemented in " + getClass().getName()); }
   }
   /**
    * @attribute inh
@@ -546,6 +564,11 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -562,61 +585,91 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

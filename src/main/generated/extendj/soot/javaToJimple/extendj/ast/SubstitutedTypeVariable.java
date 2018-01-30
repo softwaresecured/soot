@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,6 +40,7 @@ import soot.coffi.CoffiMethodSource;
  * argument bounds checking.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:62
+ * @astdecl SubstitutedTypeVariable : TypeVariable ::= Modifiers <ID:String> BodyDecl* TypeBound:Access* <Parameterization:Parameterization>;
  * @production SubstitutedTypeVariable : {@link TypeVariable} ::= <span class="component">{@link Modifiers}</span> <span class="component">&lt;ID:String&gt;</span> <span class="component">{@link BodyDecl}*</span> <span class="component">TypeBound:{@link Access}*</span> <span class="component">&lt;Parameterization:Parameterization&gt;</span>;
 
  */
@@ -63,6 +66,11 @@ public class SubstitutedTypeVariable extends TypeVariable implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "BodyDecl", "TypeBound", "Parameterization"},
+    type = {"Modifiers", "String", "List<BodyDecl>", "List<Access>", "Parameterization"},
+    kind = {"Child", "Token", "List", "List", "Token"}
+  )
   public SubstitutedTypeVariable(Modifiers p0, String p1, List<BodyDecl> p2, List<Access> p3, Parameterization p4) {
     setChild(p0, 0);
     setID(p1);
@@ -71,7 +79,7 @@ public class SubstitutedTypeVariable extends TypeVariable implements Cloneable {
     setParameterization(p4);
   }
   /**
-   * @declaredat ASTNode:22
+   * @declaredat ASTNode:27
    */
   public SubstitutedTypeVariable(Modifiers p0, beaver.Symbol p1, List<BodyDecl> p2, List<Access> p3, Parameterization p4) {
     setChild(p0, 0);
@@ -81,39 +89,39 @@ public class SubstitutedTypeVariable extends TypeVariable implements Cloneable {
     setParameterization(p4);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public boolean mayHaveRewrite() {
     return true;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public SubstitutedTypeVariable clone() throws CloneNotSupportedException {
     SubstitutedTypeVariable node = (SubstitutedTypeVariable) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:58
    */
   public SubstitutedTypeVariable copy() {
     try {
@@ -133,7 +141,7 @@ public class SubstitutedTypeVariable extends TypeVariable implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:72
+   * @declaredat ASTNode:77
    */
   @Deprecated
   public SubstitutedTypeVariable fullCopy() {
@@ -144,7 +152,7 @@ public class SubstitutedTypeVariable extends TypeVariable implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:82
+   * @declaredat ASTNode:87
    */
   public SubstitutedTypeVariable treeCopyNoTransform() {
     SubstitutedTypeVariable tree = (SubstitutedTypeVariable) copy();
@@ -165,7 +173,7 @@ public class SubstitutedTypeVariable extends TypeVariable implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:102
+   * @declaredat ASTNode:107
    */
   public SubstitutedTypeVariable treeCopy() {
     SubstitutedTypeVariable tree = (SubstitutedTypeVariable) copy();
@@ -181,7 +189,7 @@ public class SubstitutedTypeVariable extends TypeVariable implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:116
+   * @declaredat ASTNode:121
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((SubstitutedTypeVariable) node).tokenString_ID) && (tokenParameterization_Parameterization == ((SubstitutedTypeVariable) node).tokenParameterization_Parameterization);    
@@ -495,6 +503,11 @@ public class SubstitutedTypeVariable extends TypeVariable implements Cloneable {
         return lookupType(name);
       }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }

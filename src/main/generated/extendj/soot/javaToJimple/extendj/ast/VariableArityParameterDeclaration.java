@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/VariableArityParameters.ast:1
+ * @astdecl VariableArityParameterDeclaration : ParameterDeclaration;
  * @production VariableArityParameterDeclaration : {@link ParameterDeclaration};
 
  */
@@ -51,8 +54,17 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
     out.print(getID());
   }
   /**
+   * @aspect PrettyPrintUtil5
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/PrettyPrintUtil.jrag:149
+   */
+  @Override public String toString() {
+    return String.format("%s... %s",
+        getTypeAccessNoTransform().toString(),
+        getID());
+  }
+  /**
    * @aspect Diamond
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:378
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:244
    */
   @Override
   public ParameterDeclaration substituted(
@@ -81,13 +93,18 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID"},
+    type = {"Modifiers", "Access", "String"},
+    kind = {"Child", "Child", "Token"}
+  )
   public VariableArityParameterDeclaration(Modifiers p0, Access p1, String p2) {
     setChild(p0, 0);
     setChild(p1, 1);
     setID(p2);
   }
   /**
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   public VariableArityParameterDeclaration(Modifiers p0, Access p1, beaver.Symbol p2) {
     setChild(p0, 0);
@@ -95,40 +112,40 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
     setID(p2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     type_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   public VariableArityParameterDeclaration clone() throws CloneNotSupportedException {
     VariableArityParameterDeclaration node = (VariableArityParameterDeclaration) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public VariableArityParameterDeclaration copy() {
     try {
@@ -148,7 +165,7 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:67
+   * @declaredat ASTNode:72
    */
   @Deprecated
   public VariableArityParameterDeclaration fullCopy() {
@@ -159,7 +176,7 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:77
+   * @declaredat ASTNode:82
    */
   public VariableArityParameterDeclaration treeCopyNoTransform() {
     VariableArityParameterDeclaration tree = (VariableArityParameterDeclaration) copy();
@@ -180,7 +197,7 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:97
+   * @declaredat ASTNode:102
    */
   public VariableArityParameterDeclaration treeCopy() {
     VariableArityParameterDeclaration tree = (VariableArityParameterDeclaration) copy();
@@ -196,7 +213,7 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:111
+   * @declaredat ASTNode:116
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((VariableArityParameterDeclaration) node).tokenString_ID);    
@@ -286,10 +303,10 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
    * Creates a copy of this parameter declaration where parameterized types have been erased.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1610
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1609
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1610")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1609")
   public ParameterDeclaration erasedCopy() {
     ParameterDeclaration erasedCopy_value = new VariableArityParameterDeclaration(
               getModifiers().treeCopyNoTransform(),
@@ -303,7 +320,7 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -311,13 +328,13 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:273
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:272
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:273")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:272")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = super.type().arrayType();
@@ -325,7 +342,7 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -360,6 +377,7 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java5/frontend/VariableArityParameters.jrag:36
     if (!variableArityValid()) {
@@ -374,6 +392,7 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!variableArityValid()) {

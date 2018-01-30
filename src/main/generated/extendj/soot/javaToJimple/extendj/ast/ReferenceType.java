@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,70 +42,47 @@ import soot.coffi.CoffiMethodSource;
  * Concrete subclasses include class and interface declarations.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:124
+ * @astdecl ReferenceType : TypeDecl;
  * @production ReferenceType : {@link TypeDecl};
 
  */
 public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @aspect AutoBoxingCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/AutoBoxingCodegen.jrag:12
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/AutoBoxingCodegen.jrag:104
    */
-  public soot.Value emitCastTo(Body b, soot.Value v, TypeDecl type, ASTNode location) {
-    assert !type.isUnknown();
-
-    // `isPrimitiveType`  == a primitive type  or `UnknownType`
-    // `isPrimitive`      == `isPrimitiveType` or a box for a primitive type
-    // (`UnknownType` is the bottom-ish type. It fits everywhere, and is wanted nowhere.)
-    // NOTE: not all `is<Kind>{Type}` follow this convention. You must check each one.
-    if (type.isPrimitiveType()) {
-      // if we're a box -> unbox, then cast to their type
-      if (isPrimitive()) {
-        soot.Value valUnboxed = emitUnboxingOperation(b, v, location);
-        return unboxed().emitCastTo(b, valUnboxed, type, location);
-      }
-
-      // if we're not a box -> cast ourselves to their boxed type, then unbox
-      ReferenceType typeBoxed = ((ReferenceType)type.boxed());
-      soot.Value    valBoxed  = emitCastTo(b, v, typeBoxed, location);
-      return typeBoxed.emitUnboxingOperation(b, valBoxed, location);
-    }
-
-    return super.emitCastTo(b, v, type, location);
-  }
-  /**
-   * @aspect AutoBoxingCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/AutoBoxingCodegen.jrag:102
-   */
-  protected soot.Value emitUnboxingOperation(Body b, soot.Value v, ASTNode location) {
+  protected InvokeExpr emitUnboxingOperation(Body b, Value v, ASTNode location) {
     // Unbox the value on the stack from this Reference type
     // FIXME: This is broken if you've an odd case where you extend a Box type & attempt to unbox.
     SootMethodRef ref = Scene.v().makeMethodRef(
-      getSootClassDecl(),
+      sootClass(),
       unboxed().name() + "Value",
-      new ArrayList(),
-      unboxed().getSootType(),
+      Collections.emptyList(),
+      unboxed().sootType(),
       false
     );
-    return b.newVirtualInvokeExpr(asLocal(b, v), ref, new ArrayList(), location);
+    return b.newVirtualInvokeExpr(b.asLocal(v), ref, Collections.emptyList(), location);
   }
   /**
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:131
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:169
    */
-  protected void jimplify1_setupSuperclass(SootClass sc)
+  protected void jimpleDeclare_setupSuperclass(SootClass sc)
   { throw new RuntimeException("bound types should be erased prior to jimplification."); }
   /**
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:140
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:178
    */
-  public void jimplify1() {
-    SootClass sc = getSootClassDecl();
+  public void jimpleDeclare() {
+    SootClass sc = sootClass();
     sc.setResolvingLevel(SootClass.DANGLING);
     sc.setModifiers(flags());
     sc.setApplicationClass();
-    jimplify1_setupSuperclass(sc);
+    jimpleDeclare_setupSuperclass(sc);
 
-    SourceFileTag st = new soot.tagkit.SourceFileTag(sourceNameWithoutPath());
+    String srcFileWithoutPath =
+      sourceFile().substring(sourceFile().lastIndexOf(java.io.File.separatorChar) + 1);
+    SourceFileTag st = new soot.tagkit.SourceFileTag(srcFileWithoutPath);
     st.setAbsolutePath(new File(sourceFile()).getAbsolutePath());
     sc.addTag(st);
 
@@ -113,16 +92,18 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
       // the first place.
       assert typeDecl != typeObject();
 
-      SootClass iface = typeDecl.getSootClassDecl();
+      SootClass iface = typeDecl.sootClass();
       if (!sc.implementsInterface(iface.getName()))
         sc.addInterface(iface);
     }
 
     if (isNestedType())
-      sc.setOuterClass(enclosingType().getSootClassDecl());
+      sc.setOuterClass(enclosingType().sootClass());
 
     sc.setResolvingLevel(SootClass.HIERARCHY);
-    super.jimplify1();
+
+    // allow all our children to declare themselves
+    super.jimpleDeclare();
     sc.setResolvingLevel(SootClass.SIGNATURES);
   }
   /**
@@ -145,13 +126,18 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "BodyDecl"},
+    type = {"Modifiers", "String", "List<BodyDecl>"},
+    kind = {"Child", "Token", "List"}
+  )
   public ReferenceType(Modifiers p0, String p1, List<BodyDecl> p2) {
     setChild(p0, 0);
     setID(p1);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   public ReferenceType(Modifiers p0, beaver.Symbol p1, List<BodyDecl> p2) {
     setChild(p0, 0);
@@ -159,20 +145,20 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -182,13 +168,13 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
     jvmName_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:52
    */
   public ReferenceType clone() throws CloneNotSupportedException {
     ReferenceType node = (ReferenceType) super.clone();
@@ -200,7 +186,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:58
+   * @declaredat ASTNode:63
    */
   @Deprecated
   public abstract ReferenceType fullCopy();
@@ -209,7 +195,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:71
    */
   public abstract ReferenceType treeCopyNoTransform();
   /**
@@ -218,7 +204,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   public abstract ReferenceType treeCopy();
   /**
@@ -405,7 +391,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   }
   /**
    * @aspect GenerateClassfile
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:149
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:151
    */
   private ArrayList<BodyDecl> refined_GenerateClassfile_ReferenceType_methodsAndConstructors()
 {
@@ -431,7 +417,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   }
   /** @apilevel internal */
   private void narrowingConversionTo_TypeDecl_reset() {
-    narrowingConversionTo_TypeDecl_computed = new java.util.HashMap(4);
+    narrowingConversionTo_TypeDecl_computed = null;
     narrowingConversionTo_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -449,10 +435,10 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
     Object _parameters = type;
     if (narrowingConversionTo_TypeDecl_computed == null) narrowingConversionTo_TypeDecl_computed = new java.util.HashMap(4);
     if (narrowingConversionTo_TypeDecl_values == null) narrowingConversionTo_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (narrowingConversionTo_TypeDecl_values.containsKey(_parameters) && narrowingConversionTo_TypeDecl_computed != null
+    ASTState state = state();
+    if (narrowingConversionTo_TypeDecl_values.containsKey(_parameters)
         && narrowingConversionTo_TypeDecl_computed.containsKey(_parameters)
-        && (narrowingConversionTo_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || narrowingConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (narrowingConversionTo_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || narrowingConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) narrowingConversionTo_TypeDecl_values.get(_parameters);
     }
     boolean narrowingConversionTo_TypeDecl_value = narrowingConversionTo_compute(type);
@@ -462,7 +448,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
     
     } else {
       narrowingConversionTo_TypeDecl_values.put(_parameters, narrowingConversionTo_TypeDecl_value);
-      narrowingConversionTo_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      narrowingConversionTo_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return narrowingConversionTo_TypeDecl_value;
@@ -494,10 +480,10 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:178
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:177
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:178")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:177")
   public boolean isReferenceType() {
     boolean isReferenceType_value = true;
     return isReferenceType_value;
@@ -505,10 +491,10 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeWideningAndIdentity
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:530
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:526
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeWideningAndIdentity", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:530")
+  @ASTNodeAnnotation.Source(aspect="TypeWideningAndIdentity", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:526")
   public boolean isSupertypeOfNullType(NullType type) {
     boolean isSupertypeOfNullType_NullType_value = true;
     return isSupertypeOfNullType_NullType_value;
@@ -521,7 +507,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="InnerClasses", declaredAt="/home/olivier/projects/extendj/java4/backend/InnerClasses.jrag:122")
   public TypeDecl stringPromotion() {
-    TypeDecl stringPromotion_value = typeObject();
+    TypeDecl stringPromotion_value = isType("java.lang", "String") ? this : typeObject();
     return stringPromotion_value;
   }
   /**
@@ -563,7 +549,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
     unboxed_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle unboxed_computed = null;
+  protected ASTState.Cycle unboxed_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl unboxed_value;
@@ -576,8 +562,8 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="AutoBoxing", declaredAt="/home/olivier/projects/extendj/java5/frontend/AutoBoxing.jrag:77")
   public TypeDecl unboxed() {
-    ASTNode$State state = state();
-    if (unboxed_computed == ASTNode$State.NON_CYCLE || unboxed_computed == state().cycle()) {
+    ASTState state = state();
+    if (unboxed_computed == ASTState.NON_CYCLE || unboxed_computed == state().cycle()) {
       return unboxed_value;
     }
     unboxed_value = unboxed_compute();
@@ -585,7 +571,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
       unboxed_computed = state().cycle();
     
     } else {
-      unboxed_computed = ASTNode$State.NON_CYCLE;
+      unboxed_computed = ASTState.NON_CYCLE;
     
     }
     return unboxed_value;
@@ -624,10 +610,10 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect NumericPromotion
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:157
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:156
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NumericPromotion", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:157")
+  @ASTNodeAnnotation.Source(aspect="NumericPromotion", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:156")
   public TypeDecl unaryNumericPromotion() {
     TypeDecl unaryNumericPromotion_value = isNumericType() && !isUnknown() ? unboxed().unaryNumericPromotion() : this;
     return unaryNumericPromotion_value;
@@ -635,10 +621,10 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect NumericPromotion
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:166
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:165
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NumericPromotion", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:166")
+  @ASTNodeAnnotation.Source(aspect="NumericPromotion", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:165")
   public TypeDecl binaryNumericPromotion(TypeDecl type) {
     TypeDecl binaryNumericPromotion_TypeDecl_value = unboxed().binaryNumericPromotion(type);
     return binaryNumericPromotion_TypeDecl_value;
@@ -646,10 +632,10 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:187
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:186
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:187")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:186")
   public boolean isNumericType() {
     boolean isNumericType_value = !unboxed().isUnknown() && unboxed().isNumericType();
     return isNumericType_value;
@@ -657,10 +643,10 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:191
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:190
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:191")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:190")
   public boolean isIntegralType() {
     boolean isIntegralType_value = !unboxed().isUnknown() && unboxed().isIntegralType();
     return isIntegralType_value;
@@ -668,10 +654,10 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:236
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:237")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:236")
   public boolean isPrimitive() {
     boolean isPrimitive_value = !unboxed().isUnknown() && unboxed().isPrimitive();
     return isPrimitive_value;
@@ -679,10 +665,10 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:195
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:194
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:195")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:194")
   public boolean isBoolean() {
     boolean isBoolean_value = fullName().equals("java.lang.Boolean") && unboxed().isBoolean();
     return isBoolean_value;
@@ -690,10 +676,10 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect GenericsSubtype
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:579
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:576
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:579")
+  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:576")
   public boolean supertypeNullType(NullType type) {
     boolean supertypeNullType_NullType_value = true;
     return supertypeNullType_NullType_value;
@@ -701,13 +687,44 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect StrictSubtype
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:454
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:451
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:454")
+  @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:451")
   public boolean strictSupertypeNullType(NullType type) {
     boolean strictSupertypeNullType_NullType_value = true;
     return strictSupertypeNullType_NullType_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:378
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:378")
+  public Value emitCastTo(Body b, Value v, TypeDecl type, ASTNode location) {
+    {
+        assert !type.isUnknown();
+    
+        // `isPrimitiveType`  == a primitive type  or `UnknownType`
+        // `isPrimitive`      == `isPrimitiveType` or a box for a primitive type
+        // (`UnknownType` is the bottom-ish type. It fits everywhere, and is wanted nowhere.)
+        // NOTE: not all `is<Kind>{Type}` follow this convention. You must check each one.
+        if (type.isPrimitiveType()) {
+          // if we're a box -> unbox, then cast to their type
+          if (isPrimitive()) {
+            Value valUnboxed = emitUnboxingOperation(b, v, location);
+            return unboxed().emitCastTo(b, valUnboxed, type, location);
+          }
+    
+          // if we're not a box -> cast ourselves to their boxed type, then unbox
+          ReferenceType typeBoxed = ((ReferenceType)type.boxed());
+          Value         valBoxed  = emitCastTo(b, v, typeBoxed, location);
+          return typeBoxed.emitUnboxingOperation(b, valBoxed, location);
+        }
+    
+        return super.emitCastTo(b, v, type, location);
+      }
   }
   /** @apilevel internal */
   private void fieldDeclarations_reset() {
@@ -715,7 +732,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
     fieldDeclarations_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle fieldDeclarations_computed = null;
+  protected ASTState.Cycle fieldDeclarations_computed = null;
 
   /** @apilevel internal */
   protected java.util.List<FieldDeclarator> fieldDeclarations_value;
@@ -728,8 +745,8 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="GenerateClassfile", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:39")
   public java.util.List<FieldDeclarator> fieldDeclarations() {
-    ASTNode$State state = state();
-    if (fieldDeclarations_computed == ASTNode$State.NON_CYCLE || fieldDeclarations_computed == state().cycle()) {
+    ASTState state = state();
+    if (fieldDeclarations_computed == ASTState.NON_CYCLE || fieldDeclarations_computed == state().cycle()) {
       return fieldDeclarations_value;
     }
     fieldDeclarations_value = fieldDeclarations_compute();
@@ -737,7 +754,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
       fieldDeclarations_computed = state().cycle();
     
     } else {
-      fieldDeclarations_computed = ASTNode$State.NON_CYCLE;
+      fieldDeclarations_computed = ASTState.NON_CYCLE;
     
     }
     return fieldDeclarations_value;
@@ -786,7 +803,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
     jvmName_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle jvmName_computed = null;
+  protected ASTState.Cycle jvmName_computed = null;
 
   /** @apilevel internal */
   protected String jvmName_value;
@@ -799,8 +816,8 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Java2Rewrites", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Java2Rewrites.jrag:37")
   public String jvmName() {
-    ASTNode$State state = state();
-    if (jvmName_computed == ASTNode$State.NON_CYCLE || jvmName_computed == state().cycle()) {
+    ASTState state = state();
+    if (jvmName_computed == ASTState.NON_CYCLE || jvmName_computed == state().cycle()) {
       return jvmName_value;
     }
     jvmName_value = jvmName_compute();
@@ -808,7 +825,7 @@ public abstract class ReferenceType extends TypeDecl implements Cloneable {
       jvmName_computed = state().cycle();
     
     } else {
-      jvmName_computed = ASTNode$State.NON_CYCLE;
+      jvmName_computed = ASTState.NON_CYCLE;
     
     }
     return jvmName_value;

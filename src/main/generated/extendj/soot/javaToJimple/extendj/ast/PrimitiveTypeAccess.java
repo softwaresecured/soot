@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:93
+ * @astdecl PrimitiveTypeAccess : TypeAccess ::= <Package:String> <ID:String>;
  * @production PrimitiveTypeAccess : {@link TypeAccess} ::= <span class="component">&lt;Package:String&gt;</span> <span class="component">&lt;ID:String&gt;</span>;
 
  */
@@ -46,6 +49,13 @@ public class PrimitiveTypeAccess extends TypeAccess implements Cloneable {
    */
   public PrimitiveTypeAccess(String name) {
     this(PRIMITIVE_PACKAGE_NAME, name);
+  }
+  /**
+   * @aspect PrettyPrintUtil
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:75
+   */
+  @Override public String toString() {
+    return getID();
   }
   /**
    * @declaredat ASTNode:1
@@ -65,52 +75,57 @@ public class PrimitiveTypeAccess extends TypeAccess implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Package", "ID"},
+    type = {"String", "String"},
+    kind = {"Token", "Token"}
+  )
   public PrimitiveTypeAccess(String p0, String p1) {
     setPackage(p0);
     setID(p1);
   }
   /**
-   * @declaredat ASTNode:16
+   * @declaredat ASTNode:21
    */
   public PrimitiveTypeAccess(beaver.Symbol p0, beaver.Symbol p1) {
     setPackage(p0);
     setID(p1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     decls_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public PrimitiveTypeAccess clone() throws CloneNotSupportedException {
     PrimitiveTypeAccess node = (PrimitiveTypeAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public PrimitiveTypeAccess copy() {
     try {
@@ -130,7 +145,7 @@ public class PrimitiveTypeAccess extends TypeAccess implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:64
+   * @declaredat ASTNode:69
    */
   @Deprecated
   public PrimitiveTypeAccess fullCopy() {
@@ -141,7 +156,7 @@ public class PrimitiveTypeAccess extends TypeAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   public PrimitiveTypeAccess treeCopyNoTransform() {
     PrimitiveTypeAccess tree = (PrimitiveTypeAccess) copy();
@@ -162,7 +177,7 @@ public class PrimitiveTypeAccess extends TypeAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:94
+   * @declaredat ASTNode:99
    */
   public PrimitiveTypeAccess treeCopy() {
     PrimitiveTypeAccess tree = (PrimitiveTypeAccess) copy();
@@ -178,7 +193,7 @@ public class PrimitiveTypeAccess extends TypeAccess implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:108
+   * @declaredat ASTNode:113
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_Package == ((PrimitiveTypeAccess) node).tokenString_Package) && (tokenString_ID == ((PrimitiveTypeAccess) node).tokenString_ID);    
@@ -247,7 +262,7 @@ public class PrimitiveTypeAccess extends TypeAccess implements Cloneable {
     decls_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decls_computed = null;
+  protected ASTState.Cycle decls_computed = null;
 
   /** @apilevel internal */
   protected SimpleSet<TypeDecl> decls_value;
@@ -255,13 +270,13 @@ public class PrimitiveTypeAccess extends TypeAccess implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:353
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:357
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:353")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:357")
   public SimpleSet<TypeDecl> decls() {
-    ASTNode$State state = state();
-    if (decls_computed == ASTNode$State.NON_CYCLE || decls_computed == state().cycle()) {
+    ASTState state = state();
+    if (decls_computed == ASTState.NON_CYCLE || decls_computed == state().cycle()) {
       return decls_value;
     }
     decls_value = lookupType(PRIMITIVE_PACKAGE_NAME, name());
@@ -269,7 +284,7 @@ public class PrimitiveTypeAccess extends TypeAccess implements Cloneable {
       decls_computed = state().cycle();
     
     } else {
-      decls_computed = ASTNode$State.NON_CYCLE;
+      decls_computed = ASTState.NON_CYCLE;
     
     }
     return decls_value;

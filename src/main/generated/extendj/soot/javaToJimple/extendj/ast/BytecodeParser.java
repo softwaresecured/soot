@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -74,28 +76,32 @@ public class BytecodeParser extends AbstractClassfileParser implements Flags {
         println("Parsing byte codes in " + name);
       }
 
-      this.outerClassName = outerClassName;
-      parseMagic();
-      int minor = parseMinor();
-      int major = parseMajor();
-      if (AbstractClassfileParser.VERBOSE) {
-        println(String.format("Classfile version: %d.%d", major, minor));
+      try {
+        this.outerClassName = outerClassName;
+        parseMagic();
+        int minor = parseMinor();
+        int major = parseMajor();
+        if (AbstractClassfileParser.VERBOSE) {
+          println(String.format("Classfile version: %d.%d", major, minor));
+        }
+        if (major > 52) {
+          error(String.format("Can not parse classfile version %d.%d."
+                + " Classfile versions up to 52.x (Java 8) are supported by"
+                + " this version of the compiler.",
+                major, minor));
+        }
+        parseConstantPool();
+        CompilationUnit cu = new CompilationUnit();
+        TypeDecl typeDecl = parseTypeDecl();
+        cu.setPackageDecl(classInfo.packageDecl());
+        cu.addTypeDecl(typeDecl);
+        parseFields(typeDecl);
+        parseMethods(typeDecl);
+        new Attributes.TypeAttributes(this, typeDecl, outerTypeDecl, program);
+        return cu;
+      } catch (Error e) {
+        throw new IOException("Failed to parse classfile: " + name, e);
       }
-      if (major > 52) {
-        error(String.format("Can not parse classfile version %d.%d."
-              + " Classfile versions up to 52.x (Java 8) are supported by"
-              + " this version of the compiler.",
-              major, minor));
-      }
-      parseConstantPool();
-      CompilationUnit cu = new CompilationUnit();
-      TypeDecl typeDecl = parseTypeDecl();
-      cu.setPackageDecl(classInfo.packageDecl());
-      cu.addTypeDecl(typeDecl);
-      parseFields(typeDecl);
-      parseMethods(typeDecl);
-      new Attributes.TypeAttributes(this, typeDecl, outerTypeDecl, program);
-      return cu;
     }
 
   
@@ -106,7 +112,6 @@ public class BytecodeParser extends AbstractClassfileParser implements Flags {
       if ((flags & (ACC_INTERFACE | ACC_ENUM)) == ACC_ENUM) {
         // Modifiers <ID:String> /[SuperClass:Access]/ Implements:Access* BodyDecl*;
         EnumDecl decl = new EnumDecl();
-        decl.generateImplicitMembers = false;
         decl.setModifiers(modifiers);
         decl.setID(parseThisClass());
         Access superClass = parseSuperClass();

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,22 +38,23 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:263
+ * @astdecl OrLogicalExpr : LogicalExpr;
  * @production OrLogicalExpr : {@link LogicalExpr};
 
  */
 public class OrLogicalExpr extends LogicalExpr implements Cloneable {
   /**
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:197
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:194
    */
-  public void emitEvalBranch(Body b) {
+  protected void emitEvalBranch(Body b) {
     // b.setLine(this);
     getLeftOperand().emitEvalBranch(b);
-    b.addLabel(next_test_label());
+    b.addLabel(next_test_label(b));
     //if(getLeftOperand().canBeFalse()) {
       getRightOperand().emitEvalBranch(b);
       //if(getRightOperand().canBeFalse())
-        b.add(b.newGotoStmt(false_label(), this));
+        b.addGoTo(false_label(b), this);
     //}
   }
   /**
@@ -73,25 +76,30 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"LeftOperand", "RightOperand"},
+    type = {"Expr", "Expr"},
+    kind = {"Child", "Child"}
+  )
   public OrLogicalExpr(Expr p0, Expr p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -100,23 +108,23 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
     unassignedAfterTrue_Variable_reset();
     unassignedAfterFalse_Variable_reset();
     unassignedAfter_Variable_reset();
-    next_test_label_reset();
+    next_test_label_Body_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public OrLogicalExpr clone() throws CloneNotSupportedException {
     OrLogicalExpr node = (OrLogicalExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:52
    */
   public OrLogicalExpr copy() {
     try {
@@ -136,7 +144,7 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:71
    */
   @Deprecated
   public OrLogicalExpr fullCopy() {
@@ -147,7 +155,7 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:76
+   * @declaredat ASTNode:81
    */
   public OrLogicalExpr treeCopyNoTransform() {
     OrLogicalExpr tree = (OrLogicalExpr) copy();
@@ -168,7 +176,7 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:96
+   * @declaredat ASTNode:101
    */
   public OrLogicalExpr treeCopy() {
     OrLogicalExpr tree = (OrLogicalExpr) copy();
@@ -184,7 +192,7 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:110
+   * @declaredat ASTNode:115
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -262,20 +270,20 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
   public boolean assignedAfterTrue(Variable v) {
     Object _parameters = v;
     if (assignedAfterTrue_Variable_values == null) assignedAfterTrue_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfterTrue_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfterTrue_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfterTrue_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfterTrue_Variable_value;
@@ -283,7 +291,7 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
         _value.cycle = state.nextCycle();
         new_assignedAfterTrue_Variable_value = isFalse()
               || (getLeftOperand().assignedAfterTrue(v) && getRightOperand().assignedAfterTrue(v));
-        if (new_assignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfterTrue_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfterTrue_Variable_value;
         }
@@ -296,7 +304,7 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
       _value.cycle = state.cycle();
       boolean new_assignedAfterTrue_Variable_value = isFalse()
             || (getLeftOperand().assignedAfterTrue(v) && getRightOperand().assignedAfterTrue(v));
-      if (new_assignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfterTrue_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfterTrue_Variable_value;
       }
@@ -315,27 +323,27 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
   public boolean assignedAfterFalse(Variable v) {
     Object _parameters = v;
     if (assignedAfterFalse_Variable_values == null) assignedAfterFalse_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfterFalse_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfterFalse_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfterFalse_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfterFalse_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfterFalse_Variable_value = isTrue() || getRightOperand().assignedAfterFalse(v);
-        if (new_assignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfterFalse_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfterFalse_Variable_value;
         }
@@ -347,7 +355,7 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfterFalse_Variable_value = isTrue() || getRightOperand().assignedAfterFalse(v);
-      if (new_assignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfterFalse_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfterFalse_Variable_value;
       }
@@ -377,27 +385,27 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
   public boolean unassignedAfterTrue(Variable v) {
     Object _parameters = v;
     if (unassignedAfterTrue_Variable_values == null) unassignedAfterTrue_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterTrue_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterTrue_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterTrue_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterTrue_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterTrue_Variable_value = getLeftOperand().unassignedAfterTrue(v) && getRightOperand().unassignedAfterTrue(v);
-        if (new_unassignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterTrue_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterTrue_Variable_value;
         }
@@ -409,7 +417,7 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterTrue_Variable_value = getLeftOperand().unassignedAfterTrue(v) && getRightOperand().unassignedAfterTrue(v);
-      if (new_unassignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterTrue_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterTrue_Variable_value;
       }
@@ -428,27 +436,27 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
   public boolean unassignedAfterFalse(Variable v) {
     Object _parameters = v;
     if (unassignedAfterFalse_Variable_values == null) unassignedAfterFalse_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterFalse_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterFalse_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterFalse_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterFalse_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterFalse_Variable_value = getRightOperand().unassignedAfterFalse(v);
-        if (new_unassignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterFalse_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterFalse_Variable_value;
         }
@@ -460,7 +468,7 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterFalse_Variable_value = getRightOperand().unassignedAfterFalse(v);
-      if (new_unassignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterFalse_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterFalse_Variable_value;
       }
@@ -479,27 +487,27 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = unassignedAfterTrue(v) && unassignedAfterFalse(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -511,7 +519,7 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = unassignedAfterTrue(v) && unassignedAfterFalse(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -523,46 +531,51 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
   /** The operator string used for pretty printing this expression. 
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:266
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:345
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:266")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:345")
   public String printOp() {
     String printOp_value = "||";
     return printOp_value;
   }
   /** @apilevel internal */
-  private void next_test_label_reset() {
-    next_test_label_computed = null;
-    next_test_label_value = null;
+  private void next_test_label_Body_reset() {
+    next_test_label_Body_computed = null;
+    next_test_label_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle next_test_label_computed = null;
-
+  protected java.util.Map next_test_label_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt next_test_label_value;
-
+  protected java.util.Map next_test_label_Body_computed;
   /**
    * @attribute syn
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:208
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:176
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:208")
-  public soot.jimple.Stmt next_test_label() {
-    ASTNode$State state = state();
-    if (next_test_label_computed == ASTNode$State.NON_CYCLE || next_test_label_computed == state().cycle()) {
-      return next_test_label_value;
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:176")
+  public Body.Label next_test_label(Body b) {
+    Object _parameters = b;
+    if (next_test_label_Body_computed == null) next_test_label_Body_computed = new java.util.HashMap(4);
+    if (next_test_label_Body_values == null) next_test_label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (next_test_label_Body_values.containsKey(_parameters)
+        && next_test_label_Body_computed.containsKey(_parameters)
+        && (next_test_label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || next_test_label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) next_test_label_Body_values.get(_parameters);
     }
-    next_test_label_value = newLabel();
+    Body.Label next_test_label_Body_value = newLabel(b);
     if (state().inCircle()) {
-      next_test_label_computed = state().cycle();
+      next_test_label_Body_values.put(_parameters, next_test_label_Body_value);
+      next_test_label_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      next_test_label_computed = ASTNode$State.NON_CYCLE;
+      next_test_label_Body_values.put(_parameters, next_test_label_Body_value);
+      next_test_label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return next_test_label_value;
+    return next_test_label_Body_value;
   }
   /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
@@ -581,6 +594,11 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
       return super.Define_assignedBefore(_callerNode, _childNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -601,47 +619,62 @@ public class OrLogicalExpr extends LogicalExpr implements Cloneable {
       return super.Define_unassignedBefore(_callerNode, _childNode, v);
     }
   }
-  protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
-    return true;
-  }
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:48
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
    * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
    */
-  public soot.jimple.Stmt Define_condition_false_label(ASTNode _callerNode, ASTNode _childNode) {
-    if (getRightOperandNoTransform() != null && _callerNode == getRightOperand()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:78
-      return false_label();
-    }
-    else if (getLeftOperandNoTransform() != null && _callerNode == getLeftOperand()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:76
-      return next_test_label();
-    }
-    else {
-      return getParent().Define_condition_false_label(this, _callerNode);
-    }
-  }
-  protected boolean canDefine_condition_false_label(ASTNode _callerNode, ASTNode _childNode) {
+  protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
   /**
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:49
    * @apilevel internal
    */
-  public soot.jimple.Stmt Define_condition_true_label(ASTNode _callerNode, ASTNode _childNode) {
+  public Body.Label Define_condition_false_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
     if (getRightOperandNoTransform() != null && _callerNode == getRightOperand()) {
       // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:79
-      return true_label();
+      return false_label(b);
     }
     else if (getLeftOperandNoTransform() != null && _callerNode == getLeftOperand()) {
       // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:77
-      return true_label();
+      return next_test_label(b);
     }
     else {
-      return getParent().Define_condition_true_label(this, _callerNode);
+      return getParent().Define_condition_false_label(this, _callerNode, b);
     }
   }
-  protected boolean canDefine_condition_true_label(ASTNode _callerNode, ASTNode _childNode) {
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:49
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute condition_false_label
+   */
+  protected boolean canDefine_condition_false_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:50
+   * @apilevel internal
+   */
+  public Body.Label Define_condition_true_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
+    if (getRightOperandNoTransform() != null && _callerNode == getRightOperand()) {
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:80
+      return true_label(b);
+    }
+    else if (getLeftOperandNoTransform() != null && _callerNode == getLeftOperand()) {
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:78
+      return true_label(b);
+    }
+    else {
+      return getParent().Define_condition_true_label(this, _callerNode, b);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:50
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute condition_true_label
+   */
+  protected boolean canDefine_condition_true_label(ASTNode _callerNode, ASTNode _childNode, Body b) {
     return true;
   }
   /** @apilevel internal */

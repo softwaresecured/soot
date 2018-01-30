@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,10 +38,18 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:71
+ * @astdecl WildcardType : AbstractWildcardType;
  * @production WildcardType : {@link AbstractWildcardType};
 
  */
 public class WildcardType extends AbstractWildcardType implements Cloneable {
+  /**
+   * @aspect PrettyPrintUtil5
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/PrettyPrintUtil.jrag:137
+   */
+  @Override public String toString() {
+    return "?";
+  }
   /**
    * @declaredat ASTNode:1
    */
@@ -60,13 +70,18 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "BodyDecl"},
+    type = {"Modifiers", "String", "List<BodyDecl>"},
+    kind = {"Child", "Token", "List"}
+  )
   public WildcardType(Modifiers p0, String p1, List<BodyDecl> p2) {
     setChild(p0, 0);
     setID(p1);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   public WildcardType(Modifiers p0, beaver.Symbol p1, List<BodyDecl> p2) {
     setChild(p0, 0);
@@ -74,47 +89,43 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     erasure_reset();
     typeName_reset();
-    subtype_TypeDecl_reset();
-    containedIn_TypeDecl_reset();
     instanceOf_TypeDecl_reset();
-    strictSubtype_TypeDecl_reset();
-    strictContainedIn_TypeDecl_reset();
     fieldTypeSignature_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:48
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:52
    */
   public WildcardType clone() throws CloneNotSupportedException {
     WildcardType node = (WildcardType) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:56
+   * @declaredat ASTNode:57
    */
   public WildcardType copy() {
     try {
@@ -134,7 +145,7 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:75
+   * @declaredat ASTNode:76
    */
   @Deprecated
   public WildcardType fullCopy() {
@@ -145,7 +156,7 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:85
+   * @declaredat ASTNode:86
    */
   public WildcardType treeCopyNoTransform() {
     WildcardType tree = (WildcardType) copy();
@@ -166,7 +177,7 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:105
+   * @declaredat ASTNode:106
    */
   public WildcardType treeCopy() {
     WildcardType tree = (WildcardType) copy();
@@ -182,7 +193,7 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:119
+   * @declaredat ASTNode:120
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((WildcardType) node).tokenString_ID);    
@@ -381,10 +392,10 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
    * This includes methods inherited from supertypes.
    * @attribute syn
    * @aspect MemberMethods
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:457
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:484
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MemberMethods", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:457")
+  @ASTNodeAnnotation.Source(aspect="MemberMethods", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:484")
   public Collection<MethodDecl> memberMethods(String name) {
     Collection<MethodDecl> memberMethods_String_value = typeObject().memberMethods(name);
     return memberMethods_String_value;
@@ -395,7 +406,7 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
     erasure_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle erasure_computed = null;
+  protected ASTState.Cycle erasure_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl erasure_value;
@@ -408,8 +419,8 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="GenericsErasure", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:460")
   public TypeDecl erasure() {
-    ASTNode$State state = state();
-    if (erasure_computed == ASTNode$State.NON_CYCLE || erasure_computed == state().cycle()) {
+    ASTState state = state();
+    if (erasure_computed == ASTState.NON_CYCLE || erasure_computed == state().cycle()) {
       return erasure_value;
     }
     erasure_value = typeObject();
@@ -417,7 +428,7 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
       erasure_computed = state().cycle();
     
     } else {
-      erasure_computed = ASTNode$State.NON_CYCLE;
+      erasure_computed = ASTState.NON_CYCLE;
     
     }
     return erasure_value;
@@ -425,10 +436,10 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:872
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:864
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:872")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:864")
   public boolean sameSignature(Access a) {
     {
         if (a instanceof Wildcard) {
@@ -442,10 +453,10 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
    * type bound of the corresponding type parameter.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1256
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1252
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1256")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1252")
   public TypeDecl expandWildcard(TypeVariable param) {
     {
         TypeDecl bound = param.erasure();
@@ -461,7 +472,7 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
     typeName_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle typeName_computed = null;
+  protected ASTState.Cycle typeName_computed = null;
 
   /** @apilevel internal */
   protected String typeName_value;
@@ -477,8 +488,8 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="TypeName", declaredAt="/home/olivier/projects/extendj/java4/frontend/QualifiedNames.jrag:100")
   public String typeName() {
-    ASTNode$State state = state();
-    if (typeName_computed == ASTNode$State.NON_CYCLE || typeName_computed == state().cycle()) {
+    ASTState state = state();
+    if (typeName_computed == ASTState.NON_CYCLE || typeName_computed == state().cycle()) {
       return typeName_value;
     }
     typeName_value = name();
@@ -486,61 +497,21 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
       typeName_computed = state().cycle();
     
     } else {
-      typeName_computed = ASTNode$State.NON_CYCLE;
+      typeName_computed = ASTState.NON_CYCLE;
     
     }
     return typeName_value;
   }
-  /** @apilevel internal */
-  private void subtype_TypeDecl_reset() {
-    subtype_TypeDecl_values = null;
-  }
-  protected java.util.Map subtype_TypeDecl_values;
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
+  /**
+   * @attribute syn
+   * @aspect GenericsSubtype
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:492
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:492")
   public boolean subtype(TypeDecl type) {
-    Object _parameters = type;
-    if (subtype_TypeDecl_values == null) subtype_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
-    if (subtype_TypeDecl_values.containsKey(_parameters)) {
-      Object _cache = subtype_TypeDecl_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
-        return (Boolean) _cache;
-      } else {
-        _value = (ASTNode$State.CircularValue) _cache;
-      }
-    } else {
-      _value = new ASTNode$State.CircularValue();
-      subtype_TypeDecl_values.put(_parameters, _value);
-      _value.value = true;
-    }
-    ASTNode$State state = state();
-    if (!state.inCircle() || state.calledByLazyAttribute()) {
-      state.enterCircle();
-      boolean new_subtype_TypeDecl_value;
-      do {
-        _value.cycle = state.nextCycle();
-        new_subtype_TypeDecl_value = type.supertypeWildcard(this);
-        if (new_subtype_TypeDecl_value != ((Boolean)_value.value)) {
-          state.setChangeInCycle();
-          _value.value = new_subtype_TypeDecl_value;
-        }
-      } while (state.testAndClearChangeInCycle());
-      subtype_TypeDecl_values.put(_parameters, new_subtype_TypeDecl_value);
-
-      state.leaveCircle();
-      return new_subtype_TypeDecl_value;
-    } else if (_value.cycle != state.cycle()) {
-      _value.cycle = state.cycle();
-      boolean new_subtype_TypeDecl_value = type.supertypeWildcard(this);
-      if (new_subtype_TypeDecl_value != ((Boolean)_value.value)) {
-        state.setChangeInCycle();
-        _value.value = new_subtype_TypeDecl_value;
-      }
-      return new_subtype_TypeDecl_value;
-    } else {
-      return (Boolean) _value.value;
-    }
+    boolean subtype_TypeDecl_value = type.supertypeWildcard(this);
+    return subtype_TypeDecl_value;
   }
   /**
    * @attribute syn
@@ -589,10 +560,10 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   /**
    * @attribute syn
    * @aspect GenericsSubtype
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:524
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:523
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:524")
+  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:523")
   public boolean supertypeInterfaceDecl(InterfaceDecl type) {
     boolean supertypeInterfaceDecl_InterfaceDecl_value = false;
     return supertypeInterfaceDecl_InterfaceDecl_value;
@@ -655,10 +626,10 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   /**
    * @attribute syn
    * @aspect GenericsSubtype
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:541
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:539
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:541")
+  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:539")
   public boolean supertypeArrayDecl(ArrayDecl type) {
     boolean supertypeArrayDecl_ArrayDecl_value = false;
     return supertypeArrayDecl_ArrayDecl_value;
@@ -666,10 +637,10 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   /**
    * @attribute syn
    * @aspect GenericsSubtype
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:579
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:576
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:579")
+  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:576")
   public boolean supertypeNullType(NullType type) {
     boolean supertypeNullType_NullType_value = true;
     return supertypeNullType_NullType_value;
@@ -685,70 +656,27 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
     boolean isUnboundedWildcard_value = true;
     return isUnboundedWildcard_value;
   }
-  /** @apilevel internal */
-  private void containedIn_TypeDecl_reset() {
-    containedIn_TypeDecl_values = null;
-  }
-  protected java.util.Map containedIn_TypeDecl_values;
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
+  /**
+   * @attribute syn
+   * @aspect GenericsSubtype
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:164
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:164")
   public boolean containedIn(TypeDecl type) {
-    Object _parameters = type;
-    if (containedIn_TypeDecl_values == null) containedIn_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
-    if (containedIn_TypeDecl_values.containsKey(_parameters)) {
-      Object _cache = containedIn_TypeDecl_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
-        return (Boolean) _cache;
-      } else {
-        _value = (ASTNode$State.CircularValue) _cache;
-      }
-    } else {
-      _value = new ASTNode$State.CircularValue();
-      containedIn_TypeDecl_values.put(_parameters, _value);
-      _value.value = true;
-    }
-    ASTNode$State state = state();
-    if (!state.inCircle() || state.calledByLazyAttribute()) {
-      state.enterCircle();
-      boolean new_containedIn_TypeDecl_value;
-      do {
-        _value.cycle = state.nextCycle();
-        new_containedIn_TypeDecl_value = containedIn_compute(type);
-        if (new_containedIn_TypeDecl_value != ((Boolean)_value.value)) {
-          state.setChangeInCycle();
-          _value.value = new_containedIn_TypeDecl_value;
+    {
+        if (type == this) {
+          return true;
+        } else if (type instanceof WildcardExtendsType) {
+          return typeObject().subtype(((WildcardExtendsType) type).extendsType());
+        } else {
+          return false;
         }
-      } while (state.testAndClearChangeInCycle());
-      containedIn_TypeDecl_values.put(_parameters, new_containedIn_TypeDecl_value);
-
-      state.leaveCircle();
-      return new_containedIn_TypeDecl_value;
-    } else if (_value.cycle != state.cycle()) {
-      _value.cycle = state.cycle();
-      boolean new_containedIn_TypeDecl_value = containedIn_compute(type);
-      if (new_containedIn_TypeDecl_value != ((Boolean)_value.value)) {
-        state.setChangeInCycle();
-        _value.value = new_containedIn_TypeDecl_value;
       }
-      return new_containedIn_TypeDecl_value;
-    } else {
-      return (Boolean) _value.value;
-    }
   }
   /** @apilevel internal */
-  private boolean containedIn_compute(TypeDecl type) {
-      if (type == this) {
-        return true;
-      } else if (type instanceof WildcardExtendsType) {
-        return typeObject().subtype(((WildcardExtendsType) type).extendsType());
-      } else {
-        return false;
-      }
-    }
-  /** @apilevel internal */
   private void instanceOf_TypeDecl_reset() {
-    instanceOf_TypeDecl_computed = new java.util.HashMap(4);
+    instanceOf_TypeDecl_computed = null;
     instanceOf_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -758,18 +686,18 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeWideningAndIdentity
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:443
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:442
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeWideningAndIdentity", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:443")
+  @ASTNodeAnnotation.Source(aspect="TypeWideningAndIdentity", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:442")
   public boolean instanceOf(TypeDecl type) {
     Object _parameters = type;
     if (instanceOf_TypeDecl_computed == null) instanceOf_TypeDecl_computed = new java.util.HashMap(4);
     if (instanceOf_TypeDecl_values == null) instanceOf_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (instanceOf_TypeDecl_values.containsKey(_parameters) && instanceOf_TypeDecl_computed != null
+    ASTState state = state();
+    if (instanceOf_TypeDecl_values.containsKey(_parameters)
         && instanceOf_TypeDecl_computed.containsKey(_parameters)
-        && (instanceOf_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || instanceOf_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (instanceOf_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || instanceOf_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) instanceOf_TypeDecl_values.get(_parameters);
     }
     boolean instanceOf_TypeDecl_value = subtype(type);
@@ -779,61 +707,21 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
     
     } else {
       instanceOf_TypeDecl_values.put(_parameters, instanceOf_TypeDecl_value);
-      instanceOf_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      instanceOf_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return instanceOf_TypeDecl_value;
   }
-  /** @apilevel internal */
-  private void strictSubtype_TypeDecl_reset() {
-    strictSubtype_TypeDecl_values = null;
-  }
-  protected java.util.Map strictSubtype_TypeDecl_values;
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
+  /**
+   * @attribute syn
+   * @aspect StrictSubtype
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:363
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:363")
   public boolean strictSubtype(TypeDecl type) {
-    Object _parameters = type;
-    if (strictSubtype_TypeDecl_values == null) strictSubtype_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
-    if (strictSubtype_TypeDecl_values.containsKey(_parameters)) {
-      Object _cache = strictSubtype_TypeDecl_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
-        return (Boolean) _cache;
-      } else {
-        _value = (ASTNode$State.CircularValue) _cache;
-      }
-    } else {
-      _value = new ASTNode$State.CircularValue();
-      strictSubtype_TypeDecl_values.put(_parameters, _value);
-      _value.value = true;
-    }
-    ASTNode$State state = state();
-    if (!state.inCircle() || state.calledByLazyAttribute()) {
-      state.enterCircle();
-      boolean new_strictSubtype_TypeDecl_value;
-      do {
-        _value.cycle = state.nextCycle();
-        new_strictSubtype_TypeDecl_value = type.strictSupertypeWildcard(this);
-        if (new_strictSubtype_TypeDecl_value != ((Boolean)_value.value)) {
-          state.setChangeInCycle();
-          _value.value = new_strictSubtype_TypeDecl_value;
-        }
-      } while (state.testAndClearChangeInCycle());
-      strictSubtype_TypeDecl_values.put(_parameters, new_strictSubtype_TypeDecl_value);
-
-      state.leaveCircle();
-      return new_strictSubtype_TypeDecl_value;
-    } else if (_value.cycle != state.cycle()) {
-      _value.cycle = state.cycle();
-      boolean new_strictSubtype_TypeDecl_value = type.strictSupertypeWildcard(this);
-      if (new_strictSubtype_TypeDecl_value != ((Boolean)_value.value)) {
-        state.setChangeInCycle();
-        _value.value = new_strictSubtype_TypeDecl_value;
-      }
-      return new_strictSubtype_TypeDecl_value;
-    } else {
-      return (Boolean) _value.value;
-    }
+    boolean strictSubtype_TypeDecl_value = type.strictSupertypeWildcard(this);
+    return strictSubtype_TypeDecl_value;
   }
   /**
    * @attribute syn
@@ -871,10 +759,10 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   /**
    * @attribute syn
    * @aspect StrictSubtype
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:398
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:397
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:398")
+  @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:397")
   public boolean strictSupertypeInterfaceDecl(InterfaceDecl type) {
     boolean strictSupertypeInterfaceDecl_InterfaceDecl_value = true;
     return strictSupertypeInterfaceDecl_InterfaceDecl_value;
@@ -937,84 +825,41 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   /**
    * @attribute syn
    * @aspect StrictSubtype
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:415
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:413
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:415")
+  @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:413")
   public boolean strictSupertypeArrayDecl(ArrayDecl type) {
     boolean strictSupertypeArrayDecl_ArrayDecl_value = true;
     return strictSupertypeArrayDecl_ArrayDecl_value;
   }
-  /** @apilevel internal */
-  private void strictContainedIn_TypeDecl_reset() {
-    strictContainedIn_TypeDecl_values = null;
-  }
-  protected java.util.Map strictContainedIn_TypeDecl_values;
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
+  /**
+   * @attribute syn
+   * @aspect StrictSubtype
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:165
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:165")
   public boolean strictContainedIn(TypeDecl type) {
-    Object _parameters = type;
-    if (strictContainedIn_TypeDecl_values == null) strictContainedIn_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
-    if (strictContainedIn_TypeDecl_values.containsKey(_parameters)) {
-      Object _cache = strictContainedIn_TypeDecl_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
-        return (Boolean) _cache;
-      } else {
-        _value = (ASTNode$State.CircularValue) _cache;
-      }
-    } else {
-      _value = new ASTNode$State.CircularValue();
-      strictContainedIn_TypeDecl_values.put(_parameters, _value);
-      _value.value = true;
-    }
-    ASTNode$State state = state();
-    if (!state.inCircle() || state.calledByLazyAttribute()) {
-      state.enterCircle();
-      boolean new_strictContainedIn_TypeDecl_value;
-      do {
-        _value.cycle = state.nextCycle();
-        new_strictContainedIn_TypeDecl_value = strictContainedIn_compute(type);
-        if (new_strictContainedIn_TypeDecl_value != ((Boolean)_value.value)) {
-          state.setChangeInCycle();
-          _value.value = new_strictContainedIn_TypeDecl_value;
+    {
+        if (type == this) {
+          return true;
+        } else if (type instanceof WildcardExtendsType) {
+          return typeObject().strictSubtype(((WildcardExtendsType) type).extendsType());
+        } else {
+          return false;
         }
-      } while (state.testAndClearChangeInCycle());
-      strictContainedIn_TypeDecl_values.put(_parameters, new_strictContainedIn_TypeDecl_value);
-
-      state.leaveCircle();
-      return new_strictContainedIn_TypeDecl_value;
-    } else if (_value.cycle != state.cycle()) {
-      _value.cycle = state.cycle();
-      boolean new_strictContainedIn_TypeDecl_value = strictContainedIn_compute(type);
-      if (new_strictContainedIn_TypeDecl_value != ((Boolean)_value.value)) {
-        state.setChangeInCycle();
-        _value.value = new_strictContainedIn_TypeDecl_value;
       }
-      return new_strictContainedIn_TypeDecl_value;
-    } else {
-      return (Boolean) _value.value;
-    }
   }
-  /** @apilevel internal */
-  private boolean strictContainedIn_compute(TypeDecl type) {
-      if (type == this) {
-        return true;
-      } else if (type instanceof WildcardExtendsType) {
-        return typeObject().strictSubtype(((WildcardExtendsType) type).extendsType());
-      } else {
-        return false;
-      }
-    }
   /**
    * For a wildcard type this gives the bound of the wildcard.
    * For non-wildcard types this is just the same type.
    * @attribute syn
    * @aspect LambdaParametersInference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:635
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:671
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:635")
+  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:671")
   public TypeDecl boundType() {
     TypeDecl boundType_value = typeObject();
     return boundType_value;
@@ -1024,10 +869,10 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
    * in a generic function type according to the rules in JLS 8 &sect;9.9.
    * @attribute syn
    * @aspect LambdaParametersInference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:647
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:683
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:647")
+  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:683")
   public TypeDecl nonWildcardParamType(TypeVariable bound) {
     TypeDecl nonWildcardParamType_TypeVariable_value = bound.lubType();
     return nonWildcardParamType_TypeVariable_value;
@@ -1038,7 +883,7 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
     fieldTypeSignature_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle fieldTypeSignature_computed = null;
+  protected ASTState.Cycle fieldTypeSignature_computed = null;
 
   /** @apilevel internal */
   protected String fieldTypeSignature_value;
@@ -1046,13 +891,13 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:328
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:336
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:328")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:336")
   public String fieldTypeSignature() {
-    ASTNode$State state = state();
-    if (fieldTypeSignature_computed == ASTNode$State.NON_CYCLE || fieldTypeSignature_computed == state().cycle()) {
+    ASTState state = state();
+    if (fieldTypeSignature_computed == ASTState.NON_CYCLE || fieldTypeSignature_computed == state().cycle()) {
       return fieldTypeSignature_value;
     }
     fieldTypeSignature_value = "*";
@@ -1060,7 +905,7 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
       fieldTypeSignature_computed = state().cycle();
     
     } else {
-      fieldTypeSignature_computed = ASTNode$State.NON_CYCLE;
+      fieldTypeSignature_computed = ASTState.NON_CYCLE;
     
     }
     return fieldTypeSignature_value;

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:280
+ * @astdecl Modifier : ASTNode ::= <ID:String>;
  * @production Modifier : {@link ASTNode} ::= <span class="component">&lt;ID:String&gt;</span>;
 
  */
@@ -65,49 +68,54 @@ public class Modifier extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID"},
+    type = {"String"},
+    kind = {"Token"}
+  )
   public Modifier(String p0) {
     setID(p0);
   }
   /**
-   * @declaredat ASTNode:15
+   * @declaredat ASTNode:20
    */
   public Modifier(beaver.Symbol p0) {
     setID(p0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public Modifier clone() throws CloneNotSupportedException {
     Modifier node = (Modifier) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public Modifier copy() {
     try {
@@ -127,7 +135,7 @@ public class Modifier extends ASTNode<ASTNode> implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:66
    */
   @Deprecated
   public Modifier fullCopy() {
@@ -138,7 +146,7 @@ public class Modifier extends ASTNode<ASTNode> implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:71
+   * @declaredat ASTNode:76
    */
   public Modifier treeCopyNoTransform() {
     Modifier tree = (Modifier) copy();
@@ -159,7 +167,7 @@ public class Modifier extends ASTNode<ASTNode> implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:91
+   * @declaredat ASTNode:96
    */
   public Modifier treeCopy() {
     Modifier tree = (Modifier) copy();
@@ -175,7 +183,7 @@ public class Modifier extends ASTNode<ASTNode> implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:105
+   * @declaredat ASTNode:110
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((Modifier) node).tokenString_ID);    
@@ -237,6 +245,11 @@ public class Modifier extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:86
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isLeftChildOfDot
+   */
   protected boolean canDefine_isLeftChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -248,6 +261,11 @@ public class Modifier extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:101
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isRightChildOfDot
+   */
   protected boolean canDefine_isRightChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -259,6 +277,11 @@ public class Modifier extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return prevExprError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:118
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute prevExpr
+   */
   protected boolean canDefine_prevExpr(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -270,6 +293,11 @@ public class Modifier extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return nextAccessError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:142
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nextAccess
+   */
   protected boolean canDefine_nextAccess(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

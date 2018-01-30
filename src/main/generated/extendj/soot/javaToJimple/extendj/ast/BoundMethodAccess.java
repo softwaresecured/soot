@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/BoundNames.ast:3
+ * @astdecl BoundMethodAccess : MethodAccess;
  * @production BoundMethodAccess : {@link MethodAccess};
 
  */
@@ -74,6 +77,30 @@ public class BoundMethodAccess extends MethodAccess implements Cloneable {
    */
   private TypeDecl boundHostType;
   /**
+   * @aspect PrettyPrintUtil
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:109
+   */
+  @Override public String toString() {
+    return methodDecl.toString();
+  }
+  /**
+   * @aspect MethodSignature18
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:743
+   */
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    }
+    if (!(other instanceof BoundMethodAccess)) {
+      return false;
+    }
+    BoundMethodAccess o = (BoundMethodAccess) other;
+    if (methodDecl != o.methodDecl) {
+      return false;
+    }
+    return is$Equal(getArgList(), o.getArgList());
+  }
+  /**
    * @declaredat ASTNode:1
    */
   public BoundMethodAccess() {
@@ -93,52 +120,57 @@ public class BoundMethodAccess extends MethodAccess implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Arg"},
+    type = {"String", "List<Expr>"},
+    kind = {"Token", "List"}
+  )
   public BoundMethodAccess(String p0, List<Expr> p1) {
     setID(p0);
     setChild(p1, 0);
   }
   /**
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   public BoundMethodAccess(beaver.Symbol p0, List<Expr> p1) {
     setID(p0);
     setChild(p1, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     decl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public BoundMethodAccess clone() throws CloneNotSupportedException {
     BoundMethodAccess node = (BoundMethodAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:52
    */
   public BoundMethodAccess copy() {
     try {
@@ -158,7 +190,7 @@ public class BoundMethodAccess extends MethodAccess implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:71
    */
   @Deprecated
   public BoundMethodAccess fullCopy() {
@@ -169,7 +201,7 @@ public class BoundMethodAccess extends MethodAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:76
+   * @declaredat ASTNode:81
    */
   public BoundMethodAccess treeCopyNoTransform() {
     BoundMethodAccess tree = (BoundMethodAccess) copy();
@@ -190,7 +222,7 @@ public class BoundMethodAccess extends MethodAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:96
+   * @declaredat ASTNode:101
    */
   public BoundMethodAccess treeCopy() {
     BoundMethodAccess tree = (BoundMethodAccess) copy();
@@ -206,7 +238,7 @@ public class BoundMethodAccess extends MethodAccess implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:110
+   * @declaredat ASTNode:115
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((BoundMethodAccess) node).tokenString_ID);    
@@ -356,7 +388,7 @@ public class BoundMethodAccess extends MethodAccess implements Cloneable {
     decl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decl_computed = null;
+  protected ASTState.Cycle decl_computed = null;
 
   /** @apilevel internal */
   protected MethodDecl decl_value;
@@ -368,13 +400,13 @@ public class BoundMethodAccess extends MethodAccess implements Cloneable {
    * instead.
    * @attribute syn
    * @aspect LookupMethod
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:233
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:260
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:233")
+  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:260")
   public MethodDecl decl() {
-    ASTNode$State state = state();
-    if (decl_computed == ASTNode$State.NON_CYCLE || decl_computed == state().cycle()) {
+    ASTState state = state();
+    if (decl_computed == ASTState.NON_CYCLE || decl_computed == state().cycle()) {
       return decl_value;
     }
     decl_value = methodDecl;
@@ -382,7 +414,7 @@ public class BoundMethodAccess extends MethodAccess implements Cloneable {
       decl_computed = state().cycle();
     
     } else {
-      decl_computed = ASTNode$State.NON_CYCLE;
+      decl_computed = ASTState.NON_CYCLE;
     
     }
     return decl_value;
@@ -404,14 +436,19 @@ public class BoundMethodAccess extends MethodAccess implements Cloneable {
    */
   public TypeDecl Define_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:178
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:362
       int index = _callerNode.getIndexOfChild(_childNode);
-      return decl().getParameter(index).type();
+      return decl().paramType(index);
     }
     else {
       return super.Define_assignConvertedType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:69
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignConvertedType
+   */
   protected boolean canDefine_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

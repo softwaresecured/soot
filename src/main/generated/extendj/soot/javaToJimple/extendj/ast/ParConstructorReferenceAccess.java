@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,18 +38,19 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/ConstructorReference.ast:6
+ * @astdecl ParConstructorReferenceAccess : ParClassInstanceExpr;
  * @production ParConstructorReferenceAccess : {@link ParClassInstanceExpr};
 
  */
 public class ParConstructorReferenceAccess extends ParClassInstanceExpr implements Cloneable {
   /**
    * @aspect Synthetics
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:452
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:451
    */
   private FunctionDescriptor targetDescriptor;
   /**
    * @aspect Synthetics
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:453
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:452
    */
   public ParConstructorReferenceAccess(Access access,
       List<Expr> args, Opt<TypeDecl> optDecl, List<Access> typeArgs, FunctionDescriptor fd) {
@@ -76,6 +79,11 @@ public class ParConstructorReferenceAccess extends ParClassInstanceExpr implemen
   /**
    * @declaredat ASTNode:16
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Access", "Arg", "TypeDecl", "TypeArgument"},
+    type = {"Access", "List<Expr>", "Opt<TypeDecl>", "List<Access>"},
+    kind = {"Child", "List", "Opt", "List"}
+  )
   public ParConstructorReferenceAccess(Access p0, List<Expr> p1, Opt<TypeDecl> p2, List<Access> p3) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -83,40 +91,40 @@ public class ParConstructorReferenceAccess extends ParClassInstanceExpr implemen
     setChild(p3, 3);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   protected int numChildren() {
     return 4;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     targetType_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public ParConstructorReferenceAccess clone() throws CloneNotSupportedException {
     ParConstructorReferenceAccess node = (ParConstructorReferenceAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:52
    */
   public ParConstructorReferenceAccess copy() {
     try {
@@ -136,7 +144,7 @@ public class ParConstructorReferenceAccess extends ParClassInstanceExpr implemen
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:71
    */
   @Deprecated
   public ParConstructorReferenceAccess fullCopy() {
@@ -147,7 +155,7 @@ public class ParConstructorReferenceAccess extends ParClassInstanceExpr implemen
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:76
+   * @declaredat ASTNode:81
    */
   public ParConstructorReferenceAccess treeCopyNoTransform() {
     ParConstructorReferenceAccess tree = (ParConstructorReferenceAccess) copy();
@@ -168,7 +176,7 @@ public class ParConstructorReferenceAccess extends ParClassInstanceExpr implemen
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:96
+   * @declaredat ASTNode:101
    */
   public ParConstructorReferenceAccess treeCopy() {
     ParConstructorReferenceAccess tree = (ParConstructorReferenceAccess) copy();
@@ -184,7 +192,7 @@ public class ParConstructorReferenceAccess extends ParClassInstanceExpr implemen
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:110
+   * @declaredat ASTNode:115
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -492,7 +500,7 @@ public class ParConstructorReferenceAccess extends ParClassInstanceExpr implemen
     targetType_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle targetType_computed = null;
+  protected ASTState.Cycle targetType_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl targetType_value;
@@ -500,13 +508,13 @@ public class ParConstructorReferenceAccess extends ParClassInstanceExpr implemen
   /**
    * @attribute syn
    * @aspect TargetType
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:214
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:398
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:214")
+  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:398")
   public TypeDecl targetType() {
-    ASTNode$State state = state();
-    if (targetType_computed == ASTNode$State.NON_CYCLE || targetType_computed == state().cycle()) {
+    ASTState state = state();
+    if (targetType_computed == ASTState.NON_CYCLE || targetType_computed == state().cycle()) {
       return targetType_value;
     }
     targetType_value = targetType_compute();
@@ -514,7 +522,7 @@ public class ParConstructorReferenceAccess extends ParClassInstanceExpr implemen
       targetType_computed = state().cycle();
     
     } else {
-      targetType_computed = ASTNode$State.NON_CYCLE;
+      targetType_computed = ASTState.NON_CYCLE;
     
     }
     return targetType_value;

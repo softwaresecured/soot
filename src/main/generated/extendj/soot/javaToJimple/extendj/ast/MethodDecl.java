@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,10 +38,11 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:185
+ * @astdecl MethodDecl : MemberDecl ::= Modifiers TypeAccess:Access <ID:String> Parameter:ParameterDeclaration* Exception:Access* [Block];
  * @production MethodDecl : {@link MemberDecl} ::= <span class="component">{@link Modifiers}</span> <span class="component">TypeAccess:{@link Access}</span> <span class="component">&lt;ID:String&gt;</span> <span class="component">Parameter:{@link ParameterDeclaration}*</span> <span class="component">Exception:{@link Access}*</span> <span class="component">[{@link Block}]</span>;
 
  */
-public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<MethodDecl> {
+public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<MethodDecl>, MethodLikeDecl<MethodDecl> {
   /**
    * @aspect BoundNames
    * @declaredat /home/olivier/projects/extendj/java4/frontend/BoundNames.jrag:95
@@ -61,7 +64,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:455
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:456
    */
   @Override
   public int size() {
@@ -69,7 +72,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:460
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:461
    */
   @Override
   public boolean isEmpty() {
@@ -77,7 +80,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:465
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:466
    */
   @Override
   public SimpleSet<MethodDecl> add(MethodDecl o) {
@@ -85,7 +88,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:470
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:471
    */
   @Override
   public boolean contains(Object o) {
@@ -93,7 +96,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:475
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:476
    */
   @Override
   public boolean isSingleton() {
@@ -101,7 +104,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:480
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:481
    */
   @Override
   public boolean isSingleton(MethodDecl o) {
@@ -109,7 +112,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:485
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:486
    */
   @Override
   public MethodDecl singletonValue() {
@@ -117,7 +120,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:490
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:491
    */
   @Override
   public boolean equals(Object o) {
@@ -125,7 +128,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:495
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:496
    */
   @Override
   public Iterator<MethodDecl> iterator() {
@@ -173,6 +176,25 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     }
   }
   /**
+   * @aspect PrettyPrintUtil
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:121
+   */
+  @Override public String toString() {
+    int numParams = 0;
+    StringBuilder params = new StringBuilder();
+    for (ParameterDeclaration param : getParameterListNoTransform()) {
+      if (numParams > 0) {
+        params.append(", ");
+      }
+      params.append(param.toString());
+      numParams += 1;
+    }
+    return String.format("%s %s(%s)",
+        getTypeAccessNoTransform().toString(),
+        getID(),
+        params);
+  }
+  /**
    * @aspect InnerClasses
    * @declaredat /home/olivier/projects/extendj/java4/backend/InnerClasses.jrag:268
    */
@@ -203,7 +225,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1422
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1421
    */
   public BodyDecl signatureCopy() {
     return new MethodDeclSubstituted(
@@ -217,7 +239,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1523
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1522
    */
   public BodyDecl erasedCopy() {
     return new MethodDeclSubstituted(
@@ -234,7 +256,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * in the methods throws-clause. This takes the position of the type
    * parameters into account.
    * @aspect FunctionDescriptor
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/FunctionDescriptor.jrag:216
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/FunctionDescriptor.jrag:199
    */
   public boolean subtypeThrowsClause(Access exception) {
     boolean foundCompatible = false;
@@ -251,7 +273,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * in the methods throws-clause. Performs erasure on all types before
    * comparing them.
    * @aspect FunctionDescriptor
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/FunctionDescriptor.jrag:232
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/FunctionDescriptor.jrag:215
    */
   public boolean subtypeThrowsClauseErased(Access exception) {
     boolean foundCompatible = false;
@@ -265,69 +287,21 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:173
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:219
    */
-  public void jimplify1() {
-    soot.Type returnType  = type().getSootType();
-    String    signature   = SootMethod.getSubSignature(name(), sootParamTypes(), returnType);
-    if (hostType().getSootClassDecl().declaresMethod(signature)) {
-      sootMethod = hostType().getSootClassDecl().getMethod(signature);
-    } else {
-      ArrayList<String    > paramNames = new ArrayList<>();
-      ArrayList<SootClass > throwTypes = new ArrayList<>();
-      for (ParameterDeclaration p : getParameters())
-        paramNames.add(p.name());
-
-      for (Access t : getExceptions())
-        throwTypes.add(t.type().getSootClassDecl());
-
-      sootMethod = new SootMethod(name(), sootParamTypes(), returnType, flags(), throwTypes);
-      sootMethod.addTag(new soot.tagkit.ParamNamesTag(paramNames));
-      hostType().getSootClassDecl().addMethod(sootMethod);
-    }
-
-    addAttributes();
-  }
+  public MethodDecl typeErased()      { return erasedMethod(); }
   /**
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:217
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:323
    */
-  private ArrayList<soot.Type> sootParamTypes() {
-    ArrayList<soot.Type>  parameters  = new ArrayList<>();
-    for (ParameterDeclaration decl : erasedMethod().getParameters())
-      parameters.add(decl.type().erasure().getSootType());
+  public void refined_EmitJimple_MethodDecl_jimpleDefineTopLevelTerms() {
+    if (!hasBlock()       ) return;
 
-    return parameters;
-  }
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:236
-   */
-  public SootMethod sootMethod = null;
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:946
-   */
-  public void refined_EmitJimple_MethodDecl_jimplify2() {
-    if (!hasBlock()                 ) return;
-    if (!sootMethod.isConcrete()    ) return;
-    if ( sootMethod.hasActiveBody() ) return;
+    SootMethod m  = sootMethod();
+    if (!m.isConcrete()   ) return;
+    if ( m.hasActiveBody()) return;
 
-    assert !isAbstract();
-
-    JimpleBody body = Jimple.v().newBody(sootMethod);
-    sootMethod.setActiveBody(body);
-
-    Body b = new Body(hostType(), body, this);
-    //b.setLine(this);
-
-    for (ParameterDeclaration decl : getParameters())
-      decl.jimplify2(b);
-
-    getBlock().jimplify2(b);
-
-    if (type() instanceof VoidType)
-      b.add(b.newReturnVoidStmt_noloc());
+    m.setActiveBody(jimpleBody());
   }
   /**
    * @declaredat ASTNode:1
@@ -351,6 +325,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @declaredat ASTNode:16
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID", "Parameter", "Exception", "Block"},
+    type = {"Modifiers", "Access", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Block>"},
+    kind = {"Child", "Child", "Token", "List", "List", "Opt"}
+  )
   public MethodDecl(Modifiers p0, Access p1, String p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -360,7 +339,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     setChild(p5, 4);
   }
   /**
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public MethodDecl(Modifiers p0, Access p1, beaver.Symbol p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5) {
     setChild(p0, 0);
@@ -371,20 +350,20 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     setChild(p5, 4);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   protected int numChildren() {
     return 5;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -407,20 +386,20 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     handlesException_TypeDecl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:64
+   * @declaredat ASTNode:69
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:68
+   * @declaredat ASTNode:73
    */
   public MethodDecl clone() throws CloneNotSupportedException {
     MethodDecl node = (MethodDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:78
    */
   public MethodDecl copy() {
     try {
@@ -440,7 +419,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:92
+   * @declaredat ASTNode:97
    */
   @Deprecated
   public MethodDecl fullCopy() {
@@ -451,7 +430,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:102
+   * @declaredat ASTNode:107
    */
   public MethodDecl treeCopyNoTransform() {
     MethodDecl tree = (MethodDecl) copy();
@@ -472,7 +451,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:122
+   * @declaredat ASTNode:127
    */
   public MethodDecl treeCopy() {
     MethodDecl tree = (MethodDecl) copy();
@@ -488,7 +467,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:136
+   * @declaredat ASTNode:141
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((MethodDecl) node).tokenString_ID);    
@@ -856,17 +835,17 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect EmitJimpleRefinements
-   * @declaredat /home/olivier/projects/extendj/soot8/backend/EmitJimpleRefinements.jrag:51
+   * @declaredat /home/olivier/projects/extendj/soot8/backend/EmitJimpleRefinements.jrag:41
    */
    
-  public void jimplify2() {
-    if (sootMethod.getSource() instanceof soot.coffi.CoffiMethodSource) return;
+  public void jimpleDefineTopLevelTerms() {
+    if (sootMethod().getSource() instanceof soot.coffi.CoffiMethodSource) return;
 
-    refined_EmitJimple_MethodDecl_jimplify2();
+    refined_EmitJimple_MethodDecl_jimpleDefineTopLevelTerms();
   }
   /**
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:322
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:349
    */
   private boolean refined_MethodDecl_MethodDecl_sameSignature_MethodDecl(MethodDecl other)
 { return signature().equals(other.signature()); }
@@ -911,7 +890,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /** @apilevel internal */
   private void accessibleFrom_TypeDecl_reset() {
-    accessibleFrom_TypeDecl_computed = new java.util.HashMap(4);
+    accessibleFrom_TypeDecl_computed = null;
     accessibleFrom_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -929,10 +908,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     Object _parameters = type;
     if (accessibleFrom_TypeDecl_computed == null) accessibleFrom_TypeDecl_computed = new java.util.HashMap(4);
     if (accessibleFrom_TypeDecl_values == null) accessibleFrom_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (accessibleFrom_TypeDecl_values.containsKey(_parameters) && accessibleFrom_TypeDecl_computed != null
+    ASTState state = state();
+    if (accessibleFrom_TypeDecl_values.containsKey(_parameters)
         && accessibleFrom_TypeDecl_computed.containsKey(_parameters)
-        && (accessibleFrom_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || accessibleFrom_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (accessibleFrom_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || accessibleFrom_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) accessibleFrom_TypeDecl_values.get(_parameters);
     }
     boolean accessibleFrom_TypeDecl_value = accessibleFrom_compute(type);
@@ -942,7 +921,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     
     } else {
       accessibleFrom_TypeDecl_values.put(_parameters, accessibleFrom_TypeDecl_value);
-      accessibleFrom_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      accessibleFrom_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return accessibleFrom_TypeDecl_value;
@@ -989,7 +968,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /** @apilevel internal */
   private void throwsException_TypeDecl_reset() {
-    throwsException_TypeDecl_computed = new java.util.HashMap(4);
+    throwsException_TypeDecl_computed = null;
     throwsException_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1007,10 +986,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     Object _parameters = exceptionType;
     if (throwsException_TypeDecl_computed == null) throwsException_TypeDecl_computed = new java.util.HashMap(4);
     if (throwsException_TypeDecl_values == null) throwsException_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (throwsException_TypeDecl_values.containsKey(_parameters) && throwsException_TypeDecl_computed != null
+    ASTState state = state();
+    if (throwsException_TypeDecl_values.containsKey(_parameters)
         && throwsException_TypeDecl_computed.containsKey(_parameters)
-        && (throwsException_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || throwsException_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (throwsException_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || throwsException_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) throwsException_TypeDecl_values.get(_parameters);
     }
     boolean throwsException_TypeDecl_value = throwsException_compute(exceptionType);
@@ -1020,7 +999,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     
     } else {
       throwsException_TypeDecl_values.put(_parameters, throwsException_TypeDecl_value);
-      throwsException_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      throwsException_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return throwsException_TypeDecl_value;
@@ -1035,12 +1014,29 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return false;
     }
   /**
+   * Safe parameter type access.
+   * 
+   * @return the type of the parameter at the given index, or
+   * UnknownType if there is not parameter at the given index.
    * @attribute syn
-   * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:271
+   * @aspect LookupMethod
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:60
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:271")
+  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:60")
+  public TypeDecl paramType(int index) {
+    TypeDecl paramType_int_value = index >= 0 && index < getNumParameter()
+          ? getParameter(index).type()
+          : unknownType();
+    return paramType_int_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect MethodDecl
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:298
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:298")
   public String name() {
     String name_value = getID();
     return name_value;
@@ -1051,7 +1047,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     signature_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle signature_computed = null;
+  protected ASTState.Cycle signature_computed = null;
 
   /** @apilevel internal */
   protected String signature_value;
@@ -1063,13 +1059,13 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * <p>See JLS6 &sect;8.4.2.
    * @attribute syn
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:279
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:306
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:279")
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:306")
   public String signature() {
-    ASTNode$State state = state();
-    if (signature_computed == ASTNode$State.NON_CYCLE || signature_computed == state().cycle()) {
+    ASTState state = state();
+    if (signature_computed == ASTState.NON_CYCLE || signature_computed == state().cycle()) {
       return signature_value;
     }
     signature_value = signature_compute();
@@ -1077,7 +1073,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       signature_computed = state().cycle();
     
     } else {
-      signature_computed = ASTNode$State.NON_CYCLE;
+      signature_computed = ASTState.NON_CYCLE;
     
     }
     return signature_value;
@@ -1098,10 +1094,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /** Method signature, including type arguments.  
    * @attribute syn
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:293
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:320
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:293")
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:320")
   public String fullSignature() {
     {
         StringBuilder sb = new StringBuilder();
@@ -1132,10 +1128,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * the signature of the argument method.
    * @attribute syn
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:322
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:349
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:322")
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:349")
   public boolean sameSignature(MethodDecl other) {
     {
         if (!refined_MethodDecl_MethodDecl_sameSignature_MethodDecl(other)) {
@@ -1161,17 +1157,17 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * and this is not less specific than the argument
    * @attribute syn
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:333
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:360
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:333")
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:360")
   public boolean moreSpecificThan(MethodDecl m) {
     boolean moreSpecificThan_MethodDecl_value = m.lessSpecificThan(this) && !this.lessSpecificThan(m);
     return moreSpecificThan_MethodDecl_value;
   }
   /** @apilevel internal */
   private void lessSpecificThan_MethodDecl_reset() {
-    lessSpecificThan_MethodDecl_computed = new java.util.HashMap(4);
+    lessSpecificThan_MethodDecl_computed = null;
     lessSpecificThan_MethodDecl_values = null;
   }
   /** @apilevel internal */
@@ -1191,18 +1187,18 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * method.
    * @attribute syn
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:348
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:375
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:348")
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:375")
   public boolean lessSpecificThan(MethodDecl m) {
     Object _parameters = m;
     if (lessSpecificThan_MethodDecl_computed == null) lessSpecificThan_MethodDecl_computed = new java.util.HashMap(4);
     if (lessSpecificThan_MethodDecl_values == null) lessSpecificThan_MethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (lessSpecificThan_MethodDecl_values.containsKey(_parameters) && lessSpecificThan_MethodDecl_computed != null
+    ASTState state = state();
+    if (lessSpecificThan_MethodDecl_values.containsKey(_parameters)
         && lessSpecificThan_MethodDecl_computed.containsKey(_parameters)
-        && (lessSpecificThan_MethodDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || lessSpecificThan_MethodDecl_computed.get(_parameters) == state().cycle())) {
+        && (lessSpecificThan_MethodDecl_computed.get(_parameters) == ASTState.NON_CYCLE || lessSpecificThan_MethodDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) lessSpecificThan_MethodDecl_values.get(_parameters);
     }
     boolean lessSpecificThan_MethodDecl_value = lessSpecificThan_compute(m);
@@ -1212,28 +1208,73 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     
     } else {
       lessSpecificThan_MethodDecl_values.put(_parameters, lessSpecificThan_MethodDecl_value);
-      lessSpecificThan_MethodDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      lessSpecificThan_MethodDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return lessSpecificThan_MethodDecl_value;
   }
   /** @apilevel internal */
   private boolean lessSpecificThan_compute(MethodDecl m) {
-      int numA = getNumParameter();
-      int numB = m.getNumParameter();
-      int num = Math.max(numA, numB);
-      for (int i = 0; i < num; i++) {
-        TypeDecl t1 = getParameter(Math.min(i, numA - 1)).type();
-        TypeDecl t2 = m.getParameter(Math.min(i, numB - 1)).type();
-        if (!t1.instanceOf(t2) && !t1.withinBounds(t2)) {
-          return true;
+      // TODO(joqvist): fix code duplication between MethodDecl and ConstructorDecl.
+      // Here we have a non-obvious precondition: either both methods are
+      // variable arity or both are fixed arity.
+      // An applicable fixed arity method is always chosen instead of an
+      // applicable variable arity method, so a fixed arity method and
+      // a variable arity method will not be compared for most specificity.
+      if (!isVariableArity()) {
+        // Both methods have fixed arity.
+        for (int i = 0; i < getNumParameter(); i++) {
+          TypeDecl t1 = getParameter(i).type();
+          TypeDecl t2 = m.getParameter(i).type();
+          if (!t1.instanceOf(t2) && !t1.withinBounds(t2)) {
+            return true;
+          }
+        }
+      } else {
+        // Both methods have variable arity.
+        int numA = getNumParameter();
+        int numB = m.getNumParameter();
+        int num = Math.min(numA, numB);
+        for (int i = 0; i < num - 1; i++) {
+          TypeDecl t1 = getParameter(i).type();
+          TypeDecl t2 = m.getParameter(i).type();
+          if (!t1.instanceOf(t2) && !t1.withinBounds(t2)) {
+            return true;
+          }
+        }
+        if (numA <= numB) {
+          for (int i = num - 1; i < numB - 1; i++) {
+            TypeDecl t1 = getParameter(numA - 1).type().componentType();
+            TypeDecl t2 = m.getParameter(i).type();
+            if (!t1.instanceOf(t2) && !t1.withinBounds(t2)) {
+              return true;
+            }
+          }
+          TypeDecl t1 = getParameter(numA - 1).type().componentType();
+          TypeDecl t2 = m.getParameter(numB - 1).type().componentType();
+          if (!t1.instanceOf(t2) && !t1.withinBounds(t2)) {
+            return true;
+          }
+        } else {
+          for (int i = num - 1; i < numA - 1; i++) {
+            TypeDecl t1 = getParameter(i).type();
+            TypeDecl t2 = m.getParameter(numB - 1).type().componentType();
+            if (!t1.instanceOf(t2) && !t1.withinBounds(t2)) {
+              return true;
+            }
+          }
+          TypeDecl t1 = getParameter(numA - 1).type().componentType();
+          TypeDecl t2 = m.getParameter(numB - 1).type().componentType();
+          if (!t1.instanceOf(t2) && !t1.withinBounds(t2)) {
+            return true;
+          }
         }
       }
       return false;
     }
   /** @apilevel internal */
   private void overrideCandidate_MethodDecl_reset() {
-    overrideCandidate_MethodDecl_computed = new java.util.HashMap(4);
+    overrideCandidate_MethodDecl_computed = null;
     overrideCandidate_MethodDecl_values = null;
   }
   /** @apilevel internal */
@@ -1249,18 +1290,18 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * @return {@code true} of the method could potentially override.
    * @attribute syn
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:428
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:455
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:428")
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:455")
   public boolean overrideCandidate(MethodDecl m) {
     Object _parameters = m;
     if (overrideCandidate_MethodDecl_computed == null) overrideCandidate_MethodDecl_computed = new java.util.HashMap(4);
     if (overrideCandidate_MethodDecl_values == null) overrideCandidate_MethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (overrideCandidate_MethodDecl_values.containsKey(_parameters) && overrideCandidate_MethodDecl_computed != null
+    ASTState state = state();
+    if (overrideCandidate_MethodDecl_values.containsKey(_parameters)
         && overrideCandidate_MethodDecl_computed.containsKey(_parameters)
-        && (overrideCandidate_MethodDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || overrideCandidate_MethodDecl_computed.get(_parameters) == state().cycle())) {
+        && (overrideCandidate_MethodDecl_computed.get(_parameters) == ASTState.NON_CYCLE || overrideCandidate_MethodDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) overrideCandidate_MethodDecl_values.get(_parameters);
     }
     boolean overrideCandidate_MethodDecl_value = !isStatic() && !m.isPrivate() && m.accessibleFrom(hostType());
@@ -1270,14 +1311,14 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     
     } else {
       overrideCandidate_MethodDecl_values.put(_parameters, overrideCandidate_MethodDecl_value);
-      overrideCandidate_MethodDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      overrideCandidate_MethodDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return overrideCandidate_MethodDecl_value;
   }
   /** @apilevel internal */
   private void overrides_MethodDecl_reset() {
-    overrides_MethodDecl_computed = new java.util.HashMap(4);
+    overrides_MethodDecl_computed = null;
     overrides_MethodDecl_values = null;
   }
   /** @apilevel internal */
@@ -1289,18 +1330,18 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * another declaration from a supertype.
    * @attribute syn
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:435
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:462
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:435")
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:462")
   public boolean overrides(MethodDecl m) {
     Object _parameters = m;
     if (overrides_MethodDecl_computed == null) overrides_MethodDecl_computed = new java.util.HashMap(4);
     if (overrides_MethodDecl_values == null) overrides_MethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (overrides_MethodDecl_values.containsKey(_parameters) && overrides_MethodDecl_computed != null
+    ASTState state = state();
+    if (overrides_MethodDecl_values.containsKey(_parameters)
         && overrides_MethodDecl_computed.containsKey(_parameters)
-        && (overrides_MethodDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || overrides_MethodDecl_computed.get(_parameters) == state().cycle())) {
+        && (overrides_MethodDecl_computed.get(_parameters) == ASTState.NON_CYCLE || overrides_MethodDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) overrides_MethodDecl_values.get(_parameters);
     }
     boolean overrides_MethodDecl_value = !isStatic() && !m.isPrivate() && m.accessibleFrom(hostType())
@@ -1311,14 +1352,14 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     
     } else {
       overrides_MethodDecl_values.put(_parameters, overrides_MethodDecl_value);
-      overrides_MethodDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      overrides_MethodDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return overrides_MethodDecl_value;
   }
   /** @apilevel internal */
   private void hides_MethodDecl_reset() {
-    hides_MethodDecl_computed = new java.util.HashMap(4);
+    hides_MethodDecl_computed = null;
     hides_MethodDecl_values = null;
   }
   /** @apilevel internal */
@@ -1331,18 +1372,18 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * method is static and has the same signature.
    * @attribute syn
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:444
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:471
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:444")
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:471")
   public boolean hides(MethodDecl m) {
     Object _parameters = m;
     if (hides_MethodDecl_computed == null) hides_MethodDecl_computed = new java.util.HashMap(4);
     if (hides_MethodDecl_values == null) hides_MethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (hides_MethodDecl_values.containsKey(_parameters) && hides_MethodDecl_computed != null
+    ASTState state = state();
+    if (hides_MethodDecl_values.containsKey(_parameters)
         && hides_MethodDecl_computed.containsKey(_parameters)
-        && (hides_MethodDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || hides_MethodDecl_computed.get(_parameters) == state().cycle())) {
+        && (hides_MethodDecl_computed.get(_parameters) == ASTState.NON_CYCLE || hides_MethodDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) hides_MethodDecl_values.get(_parameters);
     }
     boolean hides_MethodDecl_value = isStatic() && !m.isPrivate() && m.accessibleFrom(hostType())
@@ -1353,14 +1394,14 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     
     } else {
       hides_MethodDecl_values.put(_parameters, hides_MethodDecl_value);
-      hides_MethodDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      hides_MethodDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return hides_MethodDecl_value;
   }
   /** @apilevel internal */
   private void parameterDeclaration_String_reset() {
-    parameterDeclaration_String_computed = new java.util.HashMap(4);
+    parameterDeclaration_String_computed = null;
     parameterDeclaration_String_values = null;
   }
   /** @apilevel internal */
@@ -1378,10 +1419,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     Object _parameters = name;
     if (parameterDeclaration_String_computed == null) parameterDeclaration_String_computed = new java.util.HashMap(4);
     if (parameterDeclaration_String_values == null) parameterDeclaration_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (parameterDeclaration_String_values.containsKey(_parameters) && parameterDeclaration_String_computed != null
+    ASTState state = state();
+    if (parameterDeclaration_String_values.containsKey(_parameters)
         && parameterDeclaration_String_computed.containsKey(_parameters)
-        && (parameterDeclaration_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || parameterDeclaration_String_computed.get(_parameters) == state().cycle())) {
+        && (parameterDeclaration_String_computed.get(_parameters) == ASTState.NON_CYCLE || parameterDeclaration_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<Variable>) parameterDeclaration_String_values.get(_parameters);
     }
     SimpleSet<Variable> parameterDeclaration_String_value = parameterDeclaration_compute(name);
@@ -1391,7 +1432,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     
     } else {
       parameterDeclaration_String_values.put(_parameters, parameterDeclaration_String_value);
-      parameterDeclaration_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      parameterDeclaration_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return parameterDeclaration_String_value;
@@ -1408,10 +1449,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:152
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:150
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:152")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:150")
   public Collection<Problem> modifierProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -1492,13 +1533,35 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:249
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:247
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:249")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:247")
   public boolean isSynthetic() {
     boolean isSynthetic_value = getModifiers().isSynthetic();
     return isSynthetic_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:257
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:257")
+  public boolean isPublic() {
+    boolean isPublic_value = getModifiers().isPublic() || hostType().isInterfaceDecl();
+    return isPublic_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:258
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:258")
+  public boolean isPrivate() {
+    boolean isPrivate_value = getModifiers().isPrivate();
+    return isPrivate_value;
   }
   /**
    * @attribute syn
@@ -1507,9 +1570,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:259")
-  public boolean isPublic() {
-    boolean isPublic_value = getModifiers().isPublic() || hostType().isInterfaceDecl();
-    return isPublic_value;
+  public boolean isProtected() {
+    boolean isProtected_value = getModifiers().isProtected();
+    return isProtected_value;
   }
   /**
    * @attribute syn
@@ -1518,28 +1581,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:260")
-  public boolean isPrivate() {
-    boolean isPrivate_value = getModifiers().isPrivate();
-    return isPrivate_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:261
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:261")
-  public boolean isProtected() {
-    boolean isProtected_value = getModifiers().isProtected();
-    return isProtected_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:262
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:262")
   public boolean isAbstract() {
     {
         return getModifiers().isAbstract() || (hostType().isInterfaceDecl() && !isStatic() && !isDefault());
@@ -1548,13 +1589,35 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:263
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:261
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:263")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:261")
   public boolean isStatic() {
     boolean isStatic_value = getModifiers().isStatic();
     return isStatic_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:264
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:264")
+  public boolean isFinal() {
+    boolean isFinal_value = getModifiers().isFinal();
+    return isFinal_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:265
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:265")
+  public boolean isSynchronized() {
+    boolean isSynchronized_value = getModifiers().isSynchronized();
+    return isSynchronized_value;
   }
   /**
    * @attribute syn
@@ -1563,9 +1626,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:266")
-  public boolean isFinal() {
-    boolean isFinal_value = getModifiers().isFinal();
-    return isFinal_value;
+  public boolean isNative() {
+    boolean isNative_value = getModifiers().isNative();
+    return isNative_value;
   }
   /**
    * @attribute syn
@@ -1574,28 +1637,6 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:267")
-  public boolean isSynchronized() {
-    boolean isSynchronized_value = getModifiers().isSynchronized();
-    return isSynchronized_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:268
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:268")
-  public boolean isNative() {
-    boolean isNative_value = getModifiers().isNative();
-    return isNative_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:269
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:269")
   public boolean isStrictfp() {
     boolean isStrictfp_value = getModifiers().isStrictfp();
     return isStrictfp_value;
@@ -1634,10 +1675,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:239
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:318
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:239")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:318")
   public boolean hasModifiers() {
     boolean hasModifiers_value = getModifiers().getNumModifier() > 0;
     return hasModifiers_value;
@@ -1645,10 +1686,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:251
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:330
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:251")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:330")
   public boolean hasExceptions() {
     boolean hasExceptions_value = getNumException() > 0;
     return hasExceptions_value;
@@ -1659,7 +1700,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -1667,13 +1708,13 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:290
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:289
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:290")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:289")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = getTypeAccess().type();
@@ -1681,7 +1722,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -1689,10 +1730,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:292
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:291
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:292")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:291")
   public boolean isVoid() {
     boolean isVoid_value = type().isVoid();
     return isVoid_value;
@@ -1700,10 +1741,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:514
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:516
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:514")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:516")
   public Collection<Problem> typeProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -1726,10 +1767,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect TypeHierarchyCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:387
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:401
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:387")
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:401")
   public boolean mayOverride(MethodDecl m) {
     {
         // 9.4.3
@@ -1753,7 +1794,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     descName_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle descName_computed = null;
+  protected ASTState.Cycle descName_computed = null;
 
   /** @apilevel internal */
   protected String descName_value;
@@ -1766,8 +1807,8 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstantPoolNames", declaredAt="/home/olivier/projects/extendj/java4/backend/ConstantPoolNames.jrag:117")
   public String descName() {
-    ASTNode$State state = state();
-    if (descName_computed == ASTNode$State.NON_CYCLE || descName_computed == state().cycle()) {
+    ASTState state = state();
+    if (descName_computed == ASTState.NON_CYCLE || descName_computed == state().cycle()) {
       return descName_value;
     }
     descName_value = descName_compute();
@@ -1775,7 +1816,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       descName_computed = state().cycle();
     
     } else {
-      descName_computed = ASTNode$State.NON_CYCLE;
+      descName_computed = ASTState.NON_CYCLE;
     
     }
     return descName_value;
@@ -1801,7 +1842,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     flags_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle flags_computed = null;
+  protected ASTState.Cycle flags_computed = null;
 
   /** @apilevel internal */
   protected int flags_value;
@@ -1814,8 +1855,8 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Flags", declaredAt="/home/olivier/projects/extendj/java4/backend/Flags.jrag:60")
   public int flags() {
-    ASTNode$State state = state();
-    if (flags_computed == ASTNode$State.NON_CYCLE || flags_computed == state().cycle()) {
+    ASTState state = state();
+    if (flags_computed == ASTState.NON_CYCLE || flags_computed == state().cycle()) {
       return flags_value;
     }
     flags_value = flags_compute();
@@ -1823,7 +1864,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       flags_computed = state().cycle();
     
     } else {
-      flags_computed = ASTNode$State.NON_CYCLE;
+      flags_computed = ASTState.NON_CYCLE;
     
     }
     return flags_value;
@@ -1850,10 +1891,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:428
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:425
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:428")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:425")
   public boolean hasAnnotationSuppressWarnings(String annot) {
     boolean hasAnnotationSuppressWarnings_String_value = getModifiers().hasAnnotationSuppressWarnings(annot);
     return hasAnnotationSuppressWarnings_String_value;
@@ -1861,10 +1902,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:485
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:482
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:485")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:482")
   public boolean isDeprecated() {
     boolean isDeprecated_value = getModifiers().hasDeprecatedAnnotation();
     return isDeprecated_value;
@@ -1874,7 +1915,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     usesTypeVariable_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle usesTypeVariable_computed = null;
+  protected ASTState.Cycle usesTypeVariable_computed = null;
 
   /** @apilevel internal */
   protected boolean usesTypeVariable_value;
@@ -1882,13 +1923,13 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1315
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1311
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1315")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1311")
   public boolean usesTypeVariable() {
-    ASTNode$State state = state();
-    if (usesTypeVariable_computed == ASTNode$State.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {
+    ASTState state = state();
+    if (usesTypeVariable_computed == ASTState.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {
       return usesTypeVariable_value;
     }
     usesTypeVariable_value = getModifiers().usesTypeVariable() || getTypeAccess().usesTypeVariable()
@@ -1897,7 +1938,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       usesTypeVariable_computed = state().cycle();
     
     } else {
-      usesTypeVariable_computed = ASTNode$State.NON_CYCLE;
+      usesTypeVariable_computed = ASTState.NON_CYCLE;
     
     }
     return usesTypeVariable_value;
@@ -1905,10 +1946,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1659
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1659")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658")
   public MethodDecl erasedMethod() {
     MethodDecl erasedMethod_value = this;
     return erasedMethod_value;
@@ -1916,10 +1957,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1715
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1715")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714")
   public boolean isSubstitutable() {
     boolean isSubstitutable_value = !isStatic();
     return isSubstitutable_value;
@@ -1930,7 +1971,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     sourceMethodDecl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle sourceMethodDecl_computed = null;
+  protected ASTState.Cycle sourceMethodDecl_computed = null;
 
   /** @apilevel internal */
   protected MethodDecl sourceMethodDecl_value;
@@ -1938,13 +1979,13 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1887
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1887")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886")
   public MethodDecl sourceMethodDecl() {
-    ASTNode$State state = state();
-    if (sourceMethodDecl_computed == ASTNode$State.NON_CYCLE || sourceMethodDecl_computed == state().cycle()) {
+    ASTState state = state();
+    if (sourceMethodDecl_computed == ASTState.NON_CYCLE || sourceMethodDecl_computed == state().cycle()) {
       return sourceMethodDecl_value;
     }
     sourceMethodDecl_value = this;
@@ -1952,7 +1993,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       sourceMethodDecl_computed = state().cycle();
     
     } else {
-      sourceMethodDecl_computed = ASTNode$State.NON_CYCLE;
+      sourceMethodDecl_computed = ASTState.NON_CYCLE;
     
     }
     return sourceMethodDecl_value;
@@ -1974,10 +2015,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * @return the original generic declaration of this method.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:331
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:424
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:331")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:424")
   public GenericMethodDecl genericDecl() {
     {
         throw new Error("can not evaulate generic declaration of non-generic method");
@@ -1986,10 +2027,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:420
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:513
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:420")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:513")
   public int arity() {
     int arity_value = getNumParameter();
     return arity_value;
@@ -2073,7 +2114,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /** @apilevel internal */
   private void subsignatureTo_MethodDecl_reset() {
-    subsignatureTo_MethodDecl_computed = new java.util.HashMap(4);
+    subsignatureTo_MethodDecl_computed = null;
     subsignatureTo_MethodDecl_values = null;
   }
   /** @apilevel internal */
@@ -2091,10 +2132,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     Object _parameters = m;
     if (subsignatureTo_MethodDecl_computed == null) subsignatureTo_MethodDecl_computed = new java.util.HashMap(4);
     if (subsignatureTo_MethodDecl_values == null) subsignatureTo_MethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (subsignatureTo_MethodDecl_values.containsKey(_parameters) && subsignatureTo_MethodDecl_computed != null
+    ASTState state = state();
+    if (subsignatureTo_MethodDecl_values.containsKey(_parameters)
         && subsignatureTo_MethodDecl_computed.containsKey(_parameters)
-        && (subsignatureTo_MethodDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || subsignatureTo_MethodDecl_computed.get(_parameters) == state().cycle())) {
+        && (subsignatureTo_MethodDecl_computed.get(_parameters) == ASTState.NON_CYCLE || subsignatureTo_MethodDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) subsignatureTo_MethodDecl_values.get(_parameters);
     }
     boolean subsignatureTo_MethodDecl_value = subsignatureTo_compute(m);
@@ -2104,7 +2145,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     
     } else {
       subsignatureTo_MethodDecl_values.put(_parameters, subsignatureTo_MethodDecl_value);
-      subsignatureTo_MethodDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      subsignatureTo_MethodDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return subsignatureTo_MethodDecl_value;
@@ -2121,7 +2162,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     }
   /** @apilevel internal */
   private void returnTypeSubstitutableFor_MethodDecl_reset() {
-    returnTypeSubstitutableFor_MethodDecl_computed = new java.util.HashMap(4);
+    returnTypeSubstitutableFor_MethodDecl_computed = null;
     returnTypeSubstitutableFor_MethodDecl_values = null;
   }
   /** @apilevel internal */
@@ -2139,10 +2180,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     Object _parameters = m;
     if (returnTypeSubstitutableFor_MethodDecl_computed == null) returnTypeSubstitutableFor_MethodDecl_computed = new java.util.HashMap(4);
     if (returnTypeSubstitutableFor_MethodDecl_values == null) returnTypeSubstitutableFor_MethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (returnTypeSubstitutableFor_MethodDecl_values.containsKey(_parameters) && returnTypeSubstitutableFor_MethodDecl_computed != null
+    ASTState state = state();
+    if (returnTypeSubstitutableFor_MethodDecl_values.containsKey(_parameters)
         && returnTypeSubstitutableFor_MethodDecl_computed.containsKey(_parameters)
-        && (returnTypeSubstitutableFor_MethodDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || returnTypeSubstitutableFor_MethodDecl_computed.get(_parameters) == state().cycle())) {
+        && (returnTypeSubstitutableFor_MethodDecl_computed.get(_parameters) == ASTState.NON_CYCLE || returnTypeSubstitutableFor_MethodDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) returnTypeSubstitutableFor_MethodDecl_values.get(_parameters);
     }
     boolean returnTypeSubstitutableFor_MethodDecl_value = returnTypeSubstitutableFor_compute(m);
@@ -2152,7 +2193,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     
     } else {
       returnTypeSubstitutableFor_MethodDecl_values.put(_parameters, returnTypeSubstitutableFor_MethodDecl_value);
-      returnTypeSubstitutableFor_MethodDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      returnTypeSubstitutableFor_MethodDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return returnTypeSubstitutableFor_MethodDecl_value;
@@ -2194,10 +2235,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
    * Otherwise, an unknown method is returned.
    * @attribute syn
    * @aspect LambdaParametersInference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:532
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:568
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:532")
+  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:568")
   public Option<MethodDecl> nonWildcardParameterization() {
     Option<MethodDecl> nonWildcardParameterization_value = Option.some(this);
     return nonWildcardParameterization_value;
@@ -2208,7 +2249,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     sootRef_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle sootRef_computed = null;
+  protected ASTState.Cycle sootRef_computed = null;
 
   /** @apilevel internal */
   protected SootMethodRef sootRef_value;
@@ -2216,13 +2257,13 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:242
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:225
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:242")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:225")
   public SootMethodRef sootRef() {
-    ASTNode$State state = state();
-    if (sootRef_computed == ASTNode$State.NON_CYCLE || sootRef_computed == state().cycle()) {
+    ASTState state = state();
+    if (sootRef_computed == ASTState.NON_CYCLE || sootRef_computed == state().cycle()) {
       return sootRef_value;
     }
     sootRef_value = sootRef_compute();
@@ -2230,7 +2271,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       sootRef_computed = state().cycle();
     
     } else {
-      sootRef_computed = ASTNode$State.NON_CYCLE;
+      sootRef_computed = ASTState.NON_CYCLE;
     
     }
     return sootRef_value;
@@ -2238,10 +2279,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /** @apilevel internal */
   private SootMethodRef sootRef_compute() {
       SootMethodRef ref = Scene.v().makeMethodRef(
-        hostType().getSootClassDecl(),
+        hostType().sootClass(),
         name(),
-        sootParamTypes(),
-        type().getSootType(),
+        sootMethodParamTypes(),
+        type().sootType(),
         isStatic()
       );
       //ref.resolve(); // immediately provoke dbg/sanchecks
@@ -2249,11 +2290,37 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     }
   /**
    * @attribute syn
-   * @aspect GenerateClassfile
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:173
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:531
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenerateClassfile", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:173")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:531")
+  public JimpleBody jimpleBody() {
+    {
+        if ( isAbstract() ) throw new Error("cannot make body of abstract method");
+        if (!hasBlock()   ) throw new Error("internal - unexpected - method has no block/body?");
+    
+        Body b = isStatic() ? new Body(this) : new Body(hostType(), this);
+        //b.setLine(this);
+    
+        for (ParameterDeclaration d : getExplicitisedParameters())
+          d.jimpleEmit(b);
+    
+        getBlock().jimpleEmit(b);
+    
+        if (type() instanceof VoidType)
+          b.add(b.newReturnVoidStmt_noloc());
+    
+        return b.finishBody(this);
+      }
+  }
+  /**
+   * @attribute syn
+   * @aspect GenerateClassfile
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:175
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="GenerateClassfile", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:175")
   public boolean isMethodOrConstructor() {
     boolean isMethodOrConstructor_value = true;
     return isMethodOrConstructor_value;
@@ -2261,10 +2328,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:241
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:249
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:241")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:249")
   public boolean needsSignatureAttribute() {
     {
         if (type().needsSignatureAttribute()) {
@@ -2281,10 +2348,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:372
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:380
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:372")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:380")
   public String methodTypeSignature() {
     {
         StringBuilder buf = new StringBuilder();
@@ -2311,10 +2378,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     Object _parameters = exceptionType;
     if (handlesException_TypeDecl_computed == null) handlesException_TypeDecl_computed = new java.util.HashMap(4);
     if (handlesException_TypeDecl_values == null) handlesException_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (handlesException_TypeDecl_values.containsKey(_parameters) && handlesException_TypeDecl_computed != null
+    ASTState state = state();
+    if (handlesException_TypeDecl_values.containsKey(_parameters)
         && handlesException_TypeDecl_computed.containsKey(_parameters)
-        && (handlesException_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || handlesException_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (handlesException_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || handlesException_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) handlesException_TypeDecl_values.get(_parameters);
     }
     boolean handlesException_TypeDecl_value = getParent().Define_handlesException(this, null, exceptionType);
@@ -2324,14 +2391,14 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     
     } else {
       handlesException_TypeDecl_values.put(_parameters, handlesException_TypeDecl_value);
-      handlesException_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      handlesException_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return handlesException_TypeDecl_value;
   }
   /** @apilevel internal */
   private void handlesException_TypeDecl_reset() {
-    handlesException_TypeDecl_computed = new java.util.HashMap(4);
+    handlesException_TypeDecl_computed = null;
     handlesException_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -2353,6 +2420,17 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @attribute inh
+   * @aspect LookupMethod
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:52
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
+  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:52")
+  public TypeDecl unknownType() {
+    TypeDecl unknownType_value = getParent().Define_unknownType(this, null);
+    return unknownType_value;
+  }
+  /**
+   * @attribute inh
    * @aspect SuppressWarnings
    * @declaredat /home/olivier/projects/extendj/java7/frontend/SuppressWarnings.jrag:38
    */
@@ -2365,10 +2443,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute inh
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:19
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:30
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:19")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:30")
   public TypeDecl typeObject() {
     TypeDecl typeObject_value = getParent().Define_typeObject(this, null);
     return typeObject_value;
@@ -2386,6 +2464,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return super.Define_assignedBefore(_callerNode, _childNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -2402,11 +2485,16 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return super.Define_unassignedBefore(_callerNode, _childNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:115
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
    * @apilevel internal
    */
   public boolean Define_handlesException(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
@@ -2418,6 +2506,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_handlesException(this, _callerNode, exceptionType);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute handlesException
+   */
   protected boolean canDefine_handlesException(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
     return true;
   }
@@ -2447,150 +2540,200 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_lookupVariable(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:432
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:430
    * @apilevel internal
    */
   public boolean Define_mayBePublic(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:326
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:324
       return true;
     }
     else {
       return getParent().Define_mayBePublic(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:430
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBePublic
+   */
   protected boolean canDefine_mayBePublic(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:432
    * @apilevel internal
    */
   public boolean Define_mayBeProtected(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:327
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:325
       return true;
     }
     else {
       return getParent().Define_mayBeProtected(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:432
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeProtected
+   */
   protected boolean canDefine_mayBeProtected(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:433
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:431
    * @apilevel internal
    */
   public boolean Define_mayBePrivate(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:328
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:326
       return true;
     }
     else {
       return getParent().Define_mayBePrivate(this, _callerNode);
     }
   }
-  protected boolean canDefine_mayBePrivate(ASTNode _callerNode, ASTNode _childNode) {
-    return true;
-  }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:437
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:431
    * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBePrivate
    */
-  public boolean Define_mayBeAbstract(ASTNode _callerNode, ASTNode _childNode) {
-    if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:329
-      return true;
-    }
-    else {
-      return getParent().Define_mayBeAbstract(this, _callerNode);
-    }
-  }
-  protected boolean canDefine_mayBeAbstract(ASTNode _callerNode, ASTNode _childNode) {
+  protected boolean canDefine_mayBePrivate(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:435
    * @apilevel internal
    */
+  public boolean Define_mayBeAbstract(ASTNode _callerNode, ASTNode _childNode) {
+    if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:327
+      return true;
+    }
+    else {
+      return getParent().Define_mayBeAbstract(this, _callerNode);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:435
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeAbstract
+   */
+  protected boolean canDefine_mayBeAbstract(ASTNode _callerNode, ASTNode _childNode) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:433
+   * @apilevel internal
+   */
   public boolean Define_mayBeStatic(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:330
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:328
       return true;
     }
     else {
       return getParent().Define_mayBeStatic(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:433
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeStatic
+   */
   protected boolean canDefine_mayBeStatic(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:436
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
    * @apilevel internal
    */
   public boolean Define_mayBeFinal(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:331
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:329
       return true;
     }
     else {
       return getParent().Define_mayBeFinal(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeFinal
+   */
   protected boolean canDefine_mayBeFinal(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:441
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:439
    * @apilevel internal
    */
   public boolean Define_mayBeSynchronized(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:332
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:330
       return true;
     }
     else {
       return getParent().Define_mayBeSynchronized(this, _callerNode);
     }
   }
-  protected boolean canDefine_mayBeSynchronized(ASTNode _callerNode, ASTNode _childNode) {
-    return true;
-  }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:442
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:439
    * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeSynchronized
    */
-  public boolean Define_mayBeNative(ASTNode _callerNode, ASTNode _childNode) {
-    if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:333
-      return true;
-    }
-    else {
-      return getParent().Define_mayBeNative(this, _callerNode);
-    }
-  }
-  protected boolean canDefine_mayBeNative(ASTNode _callerNode, ASTNode _childNode) {
+  protected boolean canDefine_mayBeSynchronized(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:440
    * @apilevel internal
    */
+  public boolean Define_mayBeNative(ASTNode _callerNode, ASTNode _childNode) {
+    if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:331
+      return true;
+    }
+    else {
+      return getParent().Define_mayBeNative(this, _callerNode);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:440
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeNative
+   */
+  protected boolean canDefine_mayBeNative(ASTNode _callerNode, ASTNode _childNode) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:438
+   * @apilevel internal
+   */
   public boolean Define_mayBeStrictfp(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:334
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:332
       return true;
     }
     else {
       return getParent().Define_mayBeStrictfp(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:438
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeStrictfp
+   */
   protected boolean canDefine_mayBeStrictfp(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2617,38 +2760,53 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:534
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:536
    * @apilevel internal
    */
   public TypeDecl Define_returnType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getBlockOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:536
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:538
       return type();
     }
     else {
       return getParent().Define_returnType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:536
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute returnType
+   */
   protected boolean canDefine_returnType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:207
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
    * @apilevel internal
    */
   public boolean Define_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getBlockOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:215
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:231
       return isStatic();
     }
     else {
       return getParent().Define_inStaticContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inStaticContext
+   */
   protected boolean canDefine_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2665,6 +2823,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_reachable(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:49
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reachable
+   */
   protected boolean canDefine_reachable(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2682,6 +2845,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_isMethodParameter(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:44
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isMethodParameter
+   */
   protected boolean canDefine_isMethodParameter(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2699,6 +2867,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_isConstructorParameter(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:45
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isConstructorParameter
+   */
   protected boolean canDefine_isConstructorParameter(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2716,6 +2889,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_isExceptionHandlerParameter(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:46
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isExceptionHandlerParameter
+   */
   protected boolean canDefine_isExceptionHandlerParameter(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2732,28 +2910,43 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_mayUseAnnotationTarget(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:131
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayUseAnnotationTarget
+   */
   protected boolean canDefine_mayUseAnnotationTarget(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:581
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:563
    * @apilevel internal
    */
   public boolean Define_inEnumInitializer(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:563
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inEnumInitializer
+   */
   protected boolean canDefine_inEnumInitializer(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:860
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:852
    * @apilevel internal
    */
   public String Define_typeVariableContext(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return hostType().typeName() + "." + signature();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:852
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute typeVariableContext
+   */
   protected boolean canDefine_typeVariableContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2771,6 +2964,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_variableArityValid(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/VariableArityParameters.jrag:46
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute variableArityValid
+   */
   protected boolean canDefine_variableArityValid(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2788,6 +2986,11 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_inhModifiedInScope(this, _callerNode, var);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inhModifiedInScope
+   */
   protected boolean canDefine_inhModifiedInScope(ASTNode _callerNode, ASTNode _childNode, Variable var) {
     return true;
   }
@@ -2805,22 +3008,32 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       return getParent().Define_isCatchParam(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/PreciseRethrow.jrag:202
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isCatchParam
+   */
   protected boolean canDefine_isCatchParam(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:373
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:307
    * @apilevel internal
    */
   public boolean Define_enclosedByExceptionHandler(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getBlockOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:377
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:311
       return getNumException() != 0;
     }
     else {
       return getParent().Define_enclosedByExceptionHandler(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:307
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosedByExceptionHandler
+   */
   protected boolean canDefine_enclosedByExceptionHandler(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2832,8 +3045,9 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:150
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:148
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -2851,7 +3065,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:512
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:514
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -2876,6 +3090,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : modifierProblems()) {

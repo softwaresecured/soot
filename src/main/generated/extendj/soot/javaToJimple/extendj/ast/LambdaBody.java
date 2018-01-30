@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/Lambda.ast:11
+ * @astdecl LambdaBody : ASTNode;
  * @production LambdaBody : {@link ASTNode};
 
  */
@@ -148,11 +151,19 @@ public abstract class LambdaBody extends ASTNode<ASTNode> implements Cloneable {
   public abstract boolean isExprBody();
   /**
    * @attribute syn
-   * @aspect LambdaExpr
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:85
+   * @aspect ReturnCompatible
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:47
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:85")
+  @ASTNodeAnnotation.Source(aspect="ReturnCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:47")
+  public abstract Collection<TypeDecl> returnTypes();
+  /**
+   * @attribute syn
+   * @aspect LambdaExpr
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:89
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:89")
   public abstract boolean congruentTo(FunctionDescriptor fd);
   /**
    * @attribute inh
@@ -162,8 +173,8 @@ public abstract class LambdaBody extends ASTNode<ASTNode> implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="EnclosingLambda", declaredAt="/home/olivier/projects/extendj/java8/frontend/EnclosingLambda.jrag:29")
   public LambdaExpr enclosingLambda() {
-    ASTNode$State state = state();
-    if (enclosingLambda_computed == ASTNode$State.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
+    ASTState state = state();
+    if (enclosingLambda_computed == ASTState.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
       return enclosingLambda_value;
     }
     enclosingLambda_value = getParent().Define_enclosingLambda(this, null);
@@ -171,7 +182,7 @@ public abstract class LambdaBody extends ASTNode<ASTNode> implements Cloneable {
       enclosingLambda_computed = state().cycle();
     
     } else {
-      enclosingLambda_computed = ASTNode$State.NON_CYCLE;
+      enclosingLambda_computed = ASTState.NON_CYCLE;
     
     }
     return enclosingLambda_value;
@@ -182,7 +193,7 @@ public abstract class LambdaBody extends ASTNode<ASTNode> implements Cloneable {
     enclosingLambda_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle enclosingLambda_computed = null;
+  protected ASTState.Cycle enclosingLambda_computed = null;
 
   /** @apilevel internal */
   protected LambdaExpr enclosingLambda_value;
@@ -198,10 +209,10 @@ public abstract class LambdaBody extends ASTNode<ASTNode> implements Cloneable {
     Object _parameters = name;
     if (lookupVariable_String_computed == null) lookupVariable_String_computed = new java.util.HashMap(4);
     if (lookupVariable_String_values == null) lookupVariable_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (lookupVariable_String_values.containsKey(_parameters) && lookupVariable_String_computed != null
+    ASTState state = state();
+    if (lookupVariable_String_values.containsKey(_parameters)
         && lookupVariable_String_computed.containsKey(_parameters)
-        && (lookupVariable_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || lookupVariable_String_computed.get(_parameters) == state().cycle())) {
+        && (lookupVariable_String_computed.get(_parameters) == ASTState.NON_CYCLE || lookupVariable_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<Variable>) lookupVariable_String_values.get(_parameters);
     }
     SimpleSet<Variable> lookupVariable_String_value = getParent().Define_lookupVariable(this, null, name);
@@ -211,14 +222,14 @@ public abstract class LambdaBody extends ASTNode<ASTNode> implements Cloneable {
     
     } else {
       lookupVariable_String_values.put(_parameters, lookupVariable_String_value);
-      lookupVariable_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      lookupVariable_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return lookupVariable_String_value;
   }
   /** @apilevel internal */
   private void lookupVariable_String_reset() {
-    lookupVariable_String_computed = new java.util.HashMap(4);
+    lookupVariable_String_computed = null;
     lookupVariable_String_values = null;
   }
   /** @apilevel internal */

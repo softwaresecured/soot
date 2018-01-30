@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Enums.ast:8
+ * @astdecl BoundEnumConstant : VarAccess ::= <EnumConstant:EnumConstant>;
  * @production BoundEnumConstant : {@link VarAccess} ::= <span class="component">&lt;EnumConstant:EnumConstant&gt;</span>;
 
  */
@@ -72,52 +75,57 @@ public class BoundEnumConstant extends VarAccess implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "EnumConstant"},
+    type = {"String", "EnumConstant"},
+    kind = {"Token", "Token"}
+  )
   public BoundEnumConstant(String p0, EnumConstant p1) {
     setID(p0);
     setEnumConstant(p1);
   }
   /**
-   * @declaredat ASTNode:16
+   * @declaredat ASTNode:21
    */
   public BoundEnumConstant(beaver.Symbol p0, EnumConstant p1) {
     setID(p0);
     setEnumConstant(p1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     decl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public BoundEnumConstant clone() throws CloneNotSupportedException {
     BoundEnumConstant node = (BoundEnumConstant) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public BoundEnumConstant copy() {
     try {
@@ -137,7 +145,7 @@ public class BoundEnumConstant extends VarAccess implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:64
+   * @declaredat ASTNode:69
    */
   @Deprecated
   public BoundEnumConstant fullCopy() {
@@ -148,7 +156,7 @@ public class BoundEnumConstant extends VarAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   public BoundEnumConstant treeCopyNoTransform() {
     BoundEnumConstant tree = (BoundEnumConstant) copy();
@@ -169,7 +177,7 @@ public class BoundEnumConstant extends VarAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:94
+   * @declaredat ASTNode:99
    */
   public BoundEnumConstant treeCopy() {
     BoundEnumConstant tree = (BoundEnumConstant) copy();
@@ -185,7 +193,7 @@ public class BoundEnumConstant extends VarAccess implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:108
+   * @declaredat ASTNode:113
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((BoundEnumConstant) node).tokenString_ID) && (tokenEnumConstant_EnumConstant == ((BoundEnumConstant) node).tokenEnumConstant_EnumConstant);    
@@ -245,7 +253,7 @@ public class BoundEnumConstant extends VarAccess implements Cloneable {
     decl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decl_computed = null;
+  protected ASTState.Cycle decl_computed = null;
 
   /** @apilevel internal */
   protected Variable decl_value;
@@ -253,13 +261,13 @@ public class BoundEnumConstant extends VarAccess implements Cloneable {
   /**
    * @attribute syn
    * @aspect VariableScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:391
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:359
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:391")
+  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:359")
   public Variable decl() {
-    ASTNode$State state = state();
-    if (decl_computed == ASTNode$State.NON_CYCLE || decl_computed == state().cycle()) {
+    ASTState state = state();
+    if (decl_computed == ASTState.NON_CYCLE || decl_computed == state().cycle()) {
       return decl_value;
     }
     decl_value = getEnumConstant();
@@ -267,7 +275,7 @@ public class BoundEnumConstant extends VarAccess implements Cloneable {
       decl_computed = state().cycle();
     
     } else {
-      decl_computed = ASTNode$State.NON_CYCLE;
+      decl_computed = ASTState.NON_CYCLE;
     
     }
     return decl_value;

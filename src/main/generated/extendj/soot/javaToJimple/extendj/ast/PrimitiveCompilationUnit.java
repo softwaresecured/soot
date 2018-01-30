@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,6 +40,7 @@ import soot.coffi.CoffiMethodSource;
  * synthetic type declarations for primitive types.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:51
+ * @astdecl PrimitiveCompilationUnit : CompilationUnit;
  * @production PrimitiveCompilationUnit : {@link CompilationUnit};
 
  */
@@ -63,13 +66,18 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"PackageDecl", "ImportDecl", "TypeDecl"},
+    type = {"String", "List<ImportDecl>", "List<TypeDecl>"},
+    kind = {"Token", "List", "List"}
+  )
   public PrimitiveCompilationUnit(String p0, List<ImportDecl> p1, List<TypeDecl> p2) {
     setPackageDecl(p0);
     setChild(p1, 0);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   public PrimitiveCompilationUnit(beaver.Symbol p0, List<ImportDecl> p1, List<TypeDecl> p2) {
     setPackageDecl(p0);
@@ -77,20 +85,20 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -107,20 +115,20 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     unknownType_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:56
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:55
+   * @declaredat ASTNode:60
    */
   public PrimitiveCompilationUnit clone() throws CloneNotSupportedException {
     PrimitiveCompilationUnit node = (PrimitiveCompilationUnit) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:60
+   * @declaredat ASTNode:65
    */
   public PrimitiveCompilationUnit copy() {
     try {
@@ -140,7 +148,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:79
+   * @declaredat ASTNode:84
    */
   @Deprecated
   public PrimitiveCompilationUnit fullCopy() {
@@ -151,7 +159,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:89
+   * @declaredat ASTNode:94
    */
   public PrimitiveCompilationUnit treeCopyNoTransform() {
     PrimitiveCompilationUnit tree = (PrimitiveCompilationUnit) copy();
@@ -172,7 +180,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:109
+   * @declaredat ASTNode:114
    */
   public PrimitiveCompilationUnit treeCopy() {
     PrimitiveCompilationUnit tree = (PrimitiveCompilationUnit) copy();
@@ -188,7 +196,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:123
+   * @declaredat ASTNode:128
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_PackageDecl == ((PrimitiveCompilationUnit) node).tokenString_PackageDecl);    
@@ -462,7 +470,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:37")
   public TypeDecl typeBoolean() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeBoolean_computed) {
       return typeBoolean_value;
     }
@@ -501,7 +509,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:45")
   public TypeDecl typeByte() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeByte_computed) {
       return typeByte_value;
     }
@@ -540,7 +548,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:53")
   public TypeDecl typeShort() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeShort_computed) {
       return typeShort_value;
     }
@@ -579,7 +587,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:61")
   public TypeDecl typeChar() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeChar_computed) {
       return typeChar_value;
     }
@@ -618,7 +626,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:69")
   public TypeDecl typeInt() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeInt_computed) {
       return typeInt_value;
     }
@@ -657,7 +665,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:77")
   public TypeDecl typeLong() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeLong_computed) {
       return typeLong_value;
     }
@@ -698,7 +706,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:87")
   public TypeDecl typeFloat() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeFloat_computed) {
       return typeFloat_value;
     }
@@ -737,7 +745,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:95")
   public TypeDecl typeDouble() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeDouble_computed) {
       return typeDouble_value;
     }
@@ -776,7 +784,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:103")
   public TypeDecl typeVoid() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeVoid_computed) {
       return typeVoid_value;
     }
@@ -814,7 +822,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:110")
   public TypeDecl typeNull() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (typeNull_computed) {
       return typeNull_value;
     }
@@ -852,7 +860,7 @@ public class PrimitiveCompilationUnit extends CompilationUnit implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="PrimitiveTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrimitiveTypes.jrag:117")
   public TypeDecl unknownType() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (unknownType_computed) {
       return unknownType_value;
     }

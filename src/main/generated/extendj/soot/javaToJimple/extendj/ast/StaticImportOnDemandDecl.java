@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -39,6 +41,7 @@ import soot.coffi.CoffiMethodSource;
  * needed.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/StaticImports.ast:19
+ * @astdecl StaticImportOnDemandDecl : StaticImportDecl;
  * @production StaticImportOnDemandDecl : {@link StaticImportDecl};
 
  */
@@ -71,43 +74,48 @@ public class StaticImportOnDemandDecl extends StaticImportDecl implements Clonea
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Access"},
+    type = {"Access"},
+    kind = {"Child"}
+  )
   public StaticImportOnDemandDecl(Access p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public StaticImportOnDemandDecl clone() throws CloneNotSupportedException {
     StaticImportOnDemandDecl node = (StaticImportOnDemandDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public StaticImportOnDemandDecl copy() {
     try {
@@ -127,7 +135,7 @@ public class StaticImportOnDemandDecl extends StaticImportDecl implements Clonea
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   @Deprecated
   public StaticImportOnDemandDecl fullCopy() {
@@ -138,7 +146,7 @@ public class StaticImportOnDemandDecl extends StaticImportDecl implements Clonea
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:69
+   * @declaredat ASTNode:74
    */
   public StaticImportOnDemandDecl treeCopyNoTransform() {
     StaticImportOnDemandDecl tree = (StaticImportOnDemandDecl) copy();
@@ -159,7 +167,7 @@ public class StaticImportOnDemandDecl extends StaticImportDecl implements Clonea
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:89
+   * @declaredat ASTNode:94
    */
   public StaticImportOnDemandDecl treeCopy() {
     StaticImportOnDemandDecl tree = (StaticImportOnDemandDecl) copy();
@@ -175,7 +183,7 @@ public class StaticImportOnDemandDecl extends StaticImportDecl implements Clonea
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:103
+   * @declaredat ASTNode:108
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -209,10 +217,10 @@ public class StaticImportOnDemandDecl extends StaticImportDecl implements Clonea
   /**
    * @attribute syn
    * @aspect StaticImports
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:98
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:106
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:98")
+  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:106")
   public TypeDecl type() {
     TypeDecl type_value = getAccess().type();
     return type_value;
@@ -220,10 +228,10 @@ public class StaticImportOnDemandDecl extends StaticImportDecl implements Clonea
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:527
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:531
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:527")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:531")
   public boolean isOnDemand() {
     boolean isOnDemand_value = true;
     return isOnDemand_value;
@@ -234,13 +242,18 @@ public class StaticImportOnDemandDecl extends StaticImportDecl implements Clonea
    */
   public NameType Define_nameType(ASTNode _callerNode, ASTNode _childNode) {
     if (getAccessNoTransform() != null && _callerNode == getAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:303
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:324
       return NameType.TYPE_NAME;
     }
     else {
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -252,8 +265,9 @@ public class StaticImportOnDemandDecl extends StaticImportDecl implements Clonea
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:125
+    // @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:146
     if (!getAccess().type().typeName().equals(typeName())) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -266,6 +280,7 @@ public class StaticImportOnDemandDecl extends StaticImportDecl implements Clonea
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!getAccess().type().typeName().equals(typeName())) {

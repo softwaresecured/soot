@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,65 +38,11 @@ import soot.coffi.CoffiMethodSource;
 /** A superconstructor invocation. 
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:90
+ * @astdecl SuperConstructorAccess : ConstructorAccess;
  * @production SuperConstructorAccess : {@link ConstructorAccess};
 
  */
 public class SuperConstructorAccess extends ConstructorAccess implements Cloneable {
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:544
-   */
-  public soot.Value eval(Body b) {
-    Local                     base          = b.emitThis(hostType(), this); // this
-    // FIXME: Add a proper attribute instead of doing this stupid thing to get our ctor-decl.
-    ConstructorDecl           currCtor      = hostingCtorHack();
-    ConstructorDecl           superCtorDecl = decl().erasedConstructor();
-    ArrayList<soot.Immediate> list          = new ArrayList<>();
-
-    // fwd this$0/this$1
-    if (superCtorDecl.needsEnclosing()) {
-      if (hasPrevExpr() && !prevExpr().isTypeAccess()) {
-        list.add(asImmediate(b, prevExpr().eval(b)));
-      } else if (hostType().needsSuperEnclosing()) {
-        int   offset  = hostType().needsEnclosing() ? 1 : 0;
-        Local enclose = currCtor.getExplicitisedParameters().getChild(offset).local;
-        list.add(asImmediate(b, enclose));
-      } else {
-        list.add(emitThis(b, superConstructorQualifier(superCtorDecl.hostType().enclosingType())));
-      }
-    }
-
-    // fwd args
-    for (int i = 0; i < getNumArg(); i++)
-      list.add(asImmediate(b,
-        getArg(i).type().emitCastTo(b, getArg(i), superCtorDecl.getParameter(i).type().erasure()))); // MethodInvocationConversion
-
-    // fwd captured variables from our own params.
-    // NOTE: this class's capture fields are not yet initialised.
-    // TODO: Certain indirectly captured variables should be fwd'd via a field lookup instead
-    for (Map.Entry<Variable, ParameterDeclaration> kv : currCtor.getExplicitisedCaptureParameters().entrySet()) {
-      if (hostType().enclosingVariablesHosted().contains(kv.getKey())) continue;
-
-      list.add(asImmediate(b, kv.getValue().local));
-    }
-
-    // FIXME: Add forwarding of captured variables hosted in a superclass??
-
-    // is this case even possible/useful?
-    //assert !(superCtorDecl.isPrivate() && superCtorDecl.hostType() != hostType());
-    // if (superCtorDecl.isPrivate() && ctorDecl.hostType() != hostType()) {
-    //   list.add(asImmediate(b, soot.jimple.NullConstant.v()));
-    //   b.add(
-    //     b.newInvokeStmt(
-    //       b.newSpecialInvokeExpr(base, superCtorDecl.createAccessor().sootRef(), list, this),
-    //       this
-    //     )
-    //   );
-    //   return base;
-    // }
-
-    return b.newSpecialInvokeExpr(base, superCtorDecl.sootRef(), list, this);
-  }
   /**
    * @declaredat ASTNode:1
    */
@@ -115,32 +63,37 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Arg"},
+    type = {"String", "List<Expr>"},
+    kind = {"Token", "List"}
+  )
   public SuperConstructorAccess(String p0, List<Expr> p1) {
     setID(p0);
     setChild(p1, 0);
   }
   /**
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   public SuperConstructorAccess(beaver.Symbol p0, List<Expr> p1) {
     setID(p0);
     setChild(p1, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -149,20 +102,20 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
     transformedVariableArity_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public SuperConstructorAccess clone() throws CloneNotSupportedException {
     SuperConstructorAccess node = (SuperConstructorAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   public SuperConstructorAccess copy() {
     try {
@@ -182,7 +135,7 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:68
+   * @declaredat ASTNode:73
    */
   @Deprecated
   public SuperConstructorAccess fullCopy() {
@@ -193,7 +146,7 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:78
+   * @declaredat ASTNode:83
    */
   public SuperConstructorAccess treeCopyNoTransform() {
     SuperConstructorAccess tree = (SuperConstructorAccess) copy();
@@ -214,7 +167,7 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:98
+   * @declaredat ASTNode:103
    */
   public SuperConstructorAccess treeCopy() {
     SuperConstructorAccess tree = (SuperConstructorAccess) copy();
@@ -230,7 +183,7 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:112
+   * @declaredat ASTNode:117
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((SuperConstructorAccess) node).tokenString_ID);    
@@ -395,27 +348,27 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = v.isInstanceVariable() ? unassignedBefore(v) : !v.isClassVariable();
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -427,7 +380,7 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = v.isInstanceVariable() ? unassignedBefore(v) : !v.isClassVariable();
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -442,7 +395,7 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
     decls_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decls_computed = null;
+  protected ASTState.Cycle decls_computed = null;
 
   /** @apilevel internal */
   protected SimpleSet<ConstructorDecl> decls_value;
@@ -455,8 +408,8 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstructScope", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupConstructor.jrag:97")
   public SimpleSet<ConstructorDecl> decls() {
-    ASTNode$State state = state();
-    if (decls_computed == ASTNode$State.NON_CYCLE || decls_computed == state().cycle()) {
+    ASTState state = state();
+    if (decls_computed == ASTState.NON_CYCLE || decls_computed == state().cycle()) {
       return decls_value;
     }
     decls_value = decls_compute();
@@ -464,7 +417,7 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
       decls_computed = state().cycle();
     
     } else {
-      decls_computed = ASTNode$State.NON_CYCLE;
+      decls_computed = ASTState.NON_CYCLE;
     
     }
     return decls_value;
@@ -514,10 +467,10 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
   /**
    * @attribute syn
    * @aspect TypeHierarchyCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:106
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:122
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:106")
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:122")
   public Collection<Problem> typeHierarchyProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -566,7 +519,7 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="VariableArityParametersCodegen", declaredAt="/home/olivier/projects/extendj/java5/backend/VariableArityParametersCodegen.jrag:132")
   public ConstructorAccess transformedVariableArity() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (transformedVariableArity_computed) {
       return transformedVariableArity_value;
     }
@@ -600,6 +553,68 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
     }
   /**
    * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:481
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:481")
+  public SpecialInvokeExpr eval(Body b) {
+    {
+        Local                     base      = b.emitThis(hostType(), this); // this
+        // FIXME: Add a proper attribute instead of doing this stupid thing to get our ctor-decl.
+        ConstructorDecl           currCtor  = hostingCtorHack();
+        ConstructorDecl           superCtor = decl().erasedConstructor();
+        ArrayList<Value>          params    = new ArrayList<>();
+    
+        // fwd this$0/this$1
+        if (superCtor.needsEnclosing()) {
+          if (hasPrevExpr() && !prevExpr().isTypeAccess()) {
+            params.add(prevExpr().eval(b));
+          } else if (hostType().needsSuperEnclosing()) {
+            int   offset  = hostType().needsEnclosing() ? 1 : 0;
+            Local enclose = b.local(currCtor.getExplicitisedParameters().getChild(offset));
+            params.add(enclose);
+          } else {
+            params.add(emitThis(b, superConstructorQualifier(superCtor.hostType().enclosingType())));
+          }
+        }
+    
+        // fwd args
+        for (int i = 0; i < getNumArg(); i++) {
+          TypeDecl erased = superCtor.getParameter(i).type().erasure();
+          params.add(getArg(i).evalAndCast(b, erased)); // MethodInvocationConversion
+        }
+    
+        // fwd captured variables from our own params.
+        // NOTE: this class's capture fields are not yet initialised.
+        // TODO: Certain indirectly captured variables should be fwd'd via a field lookup instead
+        for (Map.Entry<Variable, ParameterDeclaration> kv
+              : currCtor.getExplicitisedCaptureParameters().entrySet()) {
+          if (hostType().enclosingVariablesHosted().contains(kv.getKey())) continue;
+    
+          params.add(b.local(kv.getValue()));
+        }
+    
+        // FIXME: Add forwarding of captured variables hosted in a superclass??
+    
+        // is this case even possible/useful?
+        //assert !(superCtorDecl.isPrivate() && superCtorDecl.hostType() != hostType());
+        // if (superCtorDecl.isPrivate() && ctorDecl.hostType() != hostType()) {
+        //   list.add(soot.jimple.NullConstant.v());
+        //   b.add(
+        //     b.newInvokeStmt(
+        //       b.newSpecialInvokeExpr(base, superCtorDecl.createAccessor().sootRef(), list, this),
+        //       this
+        //     )
+        //   );
+        //   return base;
+        // }
+    
+        return b.newSpecialInvokeExpr(base, superCtor.sootRef(), params, this);
+      }
+  }
+  /**
+   * @attribute syn
    * @aspect ResolverDependencies
    * @declaredat /home/olivier/projects/extendj/soot8/backend/ResolverDependencies.jrag:10
    */
@@ -623,21 +638,21 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
   /**
    * @attribute inh
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:663
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:665
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:663")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:665")
   public TypeDecl enclosingInstance() {
     TypeDecl enclosingInstance_value = getParent().Define_enclosingInstance(this, null);
     return enclosingInstance_value;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:109
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
    * @apilevel internal
    */
   public boolean Define_hasPackage(ASTNode _callerNode, ASTNode _childNode, String packageName) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:114
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:118
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return unqualifiedScope().hasPackage(packageName);
     }
@@ -645,6 +660,11 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
       return super.Define_hasPackage(_callerNode, _childNode, packageName);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute hasPackage
+   */
   protected boolean canDefine_hasPackage(ASTNode _callerNode, ASTNode _childNode, String packageName) {
     return true;
   }
@@ -662,16 +682,21 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
       return super.Define_lookupVariable(_callerNode, _childNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:188
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:204
    * @apilevel internal
    */
   public boolean Define_inExplicitConstructorInvocation(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:192
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:208
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return true;
     }
@@ -679,16 +704,21 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
       return super.Define_inExplicitConstructorInvocation(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:204
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inExplicitConstructorInvocation
+   */
   protected boolean canDefine_inExplicitConstructorInvocation(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:196
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:212
    * @apilevel internal
    */
   public TypeDecl Define_enclosingExplicitConstructorHostType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:201
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:217
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return hostType();
     }
@@ -696,6 +726,11 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
       return super.Define_enclosingExplicitConstructorHostType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:212
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosingExplicitConstructorHostType
+   */
   protected boolean canDefine_enclosingExplicitConstructorHostType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -707,8 +742,9 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:104
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:120
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -719,6 +755,7 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_signatureDependencies(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/soot8/backend/ResolverDependencies.jrag:41
     if (sootSigDepType().sootDependencyNeeded()) {
@@ -733,16 +770,18 @@ public class SuperConstructorAccess extends ConstructorAccess implements Cloneab
     }
     super.collect_contributors_CompilationUnit_signatureDependencies(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : typeHierarchyProblems()) {
       collection.add(value);
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_signatureDependencies(HashSet<Type> collection) {
     super.contributeTo_CompilationUnit_signatureDependencies(collection);
     if (sootSigDepType().sootDependencyNeeded()) {
-      collection.add(sootSigDepType().getSootType());
+      collection.add(sootSigDepType().sootType());
     }
   }
 }

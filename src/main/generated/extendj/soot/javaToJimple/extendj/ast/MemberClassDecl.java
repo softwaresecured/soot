@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:189
+ * @astdecl MemberClassDecl : MemberTypeDecl ::= ClassDecl;
  * @production MemberClassDecl : {@link MemberTypeDecl} ::= <span class="component">{@link ClassDecl}</span>;
 
  */
@@ -49,14 +52,14 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1491
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1490
    */
   public BodyDecl signatureCopy() {
     return new MemberClassDecl(getClassDecl().signatureCopy());
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1581
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1580
    */
   public BodyDecl erasedCopy() {
     return new MemberClassDecl(getClassDecl().erasedCopy());
@@ -80,43 +83,48 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ClassDecl"},
+    type = {"ClassDecl"},
+    kind = {"Child"}
+  )
   public MemberClassDecl(ClassDecl p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public MemberClassDecl clone() throws CloneNotSupportedException {
     MemberClassDecl node = (MemberClassDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public MemberClassDecl copy() {
     try {
@@ -136,7 +144,7 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   @Deprecated
   public MemberClassDecl fullCopy() {
@@ -147,7 +155,7 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:69
+   * @declaredat ASTNode:74
    */
   public MemberClassDecl treeCopyNoTransform() {
     MemberClassDecl tree = (MemberClassDecl) copy();
@@ -168,7 +176,7 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:89
+   * @declaredat ASTNode:94
    */
   public MemberClassDecl treeCopy() {
     MemberClassDecl tree = (MemberClassDecl) copy();
@@ -184,7 +192,7 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:103
+   * @declaredat ASTNode:108
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -218,10 +226,10 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:658
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:662
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:658")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:662")
   public TypeDecl typeDecl() {
     TypeDecl typeDecl_value = getClassDecl();
     return typeDecl_value;
@@ -229,10 +237,10 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1715
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1715")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714")
   public boolean isSubstitutable() {
     boolean isSubstitutable_value = !isStatic();
     return isSubstitutable_value;
@@ -249,34 +257,44 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
     return modifiedInScope_Variable_value;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:588
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:584
    * @apilevel internal
    */
   public boolean Define_isMemberType(ASTNode _callerNode, ASTNode _childNode) {
     if (getClassDeclNoTransform() != null && _callerNode == getClassDecl()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:589
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:585
       return true;
     }
     else {
       return getParent().Define_isMemberType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:584
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isMemberType
+   */
   protected boolean canDefine_isMemberType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:207
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
    * @apilevel internal
    */
   public boolean Define_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getClassDeclNoTransform() != null && _callerNode == getClassDecl()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:219
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:235
       return false;
     }
     else {
       return getParent().Define_inStaticContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inStaticContext
+   */
   protected boolean canDefine_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

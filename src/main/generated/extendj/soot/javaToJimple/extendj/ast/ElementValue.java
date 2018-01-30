@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Annotations.ast:10
+ * @astdecl ElementValue : ASTNode;
  * @production ElementValue : {@link ASTNode};
 
  */
@@ -139,10 +142,10 @@ public abstract class ElementValue extends ASTNode<ASTNode> implements Cloneable
   /**
    * @attribute syn
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:451
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:448
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:451")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:448")
   public boolean hasValue(String annot) {
     boolean hasValue_String_value = false;
     return hasValue_String_value;
@@ -150,10 +153,10 @@ public abstract class ElementValue extends ASTNode<ASTNode> implements Cloneable
   /**
    * @attribute syn
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:665
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:675
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:665")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:675")
   public boolean commensurateWithTypeDecl(TypeDecl type) {
     boolean commensurateWithTypeDecl_TypeDecl_value = false;
     return commensurateWithTypeDecl_TypeDecl_value;
@@ -161,10 +164,10 @@ public abstract class ElementValue extends ASTNode<ASTNode> implements Cloneable
   /**
    * @attribute syn
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:693
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:703
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:693")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:703")
   public boolean commensurateWithArrayDecl(ArrayDecl type) {
     boolean commensurateWithArrayDecl_ArrayDecl_value = type.componentType().commensurateWith(this);
     return commensurateWithArrayDecl_ArrayDecl_value;
@@ -172,10 +175,10 @@ public abstract class ElementValue extends ASTNode<ASTNode> implements Cloneable
   /**
    * @attribute syn
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:721
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:731
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:721")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:731")
   public TypeDecl type() {
     TypeDecl type_value = unknownType();
     return type_value;
@@ -194,10 +197,10 @@ public abstract class ElementValue extends ASTNode<ASTNode> implements Cloneable
   /**
    * @attribute inh
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:713
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:713")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723")
   public TypeDecl declType() {
     TypeDecl declType_value = getParent().Define_declType(this, null);
     return declType_value;
@@ -205,10 +208,10 @@ public abstract class ElementValue extends ASTNode<ASTNode> implements Cloneable
   /**
    * @attribute inh
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:729
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:739
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:729")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:739")
   public TypeDecl unknownType() {
     TypeDecl unknownType_value = getParent().Define_unknownType(this, null);
     return unknownType_value;
@@ -221,6 +224,11 @@ public abstract class ElementValue extends ASTNode<ASTNode> implements Cloneable
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:86
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isLeftChildOfDot
+   */
   protected boolean canDefine_isLeftChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -232,6 +240,11 @@ public abstract class ElementValue extends ASTNode<ASTNode> implements Cloneable
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:101
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isRightChildOfDot
+   */
   protected boolean canDefine_isRightChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -243,6 +256,11 @@ public abstract class ElementValue extends ASTNode<ASTNode> implements Cloneable
     int childIndex = this.getIndexOfChild(_callerNode);
     return prevExprError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:118
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute prevExpr
+   */
   protected boolean canDefine_prevExpr(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -254,6 +272,11 @@ public abstract class ElementValue extends ASTNode<ASTNode> implements Cloneable
     int childIndex = this.getIndexOfChild(_callerNode);
     return nextAccessError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:142
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nextAccess
+   */
   protected boolean canDefine_nextAccess(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

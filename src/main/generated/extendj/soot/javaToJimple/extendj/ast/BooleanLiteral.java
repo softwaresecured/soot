@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +39,7 @@ import soot.coffi.CoffiMethodSource;
  * Represents a Java boolean value: either {@code true} or {@code false}.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Literals.ast:10
+ * @astdecl BooleanLiteral : Literal;
  * @production BooleanLiteral : {@link Literal};
 
  */
@@ -47,13 +50,6 @@ public class BooleanLiteral extends Literal implements Cloneable {
    */
   public BooleanLiteral(boolean b) {
     this(b ? "true" : "false");
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:84
-   */
-  public soot.Value eval(Body b) {
-    return BooleanType.emitConstant(constant().booleanValue(), b, this);
   }
   /**
    * @declaredat ASTNode:1
@@ -73,30 +69,35 @@ public class BooleanLiteral extends Literal implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"LITERAL"},
+    type = {"String"},
+    kind = {"Token"}
+  )
   public BooleanLiteral(String p0) {
     setLITERAL(p0);
   }
   /**
-   * @declaredat ASTNode:15
+   * @declaredat ASTNode:20
    */
   public BooleanLiteral(beaver.Symbol p0) {
     setLITERAL(p0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -104,20 +105,20 @@ public class BooleanLiteral extends Literal implements Cloneable {
     type_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public BooleanLiteral clone() throws CloneNotSupportedException {
     BooleanLiteral node = (BooleanLiteral) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public BooleanLiteral copy() {
     try {
@@ -137,7 +138,7 @@ public class BooleanLiteral extends Literal implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   @Deprecated
   public BooleanLiteral fullCopy() {
@@ -148,7 +149,7 @@ public class BooleanLiteral extends Literal implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:78
    */
   public BooleanLiteral treeCopyNoTransform() {
     BooleanLiteral tree = (BooleanLiteral) copy();
@@ -169,7 +170,7 @@ public class BooleanLiteral extends Literal implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:93
+   * @declaredat ASTNode:98
    */
   public BooleanLiteral treeCopy() {
     BooleanLiteral tree = (BooleanLiteral) copy();
@@ -185,7 +186,7 @@ public class BooleanLiteral extends Literal implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:107
+   * @declaredat ASTNode:112
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_LITERAL == ((BooleanLiteral) node).tokenString_LITERAL);    
@@ -225,7 +226,7 @@ public class BooleanLiteral extends Literal implements Cloneable {
     constant_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle constant_computed = null;
+  protected ASTState.Cycle constant_computed = null;
 
   /** @apilevel internal */
   protected Constant constant_value;
@@ -238,8 +239,8 @@ public class BooleanLiteral extends Literal implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstantExpression", declaredAt="/home/olivier/projects/extendj/java4/frontend/ConstantExpression.jrag:38")
   public Constant constant() {
-    ASTNode$State state = state();
-    if (constant_computed == ASTNode$State.NON_CYCLE || constant_computed == state().cycle()) {
+    ASTState state = state();
+    if (constant_computed == ASTState.NON_CYCLE || constant_computed == state().cycle()) {
       return constant_value;
     }
     constant_value = Constant.create(Boolean.valueOf(getLITERAL()).booleanValue());
@@ -247,7 +248,7 @@ public class BooleanLiteral extends Literal implements Cloneable {
       constant_computed = state().cycle();
     
     } else {
-      constant_computed = ASTNode$State.NON_CYCLE;
+      constant_computed = ASTState.NON_CYCLE;
     
     }
     return constant_value;
@@ -280,7 +281,7 @@ public class BooleanLiteral extends Literal implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -288,13 +289,13 @@ public class BooleanLiteral extends Literal implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = typeBoolean();
@@ -302,10 +303,21 @@ public class BooleanLiteral extends Literal implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:53
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:53")
+  public soot.jimple.Constant eval(Body b) {
+    soot.jimple.Constant eval_Body_value = BooleanType.emitConstant(constant().booleanValue(), b, this);
+    return eval_Body_value;
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {

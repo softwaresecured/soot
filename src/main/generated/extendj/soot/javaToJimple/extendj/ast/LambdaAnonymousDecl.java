@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/LambdaAnonymousDecl.ast:1
+ * @astdecl LambdaAnonymousDecl : AnonymousDecl ::= Modifiers <ID:String> [SuperClass:Access] Implements:Access* BodyDecl*;
  * @production LambdaAnonymousDecl : {@link AnonymousDecl} ::= <span class="component">{@link Modifiers}</span> <span class="component">&lt;ID:String&gt;</span> <span class="component">[SuperClass:{@link Access}]</span> <span class="component">Implements:{@link Access}*</span> <span class="component">{@link BodyDecl}*</span>;
 
  */
@@ -63,6 +66,11 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "Implements", "BodyDecl"},
+    type = {"Modifiers", "String", "List<Access>", "List<BodyDecl>"},
+    kind = {"Child", "Token", "List", "List"}
+  )
   public LambdaAnonymousDecl(Modifiers p0, String p1, List<Access> p2, List<BodyDecl> p3) {
     setChild(p0, 0);
     setID(p1);
@@ -70,7 +78,7 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
     setChild(p3, 2);
   }
   /**
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public LambdaAnonymousDecl(Modifiers p0, beaver.Symbol p1, List<Access> p2, List<BodyDecl> p3) {
     setChild(p0, 0);
@@ -79,20 +87,20 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
     setChild(p3, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -100,20 +108,20 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
     enclosingLambda_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   public LambdaAnonymousDecl clone() throws CloneNotSupportedException {
     LambdaAnonymousDecl node = (LambdaAnonymousDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:55
+   * @declaredat ASTNode:60
    */
   public LambdaAnonymousDecl copy() {
     try {
@@ -133,7 +141,7 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   @Deprecated
   public LambdaAnonymousDecl fullCopy() {
@@ -144,7 +152,7 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:84
+   * @declaredat ASTNode:89
    */
   public LambdaAnonymousDecl treeCopyNoTransform() {
     LambdaAnonymousDecl tree = (LambdaAnonymousDecl) copy();
@@ -171,7 +179,7 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:110
+   * @declaredat ASTNode:115
    */
   public LambdaAnonymousDecl treeCopy() {
     LambdaAnonymousDecl tree = (LambdaAnonymousDecl) copy();
@@ -193,7 +201,7 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:130
+   * @declaredat ASTNode:135
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((LambdaAnonymousDecl) node).tokenString_ID);    
@@ -566,7 +574,7 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
   }
   /** @apilevel internal */
   private void unqualifiedLookupMethod_String_reset() {
-    unqualifiedLookupMethod_String_computed = new java.util.HashMap(4);
+    unqualifiedLookupMethod_String_computed = null;
     unqualifiedLookupMethod_String_values = null;
   }
   /** @apilevel internal */
@@ -578,18 +586,18 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
    * type.
    * @attribute syn
    * @aspect LookupMethod
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:118
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:145
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:118")
+  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:145")
   public Collection<MethodDecl> unqualifiedLookupMethod(String name) {
     Object _parameters = name;
     if (unqualifiedLookupMethod_String_computed == null) unqualifiedLookupMethod_String_computed = new java.util.HashMap(4);
     if (unqualifiedLookupMethod_String_values == null) unqualifiedLookupMethod_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (unqualifiedLookupMethod_String_values.containsKey(_parameters) && unqualifiedLookupMethod_String_computed != null
+    ASTState state = state();
+    if (unqualifiedLookupMethod_String_values.containsKey(_parameters)
         && unqualifiedLookupMethod_String_computed.containsKey(_parameters)
-        && (unqualifiedLookupMethod_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || unqualifiedLookupMethod_String_computed.get(_parameters) == state().cycle())) {
+        && (unqualifiedLookupMethod_String_computed.get(_parameters) == ASTState.NON_CYCLE || unqualifiedLookupMethod_String_computed.get(_parameters) == state().cycle())) {
       return (Collection<MethodDecl>) unqualifiedLookupMethod_String_values.get(_parameters);
     }
     Collection<MethodDecl> unqualifiedLookupMethod_String_value = unqualifiedLookupMethod_compute(name);
@@ -599,7 +607,7 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
     
     } else {
       unqualifiedLookupMethod_String_values.put(_parameters, unqualifiedLookupMethod_String_value);
-      unqualifiedLookupMethod_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      unqualifiedLookupMethod_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return unqualifiedLookupMethod_String_value;
@@ -622,8 +630,8 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="EnclosingLambda", declaredAt="/home/olivier/projects/extendj/java8/frontend/EnclosingLambda.jrag:37")
   public LambdaExpr enclosingLambda() {
-    ASTNode$State state = state();
-    if (enclosingLambda_computed == ASTNode$State.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
+    ASTState state = state();
+    if (enclosingLambda_computed == ASTState.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
       return enclosingLambda_value;
     }
     enclosingLambda_value = getParent().Define_enclosingLambda(this, null);
@@ -631,7 +639,7 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
       enclosingLambda_computed = state().cycle();
     
     } else {
-      enclosingLambda_computed = ASTNode$State.NON_CYCLE;
+      enclosingLambda_computed = ASTState.NON_CYCLE;
     
     }
     return enclosingLambda_value;
@@ -642,7 +650,7 @@ public class LambdaAnonymousDecl extends AnonymousDecl implements Cloneable {
     enclosingLambda_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle enclosingLambda_computed = null;
+  protected ASTState.Cycle enclosingLambda_computed = null;
 
   /** @apilevel internal */
   protected LambdaExpr enclosingLambda_value;

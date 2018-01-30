@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,7 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast class
  * @aspect BytecodeDescriptor
- * @declaredat /home/olivier/projects/extendj/java5/frontend/BytecodeDescriptor.jrag:157
+ * @declaredat /home/olivier/projects/extendj/java5/frontend/BytecodeDescriptor.jrag:160
  */
  class MethodInfo extends java.lang.Object {
   
@@ -134,8 +136,19 @@ import soot.coffi.CoffiMethodSource;
 
       BodyDecl b;
       if (isConstructor()) {
-        b = new ConstructorDecl(AbstractClassfileParser.modifiers(flags), name, parameterList,
-            exceptionList, new Opt(), new Block());
+        if (s == null || !s.hasFormalTypeParameters()) {
+          b = new ConstructorDecl(AbstractClassfileParser.modifiers(flags), name, parameterList,
+              exceptionList, new Opt(), new Block());
+        } else {
+          b = new GenericConstructorDecl(
+              AbstractClassfileParser.modifiers(flags),
+              name,
+              parameterList,
+              exceptionList,
+              new Opt(),
+              new Block(),
+              s.typeParameters());
+        }
       } else if (attributes.elementValue() != null) {
         b = new AnnotationMethodDecl(AbstractClassfileParser.modifiers(flags), returnType, name,
             parameterList, exceptionList,

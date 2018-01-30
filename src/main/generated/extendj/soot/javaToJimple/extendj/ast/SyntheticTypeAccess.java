@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,18 +38,19 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/MethodReference.ast:9
+ * @astdecl SyntheticTypeAccess : Access;
  * @production SyntheticTypeAccess : {@link Access};
 
  */
 public class SyntheticTypeAccess extends Access implements Cloneable {
   /**
    * @aspect Synthetics
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:425
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:424
    */
   private TypeDecl type;
   /**
    * @aspect Synthetics
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:426
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:425
    */
   public SyntheticTypeAccess(TypeDecl type) {
     this.type = type;
@@ -180,7 +183,7 @@ public class SyntheticTypeAccess extends Access implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -188,13 +191,13 @@ public class SyntheticTypeAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect Synthetics
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:429
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:428
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Synthetics", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:429")
+  @ASTNodeAnnotation.Source(aspect="Synthetics", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:428")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = type;
@@ -202,10 +205,21 @@ public class SyntheticTypeAccess extends Access implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    Value eval_Body_value = eval_fail_general();
+    return eval_Body_value;
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {

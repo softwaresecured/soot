@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/GenericMethods.ast:21
+ * @astdecl ParSuperConstructorAccess : SuperConstructorAccess ::= TypeArgument:Access*;
  * @production ParSuperConstructorAccess : {@link SuperConstructorAccess} ::= <span class="component">TypeArgument:{@link Access}*</span>;
 
  */
@@ -76,13 +79,18 @@ public class ParSuperConstructorAccess extends SuperConstructorAccess implements
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Arg", "TypeArgument"},
+    type = {"String", "List<Expr>", "List<Access>"},
+    kind = {"Token", "List", "List"}
+  )
   public ParSuperConstructorAccess(String p0, List<Expr> p1, List<Access> p2) {
     setID(p0);
     setChild(p1, 0);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   public ParSuperConstructorAccess(beaver.Symbol p0, List<Expr> p1, List<Access> p2) {
     setID(p0);
@@ -90,39 +98,39 @@ public class ParSuperConstructorAccess extends SuperConstructorAccess implements
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public ParSuperConstructorAccess clone() throws CloneNotSupportedException {
     ParSuperConstructorAccess node = (ParSuperConstructorAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   public ParSuperConstructorAccess copy() {
     try {
@@ -142,7 +150,7 @@ public class ParSuperConstructorAccess extends SuperConstructorAccess implements
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:68
+   * @declaredat ASTNode:73
    */
   @Deprecated
   public ParSuperConstructorAccess fullCopy() {
@@ -153,7 +161,7 @@ public class ParSuperConstructorAccess extends SuperConstructorAccess implements
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:78
+   * @declaredat ASTNode:83
    */
   public ParSuperConstructorAccess treeCopyNoTransform() {
     ParSuperConstructorAccess tree = (ParSuperConstructorAccess) copy();
@@ -174,7 +182,7 @@ public class ParSuperConstructorAccess extends SuperConstructorAccess implements
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:98
+   * @declaredat ASTNode:103
    */
   public ParSuperConstructorAccess treeCopy() {
     ParSuperConstructorAccess tree = (ParSuperConstructorAccess) copy();
@@ -190,7 +198,7 @@ public class ParSuperConstructorAccess extends SuperConstructorAccess implements
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:112
+   * @declaredat ASTNode:117
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ParSuperConstructorAccess) node).tokenString_ID);    
@@ -458,6 +466,11 @@ public class ParSuperConstructorAccess extends SuperConstructorAccess implements
       return super.Define_nameType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -475,6 +488,11 @@ public class ParSuperConstructorAccess extends SuperConstructorAccess implements
       return super.Define_lookupType(_callerNode, _childNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }

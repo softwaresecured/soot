@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/MethodReference.ast:4
+ * @astdecl TypeMethodReference : MethodReference ::= TypeAccess:Access;
  * @production TypeMethodReference : {@link MethodReference} ::= <span class="component">TypeAccess:{@link Access}</span>;
 
  */
@@ -60,10 +63,12 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     out.print(name());
   }
   /**
-   * @aspect EmitJimpleJava8
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimpleJava8.jrag:5
+   * @aspect PrettyPrintUtil8
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/PrettyPrintUtil.jadd:117
    */
-  public soot.Value eval(Body b) { return toClass().eval(b); }
+  @Override public String toString() {
+    return getTypeAccessNoTransform().toString() + super.toString();
+  }
   /**
    * @declaredat ASTNode:1
    */
@@ -84,13 +89,18 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"TypeArgument", "ID", "TypeAccess"},
+    type = {"List<Access>", "String", "Access"},
+    kind = {"List", "Token", "Child"}
+  )
   public TypeMethodReference(List<Access> p0, String p1, Access p2) {
     setChild(p0, 0);
     setID(p1);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   public TypeMethodReference(List<Access> p0, beaver.Symbol p1, Access p2) {
     setChild(p0, 0);
@@ -98,20 +108,20 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -123,29 +133,29 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     syntheticStaticAccess_FunctionDescriptor_reset();
     syntheticStaticMethodAccess_FunctionDescriptor_reset();
     syntheticInstanceAccess_FunctionDescriptor_reset();
-    syntheticInstanceMethodAccess_FunctionDescriptor_reset();
     congruentTo_FunctionDescriptor_reset();
     potentiallyApplicableMethods_FunctionDescriptor_reset();
     exactCompileTimeDeclaration_reset();
     potentiallyCompatible_TypeDecl_BodyDecl_reset();
+    targetInterface_reset();
     toClass_reset();
     toBlock_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:54
+   * @declaredat ASTNode:59
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:58
+   * @declaredat ASTNode:63
    */
   public TypeMethodReference clone() throws CloneNotSupportedException {
     TypeMethodReference node = (TypeMethodReference) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   public TypeMethodReference copy() {
     try {
@@ -165,7 +175,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:82
+   * @declaredat ASTNode:87
    */
   @Deprecated
   public TypeMethodReference fullCopy() {
@@ -176,7 +186,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:92
+   * @declaredat ASTNode:97
    */
   public TypeMethodReference treeCopyNoTransform() {
     TypeMethodReference tree = (TypeMethodReference) copy();
@@ -197,7 +207,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:112
+   * @declaredat ASTNode:117
    */
   public TypeMethodReference treeCopy() {
     TypeMethodReference tree = (TypeMethodReference) copy();
@@ -213,7 +223,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:126
+   * @declaredat ASTNode:131
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((TypeMethodReference) node).tokenString_ID);    
@@ -385,7 +395,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   }
   /** @apilevel internal */
   private void targetStaticMethod_FunctionDescriptor_reset() {
-    targetStaticMethod_FunctionDescriptor_computed = new java.util.HashMap(4);
+    targetStaticMethod_FunctionDescriptor_computed = null;
     targetStaticMethod_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -403,10 +413,10 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     Object _parameters = fd;
     if (targetStaticMethod_FunctionDescriptor_computed == null) targetStaticMethod_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (targetStaticMethod_FunctionDescriptor_values == null) targetStaticMethod_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (targetStaticMethod_FunctionDescriptor_values.containsKey(_parameters) && targetStaticMethod_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (targetStaticMethod_FunctionDescriptor_values.containsKey(_parameters)
         && targetStaticMethod_FunctionDescriptor_computed.containsKey(_parameters)
-        && (targetStaticMethod_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || targetStaticMethod_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (targetStaticMethod_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || targetStaticMethod_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (MethodDecl) targetStaticMethod_FunctionDescriptor_values.get(_parameters);
     }
     MethodDecl targetStaticMethod_FunctionDescriptor_value = targetStaticMethod_compute(fd);
@@ -416,7 +426,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     
     } else {
       targetStaticMethod_FunctionDescriptor_values.put(_parameters, targetStaticMethod_FunctionDescriptor_value);
-      targetStaticMethod_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      targetStaticMethod_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return targetStaticMethod_FunctionDescriptor_value;
@@ -434,7 +444,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     }
   /** @apilevel internal */
   private void targetInstanceMethod_FunctionDescriptor_reset() {
-    targetInstanceMethod_FunctionDescriptor_computed = new java.util.HashMap(4);
+    targetInstanceMethod_FunctionDescriptor_computed = null;
     targetInstanceMethod_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -452,10 +462,10 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     Object _parameters = fd;
     if (targetInstanceMethod_FunctionDescriptor_computed == null) targetInstanceMethod_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (targetInstanceMethod_FunctionDescriptor_values == null) targetInstanceMethod_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (targetInstanceMethod_FunctionDescriptor_values.containsKey(_parameters) && targetInstanceMethod_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (targetInstanceMethod_FunctionDescriptor_values.containsKey(_parameters)
         && targetInstanceMethod_FunctionDescriptor_computed.containsKey(_parameters)
-        && (targetInstanceMethod_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || targetInstanceMethod_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (targetInstanceMethod_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || targetInstanceMethod_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (MethodDecl) targetInstanceMethod_FunctionDescriptor_values.get(_parameters);
     }
     MethodDecl targetInstanceMethod_FunctionDescriptor_value = targetInstanceMethod_compute(fd);
@@ -465,7 +475,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     
     } else {
       targetInstanceMethod_FunctionDescriptor_values.put(_parameters, targetInstanceMethod_FunctionDescriptor_value);
-      targetInstanceMethod_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      targetInstanceMethod_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return targetInstanceMethod_FunctionDescriptor_value;
@@ -492,7 +502,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     }
   /** @apilevel internal */
   private void validStaticMethod_FunctionDescriptor_reset() {
-    validStaticMethod_FunctionDescriptor_computed = new java.util.HashMap(4);
+    validStaticMethod_FunctionDescriptor_computed = null;
     validStaticMethod_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -510,10 +520,10 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     Object _parameters = fd;
     if (validStaticMethod_FunctionDescriptor_computed == null) validStaticMethod_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (validStaticMethod_FunctionDescriptor_values == null) validStaticMethod_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (validStaticMethod_FunctionDescriptor_values.containsKey(_parameters) && validStaticMethod_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (validStaticMethod_FunctionDescriptor_values.containsKey(_parameters)
         && validStaticMethod_FunctionDescriptor_computed.containsKey(_parameters)
-        && (validStaticMethod_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || validStaticMethod_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (validStaticMethod_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || validStaticMethod_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (Boolean) validStaticMethod_FunctionDescriptor_values.get(_parameters);
     }
     boolean validStaticMethod_FunctionDescriptor_value = validStaticMethod_compute(fd);
@@ -523,7 +533,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     
     } else {
       validStaticMethod_FunctionDescriptor_values.put(_parameters, validStaticMethod_FunctionDescriptor_value);
-      validStaticMethod_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      validStaticMethod_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return validStaticMethod_FunctionDescriptor_value;
@@ -535,7 +545,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     }
   /** @apilevel internal */
   private void validInstanceMethod_FunctionDescriptor_reset() {
-    validInstanceMethod_FunctionDescriptor_computed = new java.util.HashMap(4);
+    validInstanceMethod_FunctionDescriptor_computed = null;
     validInstanceMethod_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -553,10 +563,10 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     Object _parameters = fd;
     if (validInstanceMethod_FunctionDescriptor_computed == null) validInstanceMethod_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (validInstanceMethod_FunctionDescriptor_values == null) validInstanceMethod_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (validInstanceMethod_FunctionDescriptor_values.containsKey(_parameters) && validInstanceMethod_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (validInstanceMethod_FunctionDescriptor_values.containsKey(_parameters)
         && validInstanceMethod_FunctionDescriptor_computed.containsKey(_parameters)
-        && (validInstanceMethod_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || validInstanceMethod_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (validInstanceMethod_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || validInstanceMethod_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (Boolean) validInstanceMethod_FunctionDescriptor_values.get(_parameters);
     }
     boolean validInstanceMethod_FunctionDescriptor_value = validInstanceMethod_compute(fd);
@@ -566,7 +576,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     
     } else {
       validInstanceMethod_FunctionDescriptor_values.put(_parameters, validInstanceMethod_FunctionDescriptor_value);
-      validInstanceMethod_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      validInstanceMethod_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return validInstanceMethod_FunctionDescriptor_value;
@@ -578,7 +588,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     }
   /** @apilevel internal */
   private void inferredReferenceType_FunctionDescriptor_reset() {
-    inferredReferenceType_FunctionDescriptor_computed = new java.util.HashMap(4);
+    inferredReferenceType_FunctionDescriptor_computed = null;
     inferredReferenceType_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -596,10 +606,10 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     Object _parameters = fd;
     if (inferredReferenceType_FunctionDescriptor_computed == null) inferredReferenceType_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (inferredReferenceType_FunctionDescriptor_values == null) inferredReferenceType_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (inferredReferenceType_FunctionDescriptor_values.containsKey(_parameters) && inferredReferenceType_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (inferredReferenceType_FunctionDescriptor_values.containsKey(_parameters)
         && inferredReferenceType_FunctionDescriptor_computed.containsKey(_parameters)
-        && (inferredReferenceType_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || inferredReferenceType_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (inferredReferenceType_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || inferredReferenceType_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (TypeDecl) inferredReferenceType_FunctionDescriptor_values.get(_parameters);
     }
     TypeDecl inferredReferenceType_FunctionDescriptor_value = inferredReferenceType_compute(fd);
@@ -609,7 +619,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     
     } else {
       inferredReferenceType_FunctionDescriptor_values.put(_parameters, inferredReferenceType_FunctionDescriptor_value);
-      inferredReferenceType_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      inferredReferenceType_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return inferredReferenceType_FunctionDescriptor_value;
@@ -639,10 +649,10 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   /** @apilevel internal */
   private void syntheticStaticAccess_FunctionDescriptor_reset() {
     syntheticStaticAccess_FunctionDescriptor_values = null;
-    syntheticStaticAccess_FunctionDescriptor_list = null;
+    syntheticStaticAccess_FunctionDescriptor_proxy = null;
   }
   /** @apilevel internal */
-  protected List syntheticStaticAccess_FunctionDescriptor_list;
+  protected ASTNode syntheticStaticAccess_FunctionDescriptor_proxy;
   /** @apilevel internal */
   protected java.util.Map syntheticStaticAccess_FunctionDescriptor_values;
 
@@ -656,19 +666,22 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   public Access syntheticStaticAccess(FunctionDescriptor fd) {
     Object _parameters = fd;
     if (syntheticStaticAccess_FunctionDescriptor_values == null) syntheticStaticAccess_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (syntheticStaticAccess_FunctionDescriptor_values.containsKey(_parameters)) {
       return (Access) syntheticStaticAccess_FunctionDescriptor_values.get(_parameters);
     }
     state().enterLazyAttribute();
     Access syntheticStaticAccess_FunctionDescriptor_value = syntheticStaticAccess_compute(fd);
-    if (syntheticStaticAccess_FunctionDescriptor_list == null) {
-      syntheticStaticAccess_FunctionDescriptor_list = new List();
-      syntheticStaticAccess_FunctionDescriptor_list.setParent(this);
+    if (syntheticStaticAccess_FunctionDescriptor_proxy == null) {
+      syntheticStaticAccess_FunctionDescriptor_proxy = new ASTNode();
+      syntheticStaticAccess_FunctionDescriptor_proxy.setParent(this);
     }
-    syntheticStaticAccess_FunctionDescriptor_list.add(syntheticStaticAccess_FunctionDescriptor_value);
     if (syntheticStaticAccess_FunctionDescriptor_value != null) {
-      syntheticStaticAccess_FunctionDescriptor_value = (Access) syntheticStaticAccess_FunctionDescriptor_list.getChild(syntheticStaticAccess_FunctionDescriptor_list.numChildren - 1);
+      syntheticStaticAccess_FunctionDescriptor_value.setParent(syntheticStaticAccess_FunctionDescriptor_proxy);
+      if (syntheticStaticAccess_FunctionDescriptor_value.mayHaveRewrite()) {
+        syntheticStaticAccess_FunctionDescriptor_value = (Access) syntheticStaticAccess_FunctionDescriptor_value.rewrittenNode();
+        syntheticStaticAccess_FunctionDescriptor_value.setParent(syntheticStaticAccess_FunctionDescriptor_proxy);
+      }
     }
     syntheticStaticAccess_FunctionDescriptor_values.put(_parameters, syntheticStaticAccess_FunctionDescriptor_value);
     state().leaveLazyAttribute();
@@ -696,7 +709,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     }
   /** @apilevel internal */
   private void syntheticStaticMethodAccess_FunctionDescriptor_reset() {
-    syntheticStaticMethodAccess_FunctionDescriptor_computed = new java.util.HashMap(4);
+    syntheticStaticMethodAccess_FunctionDescriptor_computed = null;
     syntheticStaticMethodAccess_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -714,10 +727,10 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     Object _parameters = fd;
     if (syntheticStaticMethodAccess_FunctionDescriptor_computed == null) syntheticStaticMethodAccess_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (syntheticStaticMethodAccess_FunctionDescriptor_values == null) syntheticStaticMethodAccess_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (syntheticStaticMethodAccess_FunctionDescriptor_values.containsKey(_parameters) && syntheticStaticMethodAccess_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (syntheticStaticMethodAccess_FunctionDescriptor_values.containsKey(_parameters)
         && syntheticStaticMethodAccess_FunctionDescriptor_computed.containsKey(_parameters)
-        && (syntheticStaticMethodAccess_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || syntheticStaticMethodAccess_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (syntheticStaticMethodAccess_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || syntheticStaticMethodAccess_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (MethodAccess) syntheticStaticMethodAccess_FunctionDescriptor_values.get(_parameters);
     }
     MethodAccess syntheticStaticMethodAccess_FunctionDescriptor_value = syntheticStaticMethodAccess_compute(fd);
@@ -727,7 +740,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     
     } else {
       syntheticStaticMethodAccess_FunctionDescriptor_values.put(_parameters, syntheticStaticMethodAccess_FunctionDescriptor_value);
-      syntheticStaticMethodAccess_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      syntheticStaticMethodAccess_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return syntheticStaticMethodAccess_FunctionDescriptor_value;
@@ -740,10 +753,10 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   /** @apilevel internal */
   private void syntheticInstanceAccess_FunctionDescriptor_reset() {
     syntheticInstanceAccess_FunctionDescriptor_values = null;
-    syntheticInstanceAccess_FunctionDescriptor_list = null;
+    syntheticInstanceAccess_FunctionDescriptor_proxy = null;
   }
   /** @apilevel internal */
-  protected List syntheticInstanceAccess_FunctionDescriptor_list;
+  protected ASTNode syntheticInstanceAccess_FunctionDescriptor_proxy;
   /** @apilevel internal */
   protected java.util.Map syntheticInstanceAccess_FunctionDescriptor_values;
 
@@ -757,19 +770,22 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   public Access syntheticInstanceAccess(FunctionDescriptor fd) {
     Object _parameters = fd;
     if (syntheticInstanceAccess_FunctionDescriptor_values == null) syntheticInstanceAccess_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (syntheticInstanceAccess_FunctionDescriptor_values.containsKey(_parameters)) {
       return (Access) syntheticInstanceAccess_FunctionDescriptor_values.get(_parameters);
     }
     state().enterLazyAttribute();
     Access syntheticInstanceAccess_FunctionDescriptor_value = syntheticInstanceAccess_compute(fd);
-    if (syntheticInstanceAccess_FunctionDescriptor_list == null) {
-      syntheticInstanceAccess_FunctionDescriptor_list = new List();
-      syntheticInstanceAccess_FunctionDescriptor_list.setParent(this);
+    if (syntheticInstanceAccess_FunctionDescriptor_proxy == null) {
+      syntheticInstanceAccess_FunctionDescriptor_proxy = new ASTNode();
+      syntheticInstanceAccess_FunctionDescriptor_proxy.setParent(this);
     }
-    syntheticInstanceAccess_FunctionDescriptor_list.add(syntheticInstanceAccess_FunctionDescriptor_value);
     if (syntheticInstanceAccess_FunctionDescriptor_value != null) {
-      syntheticInstanceAccess_FunctionDescriptor_value = (Access) syntheticInstanceAccess_FunctionDescriptor_list.getChild(syntheticInstanceAccess_FunctionDescriptor_list.numChildren - 1);
+      syntheticInstanceAccess_FunctionDescriptor_value.setParent(syntheticInstanceAccess_FunctionDescriptor_proxy);
+      if (syntheticInstanceAccess_FunctionDescriptor_value.mayHaveRewrite()) {
+        syntheticInstanceAccess_FunctionDescriptor_value = (Access) syntheticInstanceAccess_FunctionDescriptor_value.rewrittenNode();
+        syntheticInstanceAccess_FunctionDescriptor_value.setParent(syntheticInstanceAccess_FunctionDescriptor_proxy);
+      }
     }
     syntheticInstanceAccess_FunctionDescriptor_values.put(_parameters, syntheticInstanceAccess_FunctionDescriptor_value);
     state().leaveLazyAttribute();
@@ -803,15 +819,6 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
         return qualifier.qualifiesAccess(pmAccess);
       }
     }
-  /** @apilevel internal */
-  private void syntheticInstanceMethodAccess_FunctionDescriptor_reset() {
-    syntheticInstanceMethodAccess_FunctionDescriptor_computed = new java.util.HashMap(4);
-    syntheticInstanceMethodAccess_FunctionDescriptor_values = null;
-  }
-  /** @apilevel internal */
-  protected java.util.Map syntheticInstanceMethodAccess_FunctionDescriptor_values;
-  /** @apilevel internal */
-  protected java.util.Map syntheticInstanceMethodAccess_FunctionDescriptor_computed;
   /**
    * @attribute syn
    * @aspect MethodReference
@@ -820,35 +827,12 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:204")
   public MethodAccess syntheticInstanceMethodAccess(FunctionDescriptor fd) {
-    Object _parameters = fd;
-    if (syntheticInstanceMethodAccess_FunctionDescriptor_computed == null) syntheticInstanceMethodAccess_FunctionDescriptor_computed = new java.util.HashMap(4);
-    if (syntheticInstanceMethodAccess_FunctionDescriptor_values == null) syntheticInstanceMethodAccess_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (syntheticInstanceMethodAccess_FunctionDescriptor_values.containsKey(_parameters) && syntheticInstanceMethodAccess_FunctionDescriptor_computed != null
-        && syntheticInstanceMethodAccess_FunctionDescriptor_computed.containsKey(_parameters)
-        && (syntheticInstanceMethodAccess_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || syntheticInstanceMethodAccess_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
-      return (MethodAccess) syntheticInstanceMethodAccess_FunctionDescriptor_values.get(_parameters);
-    }
-    MethodAccess syntheticInstanceMethodAccess_FunctionDescriptor_value = syntheticInstanceMethodAccess_compute(fd);
-    if (state().inCircle()) {
-      syntheticInstanceMethodAccess_FunctionDescriptor_values.put(_parameters, syntheticInstanceMethodAccess_FunctionDescriptor_value);
-      syntheticInstanceMethodAccess_FunctionDescriptor_computed.put(_parameters, state().cycle());
-    
-    } else {
-      syntheticInstanceMethodAccess_FunctionDescriptor_values.put(_parameters, syntheticInstanceMethodAccess_FunctionDescriptor_value);
-      syntheticInstanceMethodAccess_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
-    
-    }
+    MethodAccess syntheticInstanceMethodAccess_FunctionDescriptor_value = (MethodAccess) syntheticInstanceAccess(fd).lastAccess();
     return syntheticInstanceMethodAccess_FunctionDescriptor_value;
   }
   /** @apilevel internal */
-  private MethodAccess syntheticInstanceMethodAccess_compute(FunctionDescriptor fd) {
-      Access synAccess = syntheticInstanceAccess(fd);
-      return (MethodAccess) synAccess.lastAccess();
-    }
-  /** @apilevel internal */
   private void congruentTo_FunctionDescriptor_reset() {
-    congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
+    congruentTo_FunctionDescriptor_computed = null;
     congruentTo_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -858,18 +842,18 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodReference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:239
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:237
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:239")
+  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:237")
   public boolean congruentTo(FunctionDescriptor fd) {
     Object _parameters = fd;
     if (congruentTo_FunctionDescriptor_computed == null) congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (congruentTo_FunctionDescriptor_values == null) congruentTo_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters) && congruentTo_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters)
         && congruentTo_FunctionDescriptor_computed.containsKey(_parameters)
-        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (Boolean) congruentTo_FunctionDescriptor_values.get(_parameters);
     }
     boolean congruentTo_FunctionDescriptor_value = congruentTo_compute(fd);
@@ -879,7 +863,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     
     } else {
       congruentTo_FunctionDescriptor_values.put(_parameters, congruentTo_FunctionDescriptor_value);
-      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return congruentTo_FunctionDescriptor_value;
@@ -915,7 +899,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     }
   /** @apilevel internal */
   private void potentiallyApplicableMethods_FunctionDescriptor_reset() {
-    potentiallyApplicableMethods_FunctionDescriptor_computed = new java.util.HashMap(4);
+    potentiallyApplicableMethods_FunctionDescriptor_computed = null;
     potentiallyApplicableMethods_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -925,18 +909,18 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodReference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:292
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:290
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:292")
+  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:290")
   public java.util.List<MethodDecl> potentiallyApplicableMethods(FunctionDescriptor fd) {
     Object _parameters = fd;
     if (potentiallyApplicableMethods_FunctionDescriptor_computed == null) potentiallyApplicableMethods_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (potentiallyApplicableMethods_FunctionDescriptor_values == null) potentiallyApplicableMethods_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (potentiallyApplicableMethods_FunctionDescriptor_values.containsKey(_parameters) && potentiallyApplicableMethods_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (potentiallyApplicableMethods_FunctionDescriptor_values.containsKey(_parameters)
         && potentiallyApplicableMethods_FunctionDescriptor_computed.containsKey(_parameters)
-        && (potentiallyApplicableMethods_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || potentiallyApplicableMethods_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (potentiallyApplicableMethods_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || potentiallyApplicableMethods_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (java.util.List<MethodDecl>) potentiallyApplicableMethods_FunctionDescriptor_values.get(_parameters);
     }
     java.util.List<MethodDecl> potentiallyApplicableMethods_FunctionDescriptor_value = potentiallyApplicableMethods_compute(fd);
@@ -946,7 +930,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     
     } else {
       potentiallyApplicableMethods_FunctionDescriptor_values.put(_parameters, potentiallyApplicableMethods_FunctionDescriptor_value);
-      potentiallyApplicableMethods_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      potentiallyApplicableMethods_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return potentiallyApplicableMethods_FunctionDescriptor_value;
@@ -988,7 +972,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     exactCompileTimeDeclaration_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle exactCompileTimeDeclaration_computed = null;
+  protected ASTState.Cycle exactCompileTimeDeclaration_computed = null;
 
   /** @apilevel internal */
   protected MethodDecl exactCompileTimeDeclaration_value;
@@ -996,13 +980,13 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodReference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:360
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:358
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:360")
+  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:358")
   public MethodDecl exactCompileTimeDeclaration() {
-    ASTNode$State state = state();
-    if (exactCompileTimeDeclaration_computed == ASTNode$State.NON_CYCLE || exactCompileTimeDeclaration_computed == state().cycle()) {
+    ASTState state = state();
+    if (exactCompileTimeDeclaration_computed == ASTState.NON_CYCLE || exactCompileTimeDeclaration_computed == state().cycle()) {
       return exactCompileTimeDeclaration_value;
     }
     exactCompileTimeDeclaration_value = exactCompileTimeDeclaration_compute();
@@ -1010,7 +994,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
       exactCompileTimeDeclaration_computed = state().cycle();
     
     } else {
-      exactCompileTimeDeclaration_computed = ASTNode$State.NON_CYCLE;
+      exactCompileTimeDeclaration_computed = ASTState.NON_CYCLE;
     
     }
     return exactCompileTimeDeclaration_value;
@@ -1047,7 +1031,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     }
   /** @apilevel internal */
   private void potentiallyCompatible_TypeDecl_BodyDecl_reset() {
-    potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
+    potentiallyCompatible_TypeDecl_BodyDecl_computed = null;
     potentiallyCompatible_TypeDecl_BodyDecl_values = null;
   }
   /** @apilevel internal */
@@ -1057,20 +1041,20 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544")
   public boolean potentiallyCompatible(TypeDecl type, BodyDecl candidateDecl) {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(type);
     _parameters.add(candidateDecl);
     if (potentiallyCompatible_TypeDecl_BodyDecl_computed == null) potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
     if (potentiallyCompatible_TypeDecl_BodyDecl_values == null) potentiallyCompatible_TypeDecl_BodyDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters) && potentiallyCompatible_TypeDecl_BodyDecl_computed != null
+    ASTState state = state();
+    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters)
         && potentiallyCompatible_TypeDecl_BodyDecl_computed.containsKey(_parameters)
-        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
+        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTState.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) potentiallyCompatible_TypeDecl_BodyDecl_values.get(_parameters);
     }
     boolean potentiallyCompatible_TypeDecl_BodyDecl_value = potentiallyCompatible_compute(type, candidateDecl);
@@ -1080,7 +1064,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     
     } else {
       potentiallyCompatible_TypeDecl_BodyDecl_values.put(_parameters, potentiallyCompatible_TypeDecl_BodyDecl_value);
-      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return potentiallyCompatible_TypeDecl_BodyDecl_value;
@@ -1111,6 +1095,90 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
       return foundMethod;
     }
   /** @apilevel internal */
+  private void targetInterface_reset() {
+    targetInterface_computed = null;
+    targetInterface_value = null;
+  }
+  /** @apilevel internal */
+  protected ASTState.Cycle targetInterface_computed = null;
+
+  /** @apilevel internal */
+  protected InterfaceDecl targetInterface_value;
+
+  /**
+   * @attribute syn
+   * @aspect TargetType
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:229
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:229")
+  public InterfaceDecl targetInterface() {
+    ASTState state = state();
+    if (targetInterface_computed == ASTState.NON_CYCLE || targetInterface_computed == state().cycle()) {
+      return targetInterface_value;
+    }
+    targetInterface_value = targetInterface_compute();
+    if (state().inCircle()) {
+      targetInterface_computed = state().cycle();
+    
+    } else {
+      targetInterface_computed = ASTState.NON_CYCLE;
+    
+    }
+    return targetInterface_value;
+  }
+  /** @apilevel internal */
+  private InterfaceDecl targetInterface_compute() {
+      if (targetType().isNull()) {
+        return null;
+      } else if (!(targetType() instanceof InterfaceDecl)) {
+        return null;
+      } else {
+        InterfaceDecl iDecl = (InterfaceDecl) targetType();
+        FunctionDescriptor fd = iDecl.functionDescriptor();
+        MethodDecl unknown = unknownMethod();
+        MethodDecl targetMethod = targetStaticMethod(fd);
+        if (targetMethod == unknown) {
+          targetMethod = targetInstanceMethod(fd);
+        } else {
+          if (targetInstanceMethod(fd) != unknown) {
+            targetMethod = unknown;
+          }
+        }
+        if (targetMethod != unknown
+            && !targetMethod.type().isUnknown()
+            && !targetMethod.type().isVoid()) {
+          InterfaceDecl iface = (InterfaceDecl) iDecl.original();
+          MethodDecl method = iface.functionDescriptor().method.get();
+          TypeDecl returnType = method.type();
+          if (!returnType.isVoid() && returnType.involvesTypeParameters()) {
+            Constraints constraints = new Constraints();
+            GenericInterfaceDecl genericInterface = (GenericInterfaceDecl) iface;
+            for (TypeVariable var : genericInterface.getTypeParameters()) {
+              constraints.addTypeVariable(var);
+            }
+            TypeDecl ret = targetMethod.type();
+            if (ret.isPrimitiveType()) {
+              ret = ret.boxed();
+            }
+            constraints.convertibleFrom(ret, returnType);
+            constraints.resolveEqualityConstraints();
+            constraints.resolveSupertypeConstraints();
+            constraints.resolveSubtypeConstraints();
+            Parameterization parameterization = ((ParInterfaceDecl) iDecl).getParameterization();
+            java.util.List<TypeDecl> args = new ArrayList<TypeDecl>(constraints.typeArguments());
+            for (int i = 0; i < args.size(); ++i) {
+              if (args.get(i) == null) {
+                args.set(i, parameterization.args.get(i));
+              }
+            }
+            iDecl = (InterfaceDecl) genericInterface.lookupParTypeDecl(args);
+          }
+        }
+        return iDecl;
+      }
+    }
+  /** @apilevel internal */
   private void toClass_reset() {
     toClass_computed = false;
     
@@ -1130,7 +1198,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="MethodReferenceToClass", declaredAt="/home/olivier/projects/extendj/java8/backend/MethodReferenceToClass.jrag:147")
   public ClassInstanceExpr toClass() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (toClass_computed) {
       return toClass_value;
     }
@@ -1184,7 +1252,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     toBlock_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle toBlock_computed = null;
+  protected ASTState.Cycle toBlock_computed = null;
 
   /** @apilevel internal */
   protected Block toBlock_value;
@@ -1197,8 +1265,8 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="MethodReferenceToClass", declaredAt="/home/olivier/projects/extendj/java8/backend/MethodReferenceToClass.jrag:184")
   public Block toBlock() {
-    ASTNode$State state = state();
-    if (toBlock_computed == ASTNode$State.NON_CYCLE || toBlock_computed == state().cycle()) {
+    ASTState state = state();
+    if (toBlock_computed == ASTState.NON_CYCLE || toBlock_computed == state().cycle()) {
       return toBlock_value;
     }
     toBlock_value = toBlock_compute();
@@ -1206,7 +1274,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
       toBlock_computed = state().cycle();
     
     } else {
-      toBlock_computed = ASTNode$State.NON_CYCLE;
+      toBlock_computed = ASTState.NON_CYCLE;
     
     }
     return toBlock_value;
@@ -1253,98 +1321,175 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
       return new Block(stmtList);
     }
   /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    Value eval_Body_value = toClass().eval(b);
+    return eval_Body_value;
+  }
+  /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
    * @apilevel internal
    */
   public NameType Define_nameType(ASTNode _callerNode, ASTNode _childNode) {
     if (getTypeAccessNoTransform() != null && _callerNode == getTypeAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:216
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:214
       return NameType.TYPE_NAME;
     }
     else {
       return super.Define_nameType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   */
+  public TypeDecl Define_targetType(ASTNode _callerNode, ASTNode _childNode) {
+    if (_callerNode == syntheticInstanceAccess_FunctionDescriptor_proxy) {
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:46
+      int childIndex = _callerNode.getIndexOfChild(_childNode);
+      {
+          if (targetType().isNull()) {
+            return unknownType();
+          } else if (!(targetType() instanceof InterfaceDecl)) {
+            return unknownType();
+          } else {
+            InterfaceDecl iface = (InterfaceDecl) targetType();
+            FunctionDescriptor fd = iface.functionDescriptor();
+            if (fd.method.hasValue()) {
+              return fd.method.get().type();
+            } else {
+              return unknownType();
+            }
+          }
+        }
+    }
+    else {
+      return getParent().Define_targetType(this, _callerNode);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
+  protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getTypeAccessNoTransform() != null && _callerNode == getTypeAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:397
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:581
       return false;
     }
     else {
       return getParent().Define_assignmentContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getTypeAccessNoTransform() != null && _callerNode == getTypeAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:398
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:582
       return false;
     }
     else {
       return getParent().Define_invocationContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getTypeAccessNoTransform() != null && _callerNode == getTypeAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:399
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:583
       return false;
     }
     else {
       return getParent().Define_castContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getTypeAccessNoTransform() != null && _callerNode == getTypeAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:400
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:584
       return false;
     }
     else {
       return getParent().Define_stringContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getTypeAccessNoTransform() != null && _callerNode == getTypeAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:401
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:585
       return false;
     }
     else {
       return getParent().Define_numericContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1368,6 +1513,11 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
       return getParent().Define_assignConvertedType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:69
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignConvertedType
+   */
   protected boolean canDefine_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1379,6 +1529,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_nestedTypes(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java8/backend/MethodReferenceToClass.jrag:34
     {
@@ -1392,6 +1543,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
     }
     super.collect_contributors_TypeDecl_nestedTypes(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_accessors(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
 
 
@@ -1399,6 +1551,7 @@ public class TypeMethodReference extends MethodReference implements Cloneable {
 toClass().collect_contributors_TypeDecl_accessors(_root, _map);
     super.collect_contributors_TypeDecl_accessors(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_nestedTypes(LinkedList<TypeDecl> collection) {
     super.contributeTo_TypeDecl_nestedTypes(collection);
     collection.add(toClass().getTypeDecl());

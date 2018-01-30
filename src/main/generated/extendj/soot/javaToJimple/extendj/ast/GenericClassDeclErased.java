@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +39,7 @@ import soot.coffi.CoffiMethodSource;
  * An erased class declaration. All parameterized type accesses are erased.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:112
+ * @astdecl GenericClassDeclErased : GenericClassDeclSubstituted;
  * @production GenericClassDeclErased : {@link GenericClassDeclSubstituted};
 
  */
@@ -65,6 +68,11 @@ public class GenericClassDeclErased extends GenericClassDeclSubstituted implemen
   /**
    * @declaredat ASTNode:18
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "SuperClass", "Implements", "TypeParameter", "Original"},
+    type = {"Modifiers", "String", "Opt<Access>", "List<Access>", "List<TypeVariable>", "TypeDecl"},
+    kind = {"Child", "Token", "Opt", "List", "List", "Token"}
+  )
   public GenericClassDeclErased(Modifiers p0, String p1, Opt<Access> p2, List<Access> p3, List<TypeVariable> p4, TypeDecl p5) {
     setChild(p0, 0);
     setID(p1);
@@ -74,7 +82,7 @@ public class GenericClassDeclErased extends GenericClassDeclSubstituted implemen
     setOriginal(p5);
   }
   /**
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   public GenericClassDeclErased(Modifiers p0, beaver.Symbol p1, Opt<Access> p2, List<Access> p3, List<TypeVariable> p4, TypeDecl p5) {
     setChild(p0, 0);
@@ -85,40 +93,40 @@ public class GenericClassDeclErased extends GenericClassDeclSubstituted implemen
     setOriginal(p5);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   protected int numChildren() {
     return 4;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     getBodyDeclList_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:54
+   * @declaredat ASTNode:59
    */
   public GenericClassDeclErased clone() throws CloneNotSupportedException {
     GenericClassDeclErased node = (GenericClassDeclErased) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   public GenericClassDeclErased copy() {
     try {
@@ -138,7 +146,7 @@ public class GenericClassDeclErased extends GenericClassDeclSubstituted implemen
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:78
+   * @declaredat ASTNode:83
    */
   @Deprecated
   public GenericClassDeclErased fullCopy() {
@@ -149,7 +157,7 @@ public class GenericClassDeclErased extends GenericClassDeclSubstituted implemen
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:88
+   * @declaredat ASTNode:93
    */
   public GenericClassDeclErased treeCopyNoTransform() {
     GenericClassDeclErased tree = (GenericClassDeclErased) copy();
@@ -178,7 +186,7 @@ public class GenericClassDeclErased extends GenericClassDeclSubstituted implemen
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:116
+   * @declaredat ASTNode:121
    */
   public GenericClassDeclErased treeCopy() {
     GenericClassDeclErased tree = (GenericClassDeclErased) copy();
@@ -202,7 +210,7 @@ public class GenericClassDeclErased extends GenericClassDeclSubstituted implemen
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:138
+   * @declaredat ASTNode:143
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((GenericClassDeclErased) node).tokenString_ID) && (tokenTypeDecl_Original == ((GenericClassDeclErased) node).tokenTypeDecl_Original);    
@@ -715,12 +723,12 @@ public class GenericClassDeclErased extends GenericClassDeclSubstituted implemen
   /**
    * @attribute syn nta
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1676
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1675
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1676")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1675")
   public List<BodyDecl> getBodyDeclList() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getBodyDeclList_computed) {
       return (List<BodyDecl>) getChild(getBodyDeclListChildPosition());
     }

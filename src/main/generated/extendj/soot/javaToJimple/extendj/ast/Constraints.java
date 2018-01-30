@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,7 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast class
  * @aspect GenericMethodsInference
- * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:164
+ * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:175
  */
  class Constraints extends java.lang.Object {
   
@@ -91,17 +93,25 @@ import soot.coffi.CoffiMethodSource;
 
     public String toString() {
       StringBuilder str = new StringBuilder();
-      str.append("Current constraints: ");
       for (TypeVariable T : typeVariables) {
         ConstraintSet set = constraintsMap.get(T);
         for (TypeDecl U : set.supertypeConstraints) {
-          str.append("  " + T.fullName() + " :> " + U.fullName());
+          if (str.length() > 0) {
+            str.append("\n");
+          }
+          str.append(T.fullName() + " :> " + U.fullName());
         }
         for (TypeDecl U : set.subtypeConstraints) {
-          str.append("  " + T.fullName() + " <: " + U.fullName());
+          if (str.length() > 0) {
+            str.append("\n");
+          }
+          str.append(T.fullName() + " <: " + U.fullName());
         }
         for (TypeDecl U : set.equaltypeConstraints) {
-          str.append("  " + T.fullName() + " = " + U.fullName());
+          if (str.length() > 0) {
+            str.append("\n");
+          }
+          str.append(T.fullName() + " = " + U.fullName());
         }
       }
       return str.toString();
@@ -140,7 +150,8 @@ import soot.coffi.CoffiMethodSource;
             break; // Continue on next type variable.
           }
         }
-        if (set.typeArgument == null && set.equaltypeConstraints.size() == 1
+        if (set.typeArgument == null
+            && set.equaltypeConstraints.size() == 1
             && set.equaltypeConstraints.contains(T)) {
           set.typeArgument = T;
         }
@@ -187,7 +198,8 @@ import soot.coffi.CoffiMethodSource;
     public void resolveSubtypeConstraints() {
       for (TypeVariable T : typeVariables) {
         ConstraintSet set = constraintsMap.get(T);
-        if (set.typeArgument == null && !set.subtypeConstraints.isEmpty()) {
+        if ((set.typeArgument == null || set.typeArgument == T)
+            && !set.subtypeConstraints.isEmpty()) {
           ArrayList<TypeDecl> bounds = new ArrayList<TypeDecl>();
           for (TypeDecl type : set.subtypeConstraints) {
             bounds.add(type);
@@ -202,7 +214,8 @@ import soot.coffi.CoffiMethodSource;
     public void resolveSupertypeConstraints() {
       for (TypeVariable T : typeVariables) {
         ConstraintSet set = constraintsMap.get(T);
-        if (set.typeArgument == null && !set.supertypeConstraints.isEmpty()) {
+        if ((set.typeArgument == null || set.typeArgument == T)
+            && !set.supertypeConstraints.isEmpty()) {
           TypeDecl typeDecl = T.lookupLUBType(set.supertypeConstraints).lub();
           set.typeArgument = typeDecl;
         }

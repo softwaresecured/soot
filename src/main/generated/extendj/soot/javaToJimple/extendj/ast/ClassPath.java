@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,7 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast class
  * @aspect ClassPath
- * @declaredat /home/olivier/projects/extendj/soot8/frontend/ClassPath.jrag:149
+ * @declaredat /home/olivier/projects/extendj/soot8/frontend/ClassPath.jrag:236
  */
 public class ClassPath extends java.lang.Object {
   
@@ -157,6 +159,11 @@ public class ClassPath extends java.lang.Object {
         }
       }
       for (String path : sourcePaths) {
+        // PathPart part = null;
+        // try {
+        //     part = new File(path).isFile()  ? new JarSrcFilePath(path)
+        //                                     : PathPart.createSourcePath(path);
+        // } catch (IOException e) {}
         PathPart part = PathPart.createSourcePath(path);
         if (part != null) {
           addSourcePath(part);
@@ -188,6 +195,35 @@ public class ClassPath extends java.lang.Object {
 
   
 
+    public ClassSource classSource(int srcPrec, String typeName) {
+      initPaths();
+
+      ClassSource sourcePart  = ClassSource.NONE;
+      ClassSource classPart   = ClassSource.NONE;
+
+      for (PathPart part : sourcePath) {
+        sourcePart = part.findSource(typeName);
+        if (sourcePart != ClassSource.NONE) break;
+      }
+
+      for (PathPart part : classPath) {
+        classPart = part.findSource(typeName);
+        if (classPart != ClassSource.NONE) break;
+      }
+
+      boolean javaMoreRecent  =  (   sourcePart               != ClassSource.NONE            )
+                              && ( ( classPart                == ClassSource.NONE          )
+                               ||  ( classPart.lastModified() <  sourcePart.lastModified() ) );
+      boolean javaPreferred   = (srcPrec == SRC_PREC_JAVA) || javaMoreRecent;
+      boolean useSrcPart      = (sourcePart != ClassSource.NONE   ) &&
+                                (srcPrec    != SRC_PREC_ONLY_CLASS) &&
+                                javaPreferred;
+
+      return useSrcPart ? sourcePart : classPart;
+    }
+
+  
+
     /**
      * Load a compilation unit from disk based on a classname. A class file is parsed if one exists
      * matching the classname that is not older than a corresponding source file, otherwise the
@@ -199,48 +235,18 @@ public class ClassPath extends java.lang.Object {
      * @return the loaded compilation unit, or the provided default compilation unit if no matching
      * compilation unit was found.
      */
-    public synchronized CompilationUnit getCompilationUnit(int srcPrec, String typeName, CompilationUnit defaultCompilationUnit) {
+    public synchronized CompilationUnit getCompilationUnit(ClassSource src, String typeName, CompilationUnit defaultCompilationUnit) {
+      if (src == ClassSource.NONE) return defaultCompilationUnit;
       try {
-        initPaths();
+        final CompilationUnit u = src.parseCompilationUnit(program);
 
-        ClassSource sourcePart  = ClassSource.NONE;
-        ClassSource classPart   = ClassSource.NONE;
+        // check if unit's declared pkg matches `typeName`'s pkg
+        // if it doesn't then fail and return the default compilation unit
+        int     pkgPartIdx    = typeName.lastIndexOf('.');
+        if (pkgPartIdx != -1                        ) return u;
 
-        for (PathPart part : sourcePath) {
-          sourcePart = part.findSource(typeName);
-          if (sourcePart != ClassSource.NONE) break;
-        }
-
-        for (PathPart part : classPath) {
-          classPart = part.findSource(typeName);
-          if (classPart != ClassSource.NONE) break;
-        }
-
-        boolean javaMoreRecent  =  (   sourcePart               != ClassSource.NONE           )
-                                && ( ( classPart                == ClassSource.NONE          )
-                                 ||  ( classPart.lastModified() <  sourcePart.lastModified() ) );
-        boolean javaPreferred   = javaMoreRecent || (srcPrec == SRC_PREC_JAVA);
-
-        if ((sourcePart != ClassSource.NONE   ) &&
-            (srcPrec    != SRC_PREC_ONLY_CLASS) &&
-            javaPreferred) {
-          CompilationUnit unit = sourcePart.parseCompilationUnit(program);
-
-          int index = typeName.lastIndexOf('.');
-          if (index == -1) return unit;
-
-          String pkgName = typeName.substring(0, index);
-          if (pkgName.equals(unit.getPackageDecl())) return unit;
-        }
-
-        if (classPart != ClassSource.NONE) {
-          CompilationUnit unit = classPart.parseCompilationUnit(program);
-          int index = typeName.lastIndexOf('.');
-          if (index == -1) return unit;
-
-          String pkgName = typeName.substring(0, index);
-          if (pkgName.equals(unit.getPackageDecl())) return unit;
-        }
+        String  pkgRequested  = typeName.substring(0, pkgPartIdx);
+        if (pkgRequested.equals(u.getPackageDecl()) ) return u;
 
         return defaultCompilationUnit;
       } catch (IOException e) {

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,10 +38,29 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/MethodReference.ast:1
+ * @astdecl MethodReference : Expr ::= TypeArgument:Access* <ID:String>;
  * @production MethodReference : {@link Expr} ::= <span class="component">TypeArgument:{@link Access}*</span> <span class="component">&lt;ID:String&gt;</span>;
 
  */
 public abstract class MethodReference extends Expr implements Cloneable {
+  /**
+   * @aspect PrettyPrintUtil8
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/PrettyPrintUtil.jadd:98
+   */
+  @Override public String toString() {
+    StringBuilder params = new StringBuilder();
+    for (Access arg : getTypeArgumentListNoTransform()) {
+      if (params.length() > 0) {
+        params.append(", ");
+      }
+      params.append(arg.toString());
+    }
+    if (params.length() == 0) {
+      return "::" + getID();
+    } else {
+      return String.format("::<%s>%s", params.toString(), getID());
+    }
+  }
   /**
    * @declaredat ASTNode:1
    */
@@ -60,32 +81,37 @@ public abstract class MethodReference extends Expr implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"TypeArgument", "ID"},
+    type = {"List<Access>", "String"},
+    kind = {"List", "Token"}
+  )
   public MethodReference(List<Access> p0, String p1) {
     setChild(p0, 0);
     setID(p1);
   }
   /**
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   public MethodReference(List<Access> p0, beaver.Symbol p1) {
     setChild(p0, 0);
     setID(p1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -102,13 +128,13 @@ public abstract class MethodReference extends Expr implements Cloneable {
     toParameterList_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:52
+   * @declaredat ASTNode:57
    */
   public MethodReference clone() throws CloneNotSupportedException {
     MethodReference node = (MethodReference) super.clone();
@@ -120,7 +146,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   @Deprecated
   public abstract MethodReference fullCopy();
@@ -129,7 +155,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:71
+   * @declaredat ASTNode:76
    */
   public abstract MethodReference treeCopyNoTransform();
   /**
@@ -138,7 +164,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:79
+   * @declaredat ASTNode:84
    */
   public abstract MethodReference treeCopy();
   /**
@@ -292,33 +318,33 @@ public abstract class MethodReference extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodReference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:239
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:237
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:239")
+  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:237")
   public abstract boolean congruentTo(FunctionDescriptor fd);
   /**
    * @attribute syn
    * @aspect MethodReference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:292
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:290
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:292")
+  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:290")
   public abstract java.util.List<MethodDecl> potentiallyApplicableMethods(FunctionDescriptor fd);
   /**
    * @attribute syn
    * @aspect MethodReference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:360
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:358
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:360")
+  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:358")
   public abstract MethodDecl exactCompileTimeDeclaration();
   /** @apilevel internal */
   private void isExact_reset() {
     isExact_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isExact_computed = null;
+  protected ASTState.Cycle isExact_computed = null;
 
   /** @apilevel internal */
   protected boolean isExact_value;
@@ -326,13 +352,13 @@ public abstract class MethodReference extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodReference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:359
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:357
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:359")
+  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:357")
   public boolean isExact() {
-    ASTNode$State state = state();
-    if (isExact_computed == ASTNode$State.NON_CYCLE || isExact_computed == state().cycle()) {
+    ASTState state = state();
+    if (isExact_computed == ASTState.NON_CYCLE || isExact_computed == state().cycle()) {
       return isExact_value;
     }
     isExact_value = exactCompileTimeDeclaration() != unknownMethod();
@@ -340,14 +366,14 @@ public abstract class MethodReference extends Expr implements Cloneable {
       isExact_computed = state().cycle();
     
     } else {
-      isExact_computed = ASTNode$State.NON_CYCLE;
+      isExact_computed = ASTState.NON_CYCLE;
     
     }
     return isExact_value;
   }
   /** @apilevel internal */
   private void compatibleStrictContext_TypeDecl_reset() {
-    compatibleStrictContext_TypeDecl_computed = new java.util.HashMap(4);
+    compatibleStrictContext_TypeDecl_computed = null;
     compatibleStrictContext_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -357,18 +383,18 @@ public abstract class MethodReference extends Expr implements Cloneable {
   /** Used to compute compatibility during phase 1 of overload resolution. 
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:50
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:91
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:50")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:91")
   public boolean compatibleStrictContext(TypeDecl type) {
     Object _parameters = type;
     if (compatibleStrictContext_TypeDecl_computed == null) compatibleStrictContext_TypeDecl_computed = new java.util.HashMap(4);
     if (compatibleStrictContext_TypeDecl_values == null) compatibleStrictContext_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (compatibleStrictContext_TypeDecl_values.containsKey(_parameters) && compatibleStrictContext_TypeDecl_computed != null
+    ASTState state = state();
+    if (compatibleStrictContext_TypeDecl_values.containsKey(_parameters)
         && compatibleStrictContext_TypeDecl_computed.containsKey(_parameters)
-        && (compatibleStrictContext_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || compatibleStrictContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (compatibleStrictContext_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || compatibleStrictContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) compatibleStrictContext_TypeDecl_values.get(_parameters);
     }
     boolean compatibleStrictContext_TypeDecl_value = compatibleStrictContext_compute(type);
@@ -378,7 +404,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
     
     } else {
       compatibleStrictContext_TypeDecl_values.put(_parameters, compatibleStrictContext_TypeDecl_value);
-      compatibleStrictContext_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      compatibleStrictContext_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return compatibleStrictContext_TypeDecl_value;
@@ -393,7 +419,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
     }
   /** @apilevel internal */
   private void compatibleLooseContext_TypeDecl_reset() {
-    compatibleLooseContext_TypeDecl_computed = new java.util.HashMap(4);
+    compatibleLooseContext_TypeDecl_computed = null;
     compatibleLooseContext_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -403,18 +429,18 @@ public abstract class MethodReference extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:94
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:135
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:94")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:135")
   public boolean compatibleLooseContext(TypeDecl type) {
     Object _parameters = type;
     if (compatibleLooseContext_TypeDecl_computed == null) compatibleLooseContext_TypeDecl_computed = new java.util.HashMap(4);
     if (compatibleLooseContext_TypeDecl_values == null) compatibleLooseContext_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (compatibleLooseContext_TypeDecl_values.containsKey(_parameters) && compatibleLooseContext_TypeDecl_computed != null
+    ASTState state = state();
+    if (compatibleLooseContext_TypeDecl_values.containsKey(_parameters)
         && compatibleLooseContext_TypeDecl_computed.containsKey(_parameters)
-        && (compatibleLooseContext_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || compatibleLooseContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (compatibleLooseContext_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || compatibleLooseContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) compatibleLooseContext_TypeDecl_values.get(_parameters);
     }
     boolean compatibleLooseContext_TypeDecl_value = compatibleStrictContext(type);
@@ -424,14 +450,14 @@ public abstract class MethodReference extends Expr implements Cloneable {
     
     } else {
       compatibleLooseContext_TypeDecl_values.put(_parameters, compatibleLooseContext_TypeDecl_value);
-      compatibleLooseContext_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      compatibleLooseContext_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return compatibleLooseContext_TypeDecl_value;
   }
   /** @apilevel internal */
   private void pertinentToApplicability_Expr_BodyDecl_int_reset() {
-    pertinentToApplicability_Expr_BodyDecl_int_computed = new java.util.HashMap(4);
+    pertinentToApplicability_Expr_BodyDecl_int_computed = null;
     pertinentToApplicability_Expr_BodyDecl_int_values = null;
   }
   /** @apilevel internal */
@@ -441,10 +467,10 @@ public abstract class MethodReference extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:122
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:163
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:122")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:163")
   public boolean pertinentToApplicability(Expr access, BodyDecl decl, int argIndex) {
     java.util.List _parameters = new java.util.ArrayList(3);
     _parameters.add(access);
@@ -452,10 +478,10 @@ public abstract class MethodReference extends Expr implements Cloneable {
     _parameters.add(argIndex);
     if (pertinentToApplicability_Expr_BodyDecl_int_computed == null) pertinentToApplicability_Expr_BodyDecl_int_computed = new java.util.HashMap(4);
     if (pertinentToApplicability_Expr_BodyDecl_int_values == null) pertinentToApplicability_Expr_BodyDecl_int_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (pertinentToApplicability_Expr_BodyDecl_int_values.containsKey(_parameters) && pertinentToApplicability_Expr_BodyDecl_int_computed != null
+    ASTState state = state();
+    if (pertinentToApplicability_Expr_BodyDecl_int_values.containsKey(_parameters)
         && pertinentToApplicability_Expr_BodyDecl_int_computed.containsKey(_parameters)
-        && (pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == ASTNode$State.NON_CYCLE || pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == state().cycle())) {
+        && (pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == ASTState.NON_CYCLE || pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == state().cycle())) {
       return (Boolean) pertinentToApplicability_Expr_BodyDecl_int_values.get(_parameters);
     }
     boolean pertinentToApplicability_Expr_BodyDecl_int_value = pertinentToApplicability_compute(access, decl, argIndex);
@@ -465,7 +491,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
     
     } else {
       pertinentToApplicability_Expr_BodyDecl_int_values.put(_parameters, pertinentToApplicability_Expr_BodyDecl_int_value);
-      pertinentToApplicability_Expr_BodyDecl_int_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      pertinentToApplicability_Expr_BodyDecl_int_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return pertinentToApplicability_Expr_BodyDecl_int_value;
@@ -504,7 +530,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
     }
   /** @apilevel internal */
   private void moreSpecificThan_TypeDecl_TypeDecl_reset() {
-    moreSpecificThan_TypeDecl_TypeDecl_computed = new java.util.HashMap(4);
+    moreSpecificThan_TypeDecl_TypeDecl_computed = null;
     moreSpecificThan_TypeDecl_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -518,20 +544,20 @@ public abstract class MethodReference extends Expr implements Cloneable {
    * @return {@code true} if type1 is more specific than type2, {@code false} otherwise
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:248
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:289
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:248")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:289")
   public boolean moreSpecificThan(TypeDecl type1, TypeDecl type2) {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(type1);
     _parameters.add(type2);
     if (moreSpecificThan_TypeDecl_TypeDecl_computed == null) moreSpecificThan_TypeDecl_TypeDecl_computed = new java.util.HashMap(4);
     if (moreSpecificThan_TypeDecl_TypeDecl_values == null) moreSpecificThan_TypeDecl_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (moreSpecificThan_TypeDecl_TypeDecl_values.containsKey(_parameters) && moreSpecificThan_TypeDecl_TypeDecl_computed != null
+    ASTState state = state();
+    if (moreSpecificThan_TypeDecl_TypeDecl_values.containsKey(_parameters)
         && moreSpecificThan_TypeDecl_TypeDecl_computed.containsKey(_parameters)
-        && (moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) moreSpecificThan_TypeDecl_TypeDecl_values.get(_parameters);
     }
     boolean moreSpecificThan_TypeDecl_TypeDecl_value = moreSpecificThan_compute(type1, type2);
@@ -541,7 +567,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
     
     } else {
       moreSpecificThan_TypeDecl_TypeDecl_values.put(_parameters, moreSpecificThan_TypeDecl_TypeDecl_value);
-      moreSpecificThan_TypeDecl_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      moreSpecificThan_TypeDecl_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return moreSpecificThan_TypeDecl_TypeDecl_value;
@@ -608,7 +634,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
     }
   /** @apilevel internal */
   private void potentiallyCompatible_TypeDecl_BodyDecl_reset() {
-    potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
+    potentiallyCompatible_TypeDecl_BodyDecl_computed = null;
     potentiallyCompatible_TypeDecl_BodyDecl_values = null;
   }
   /** @apilevel internal */
@@ -618,20 +644,20 @@ public abstract class MethodReference extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544")
   public boolean potentiallyCompatible(TypeDecl type, BodyDecl candidateDecl) {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(type);
     _parameters.add(candidateDecl);
     if (potentiallyCompatible_TypeDecl_BodyDecl_computed == null) potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
     if (potentiallyCompatible_TypeDecl_BodyDecl_values == null) potentiallyCompatible_TypeDecl_BodyDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters) && potentiallyCompatible_TypeDecl_BodyDecl_computed != null
+    ASTState state = state();
+    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters)
         && potentiallyCompatible_TypeDecl_BodyDecl_computed.containsKey(_parameters)
-        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
+        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTState.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) potentiallyCompatible_TypeDecl_BodyDecl_values.get(_parameters);
     }
     boolean potentiallyCompatible_TypeDecl_BodyDecl_value = potentiallyCompatible_compute(type, candidateDecl);
@@ -641,7 +667,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
     
     } else {
       potentiallyCompatible_TypeDecl_BodyDecl_values.put(_parameters, potentiallyCompatible_TypeDecl_BodyDecl_value);
-      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return potentiallyCompatible_TypeDecl_BodyDecl_value;
@@ -692,7 +718,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
     isPolyExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isPolyExpression_computed = null;
+  protected ASTState.Cycle isPolyExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isPolyExpression_value;
@@ -705,8 +731,8 @@ public abstract class MethodReference extends Expr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:86")
   public boolean isPolyExpression() {
-    ASTNode$State state = state();
-    if (isPolyExpression_computed == ASTNode$State.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isPolyExpression_computed == ASTState.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
       return isPolyExpression_value;
     }
     isPolyExpression_value = true;
@@ -714,14 +740,14 @@ public abstract class MethodReference extends Expr implements Cloneable {
       isPolyExpression_computed = state().cycle();
     
     } else {
-      isPolyExpression_computed = ASTNode$State.NON_CYCLE;
+      isPolyExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isPolyExpression_value;
   }
   /** @apilevel internal */
   private void assignConversionTo_TypeDecl_reset() {
-    assignConversionTo_TypeDecl_computed = new java.util.HashMap(4);
+    assignConversionTo_TypeDecl_computed = null;
     assignConversionTo_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -739,10 +765,10 @@ public abstract class MethodReference extends Expr implements Cloneable {
     Object _parameters = type;
     if (assignConversionTo_TypeDecl_computed == null) assignConversionTo_TypeDecl_computed = new java.util.HashMap(4);
     if (assignConversionTo_TypeDecl_values == null) assignConversionTo_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (assignConversionTo_TypeDecl_values.containsKey(_parameters) && assignConversionTo_TypeDecl_computed != null
+    ASTState state = state();
+    if (assignConversionTo_TypeDecl_values.containsKey(_parameters)
         && assignConversionTo_TypeDecl_computed.containsKey(_parameters)
-        && (assignConversionTo_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || assignConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (assignConversionTo_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || assignConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) assignConversionTo_TypeDecl_values.get(_parameters);
     }
     boolean assignConversionTo_TypeDecl_value = assignConversionTo_compute(type);
@@ -752,7 +778,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
     
     } else {
       assignConversionTo_TypeDecl_values.put(_parameters, assignConversionTo_TypeDecl_value);
-      assignConversionTo_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      assignConversionTo_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return assignConversionTo_TypeDecl_value;
@@ -782,7 +808,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
     targetInterface_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle targetInterface_computed = null;
+  protected ASTState.Cycle targetInterface_computed = null;
 
   /** @apilevel internal */
   protected InterfaceDecl targetInterface_value;
@@ -790,13 +816,13 @@ public abstract class MethodReference extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TargetType
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:157
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:175
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:157")
+  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:175")
   public InterfaceDecl targetInterface() {
-    ASTNode$State state = state();
-    if (targetInterface_computed == ASTNode$State.NON_CYCLE || targetInterface_computed == state().cycle()) {
+    ASTState state = state();
+    if (targetInterface_computed == ASTState.NON_CYCLE || targetInterface_computed == state().cycle()) {
       return targetInterface_value;
     }
     targetInterface_value = targetInterface_compute();
@@ -804,7 +830,7 @@ public abstract class MethodReference extends Expr implements Cloneable {
       targetInterface_computed = state().cycle();
     
     } else {
-      targetInterface_computed = ASTNode$State.NON_CYCLE;
+      targetInterface_computed = ASTState.NON_CYCLE;
     
     }
     return targetInterface_value;
@@ -819,54 +845,36 @@ public abstract class MethodReference extends Expr implements Cloneable {
         return (InterfaceDecl) targetType();
       }
     }
-/** @apilevel internal */
-protected ASTNode$State.Cycle type_cycle = null;
   /** @apilevel internal */
   private void type_reset() {
-    type_computed = false;
-    type_initialized = false;
+    type_computed = null;
     type_value = null;
-    type_cycle = null;
   }
   /** @apilevel internal */
-  protected boolean type_computed = false;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
-  /** @apilevel internal */
-  protected boolean type_initialized = false;
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:81")
+
+  /**
+   * @attribute syn
+   * @aspect TypeCheck
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:117
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:117")
   public TypeDecl type() {
-    if (type_computed) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
-    ASTNode$State state = state();
-    if (!type_initialized) {
-      type_initialized = true;
-      type_value = unknownType();
-    }
-    if (!state.inCircle() || state.calledByLazyAttribute()) {
-      state.enterCircle();
-      do {
-        type_cycle = state.nextCycle();
-        TypeDecl new_type_value = type_compute();
-        if ((new_type_value == null && type_value != null) || (new_type_value != null && !new_type_value.equals(type_value))) {
-          state.setChangeInCycle();
-        }
-        type_value = new_type_value;
-      } while (state.testAndClearChangeInCycle());
-      type_computed = true;
-
-      state.leaveCircle();
-    } else if (type_cycle != state.cycle()) {
-      type_cycle = state.cycle();
-      TypeDecl new_type_value = type_compute();
-      if ((new_type_value == null && type_value != null) || (new_type_value != null && !new_type_value.equals(type_value))) {
-        state.setChangeInCycle();
-      }
-      type_value = new_type_value;
+    type_value = type_compute();
+    if (state().inCircle()) {
+      type_computed = state().cycle();
+    
     } else {
+      type_computed = ASTState.NON_CYCLE;
+    
     }
     return type_value;
   }
@@ -894,10 +902,10 @@ protected ASTNode$State.Cycle type_cycle = null;
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:246
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:282
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:246")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:282")
   public Collection<Problem> typeProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -1045,7 +1053,7 @@ protected ASTNode$State.Cycle type_cycle = null;
     toParameterList_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle toParameterList_computed = null;
+  protected ASTState.Cycle toParameterList_computed = null;
 
   /** @apilevel internal */
   protected List<ParameterDeclaration> toParameterList_value;
@@ -1058,8 +1066,8 @@ protected ASTNode$State.Cycle type_cycle = null;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="MethodReferenceToClass", declaredAt="/home/olivier/projects/extendj/java8/backend/MethodReferenceToClass.jrag:102")
   public List<ParameterDeclaration> toParameterList() {
-    ASTNode$State state = state();
-    if (toParameterList_computed == ASTNode$State.NON_CYCLE || toParameterList_computed == state().cycle()) {
+    ASTState state = state();
+    if (toParameterList_computed == ASTState.NON_CYCLE || toParameterList_computed == state().cycle()) {
       return toParameterList_value;
     }
     toParameterList_value = toParameterList_compute();
@@ -1067,7 +1075,7 @@ protected ASTNode$State.Cycle type_cycle = null;
       toParameterList_computed = state().cycle();
     
     } else {
-      toParameterList_computed = ASTNode$State.NON_CYCLE;
+      toParameterList_computed = ASTState.NON_CYCLE;
     
     }
     return toParameterList_value;
@@ -1100,7 +1108,7 @@ protected ASTNode$State.Cycle type_cycle = null;
    */
   public NameType Define_nameType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getTypeArgumentListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:215
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:213
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return NameType.TYPE_NAME;
     }
@@ -1108,6 +1116,11 @@ protected ASTNode$State.Cycle type_cycle = null;
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1119,6 +1132,7 @@ protected ASTNode$State.Cycle type_cycle = null;
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java8/frontend/NameCheck.jrag:503
     {
@@ -1129,7 +1143,7 @@ protected ASTNode$State.Cycle type_cycle = null;
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:244
+    // @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:280
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -1140,6 +1154,7 @@ protected ASTNode$State.Cycle type_cycle = null;
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : nameProblems()) {

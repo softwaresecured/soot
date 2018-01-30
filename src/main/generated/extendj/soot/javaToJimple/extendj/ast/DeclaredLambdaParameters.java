@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/Lambda.ast:9
+ * @astdecl DeclaredLambdaParameters : LambdaParameters ::= Parameter:ParameterDeclaration*;
  * @production DeclaredLambdaParameters : {@link LambdaParameters} ::= <span class="component">Parameter:{@link ParameterDeclaration}*</span>;
 
  */
@@ -62,6 +65,22 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
     out.print(")");
   }
   /**
+   * @aspect PrettyPrintUtil8
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/PrettyPrintUtil.jadd:58
+   */
+  @Override public String toString() {
+    int numParams = 0;
+    StringBuilder params = new StringBuilder();
+    for (ParameterDeclaration param : getParameterListNoTransform()) {
+      if (numParams > 0) {
+        params.append(", ");
+      }
+      params.append(param.toString());
+      numParams += 1;
+    }
+    return String.format("(%s)", params.toString());
+  }
+  /**
    * @declaredat ASTNode:1
    */
   public DeclaredLambdaParameters() {
@@ -81,24 +100,29 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Parameter"},
+    type = {"List<ParameterDeclaration>"},
+    kind = {"List"}
+  )
   public DeclaredLambdaParameters(List<ParameterDeclaration> p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -107,20 +131,20 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
     parameterDeclaration_String_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public DeclaredLambdaParameters clone() throws CloneNotSupportedException {
     DeclaredLambdaParameters node = (DeclaredLambdaParameters) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public DeclaredLambdaParameters copy() {
     try {
@@ -140,7 +164,7 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   @Deprecated
   public DeclaredLambdaParameters fullCopy() {
@@ -151,7 +175,7 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:78
    */
   public DeclaredLambdaParameters treeCopyNoTransform() {
     DeclaredLambdaParameters tree = (DeclaredLambdaParameters) copy();
@@ -172,7 +196,7 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:93
+   * @declaredat ASTNode:98
    */
   public DeclaredLambdaParameters treeCopy() {
     DeclaredLambdaParameters tree = (DeclaredLambdaParameters) copy();
@@ -188,7 +212,7 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:107
+   * @declaredat ASTNode:112
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -308,7 +332,7 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
     numParameters_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle numParameters_computed = null;
+  protected ASTState.Cycle numParameters_computed = null;
 
   /** @apilevel internal */
   protected int numParameters_value;
@@ -316,13 +340,13 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
   /**
    * @attribute syn
    * @aspect LambdaExpr
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:43
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:47
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:43")
+  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:47")
   public int numParameters() {
-    ASTNode$State state = state();
-    if (numParameters_computed == ASTNode$State.NON_CYCLE || numParameters_computed == state().cycle()) {
+    ASTState state = state();
+    if (numParameters_computed == ASTState.NON_CYCLE || numParameters_computed == state().cycle()) {
       return numParameters_value;
     }
     numParameters_value = getNumParameter();
@@ -330,14 +354,14 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
       numParameters_computed = state().cycle();
     
     } else {
-      numParameters_computed = ASTNode$State.NON_CYCLE;
+      numParameters_computed = ASTState.NON_CYCLE;
     
     }
     return numParameters_value;
   }
   /** @apilevel internal */
   private void congruentTo_FunctionDescriptor_reset() {
-    congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
+    congruentTo_FunctionDescriptor_computed = null;
     congruentTo_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -347,18 +371,18 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
   /**
    * @attribute syn
    * @aspect LambdaExpr
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:49
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:53
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:49")
+  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:53")
   public boolean congruentTo(FunctionDescriptor fd) {
     Object _parameters = fd;
     if (congruentTo_FunctionDescriptor_computed == null) congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (congruentTo_FunctionDescriptor_values == null) congruentTo_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters) && congruentTo_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters)
         && congruentTo_FunctionDescriptor_computed.containsKey(_parameters)
-        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (Boolean) congruentTo_FunctionDescriptor_values.get(_parameters);
     }
     boolean congruentTo_FunctionDescriptor_value = congruentTo_compute(fd);
@@ -368,7 +392,7 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
     
     } else {
       congruentTo_FunctionDescriptor_values.put(_parameters, congruentTo_FunctionDescriptor_value);
-      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return congruentTo_FunctionDescriptor_value;
@@ -394,7 +418,7 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
     }
   /** @apilevel internal */
   private void parameterDeclaration_String_reset() {
-    parameterDeclaration_String_computed = new java.util.HashMap(4);
+    parameterDeclaration_String_computed = null;
     parameterDeclaration_String_values = null;
   }
   /** @apilevel internal */
@@ -412,10 +436,10 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
     Object _parameters = name;
     if (parameterDeclaration_String_computed == null) parameterDeclaration_String_computed = new java.util.HashMap(4);
     if (parameterDeclaration_String_values == null) parameterDeclaration_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (parameterDeclaration_String_values.containsKey(_parameters) && parameterDeclaration_String_computed != null
+    ASTState state = state();
+    if (parameterDeclaration_String_values.containsKey(_parameters)
         && parameterDeclaration_String_computed.containsKey(_parameters)
-        && (parameterDeclaration_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || parameterDeclaration_String_computed.get(_parameters) == state().cycle())) {
+        && (parameterDeclaration_String_computed.get(_parameters) == ASTState.NON_CYCLE || parameterDeclaration_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<Variable>) parameterDeclaration_String_values.get(_parameters);
     }
     SimpleSet<Variable> parameterDeclaration_String_value = parameterDeclaration_compute(name);
@@ -425,7 +449,7 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
     
     } else {
       parameterDeclaration_String_values.put(_parameters, parameterDeclaration_String_value);
-      parameterDeclaration_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      parameterDeclaration_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return parameterDeclaration_String_value;
@@ -472,6 +496,11 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
       return getParent().Define_inhModifiedInScope(this, _callerNode, var);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inhModifiedInScope
+   */
   protected boolean canDefine_inhModifiedInScope(ASTNode _callerNode, ASTNode _childNode, Variable var) {
     return true;
   }
@@ -489,6 +518,11 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
       return getParent().Define_lookupVariable(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -506,6 +540,11 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
       return getParent().Define_variableArityValid(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/VariableArityParameters.jrag:46
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute variableArityValid
+   */
   protected boolean canDefine_variableArityValid(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -517,6 +556,7 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java8/frontend/NameCheck.jrag:545
     {
@@ -529,6 +569,7 @@ public class DeclaredLambdaParameters extends LambdaParameters implements Clonea
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : nameProblems()) {

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:183
+ * @astdecl ArrayInit : Expr ::= Init:Expr*;
  * @production ArrayInit : {@link Expr} ::= <span class="component">Init:{@link Expr}*</span>;
 
  */
@@ -53,30 +56,6 @@ public class ArrayInit extends Expr implements Cloneable {
       }
     });
     out.print(" }");
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:713
-   */
-  public soot.Value eval(Body b) {
-    soot.Value size = IntType.emitConstant(getNumInit(), b, this);
-    Local array = asLocal(b, b.newNewArrayExpr(
-      type().componentType().getSootType(),
-      asImmediate(b, size),
-      this
-    ));
-    for(int i = 0; i < getNumInit(); i++) {
-      Value rvalue =
-        getInit(i).type().emitCastTo(b, // Assign conversion
-          getInit(i),
-          expectedType()
-        );
-      Value index = IntType.emitConstant(i, b, this);
-      Value lvalue = b.newArrayRef(array, index, getInit(i));
-      //b.setLine(this);
-      b.add(b.newAssignStmt(lvalue, asImmediate(b, rvalue), getInit(i)));
-    }
-    return array;
   }
   /**
    * @declaredat ASTNode:1
@@ -98,24 +77,29 @@ public class ArrayInit extends Expr implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Init"},
+    type = {"List<Expr>"},
+    kind = {"List"}
+  )
   public ArrayInit(List<Expr> p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -126,20 +110,20 @@ public class ArrayInit extends Expr implements Cloneable {
     declType_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public ArrayInit clone() throws CloneNotSupportedException {
     ArrayInit node = (ArrayInit) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public ArrayInit copy() {
     try {
@@ -159,7 +143,7 @@ public class ArrayInit extends Expr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:65
+   * @declaredat ASTNode:70
    */
   @Deprecated
   public ArrayInit fullCopy() {
@@ -170,7 +154,7 @@ public class ArrayInit extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:75
+   * @declaredat ASTNode:80
    */
   public ArrayInit treeCopyNoTransform() {
     ArrayInit tree = (ArrayInit) copy();
@@ -191,7 +175,7 @@ public class ArrayInit extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:95
+   * @declaredat ASTNode:100
    */
   public ArrayInit treeCopy() {
     ArrayInit tree = (ArrayInit) copy();
@@ -207,7 +191,7 @@ public class ArrayInit extends Expr implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:109
+   * @declaredat ASTNode:114
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -368,27 +352,27 @@ public class ArrayInit extends Expr implements Cloneable {
     _parameters.add(childIndex);
     _parameters.add(v);
     if (computeDABefore_int_Variable_values == null) computeDABefore_int_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (computeDABefore_int_Variable_values.containsKey(_parameters)) {
       Object _cache = computeDABefore_int_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       computeDABefore_int_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_computeDABefore_int_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_computeDABefore_int_Variable_value = computeDABefore_compute(childIndex, v);
-        if (new_computeDABefore_int_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_computeDABefore_int_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_computeDABefore_int_Variable_value;
         }
@@ -400,7 +384,7 @@ public class ArrayInit extends Expr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_computeDABefore_int_Variable_value = computeDABefore_compute(childIndex, v);
-      if (new_computeDABefore_int_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_computeDABefore_int_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_computeDABefore_int_Variable_value;
       }
@@ -430,27 +414,27 @@ public class ArrayInit extends Expr implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = getNumInit() == 0 ? unassignedBefore(v) : getInit(getNumInit()-1).unassignedAfter(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -462,7 +446,7 @@ public class ArrayInit extends Expr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = getNumInit() == 0 ? unassignedBefore(v) : getInit(getNumInit()-1).unassignedAfter(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -483,27 +467,27 @@ public class ArrayInit extends Expr implements Cloneable {
     _parameters.add(childIndex);
     _parameters.add(v);
     if (computeDUbefore_int_Variable_values == null) computeDUbefore_int_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (computeDUbefore_int_Variable_values.containsKey(_parameters)) {
       Object _cache = computeDUbefore_int_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       computeDUbefore_int_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_computeDUbefore_int_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_computeDUbefore_int_Variable_value = computeDUbefore_compute(childIndex, v);
-        if (new_computeDUbefore_int_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_computeDUbefore_int_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_computeDUbefore_int_Variable_value;
         }
@@ -515,7 +499,7 @@ public class ArrayInit extends Expr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_computeDUbefore_int_Variable_value = computeDUbefore_compute(childIndex, v);
-      if (new_computeDUbefore_int_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_computeDUbefore_int_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_computeDUbefore_int_Variable_value;
       }
@@ -541,7 +525,7 @@ public class ArrayInit extends Expr implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -549,13 +533,13 @@ public class ArrayInit extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = declType();
@@ -563,7 +547,7 @@ public class ArrayInit extends Expr implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -571,10 +555,10 @@ public class ArrayInit extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:188
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:190
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:188")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:190")
   public Collection<Problem> typeProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -610,15 +594,40 @@ public class ArrayInit extends Expr implements Cloneable {
       }
   }
   /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:639
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:639")
+  public Local eval(Body b) {
+    {
+        Value size  = IntType.emitConstant(getNumInit(), b, this);
+        Local array = b.asLocal(b.newNewArrayExpr(
+          type().componentType().sootType(),
+          size,
+          this
+        ));
+        for (int i = 0; i < getNumInit(); i++) {
+          Value       index   = IntType.emitConstant(i, b, this);
+          ConcreteRef lvalue  = b.newArrayRef(array, index, getInit(i));
+          Value       rvalue  = getInit(i).evalAndCast(b, expectedType()); // Assign conversion
+          //b.setLine(this);
+          b.add(b.newAssignStmt(lvalue, rvalue, getInit(i)));
+        }
+        return array;
+      }
+  }
+  /**
    * @attribute inh
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:277
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:276
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:277")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:276")
   public TypeDecl declType() {
-    ASTNode$State state = state();
-    if (declType_computed == ASTNode$State.NON_CYCLE || declType_computed == state().cycle()) {
+    ASTState state = state();
+    if (declType_computed == ASTState.NON_CYCLE || declType_computed == state().cycle()) {
       return declType_value;
     }
     declType_value = getParent().Define_declType(this, null);
@@ -626,7 +635,7 @@ public class ArrayInit extends Expr implements Cloneable {
       declType_computed = state().cycle();
     
     } else {
-      declType_computed = ASTNode$State.NON_CYCLE;
+      declType_computed = ASTState.NON_CYCLE;
     
     }
     return declType_value;
@@ -637,7 +646,7 @@ public class ArrayInit extends Expr implements Cloneable {
     declType_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle declType_computed = null;
+  protected ASTState.Cycle declType_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl declType_value;
@@ -667,6 +676,11 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_isSource(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:44
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isSource
+   */
   protected boolean canDefine_isSource(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -684,6 +698,11 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -701,16 +720,21 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:713
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
    * @apilevel internal
    */
   public TypeDecl Define_declType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:284
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:283
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return declType().componentType();
     }
@@ -718,6 +742,11 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_declType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declType
+   */
   protected boolean canDefine_declType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -735,6 +764,11 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_expectedType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/backend/InnerClasses.jrag:104
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute expectedType
+   */
   protected boolean canDefine_expectedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -752,6 +786,11 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_assignConvertedType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:69
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignConvertedType
+   */
   protected boolean canDefine_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -761,7 +800,7 @@ public class ArrayInit extends Expr implements Cloneable {
    */
   public TypeDecl Define_targetType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:79
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:97
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       {
           if (!(targetType() instanceof ArrayDecl)) {
@@ -775,16 +814,21 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_targetType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
   protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:361
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:545
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return true;
     }
@@ -792,16 +836,21 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_assignmentContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:362
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:546
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -809,16 +858,21 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_invocationContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:363
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:547
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -826,16 +880,21 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_castContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:364
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:548
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -843,16 +902,21 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_stringContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getInitListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:365
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:549
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -860,6 +924,11 @@ public class ArrayInit extends Expr implements Cloneable {
       return getParent().Define_numericContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -871,8 +940,9 @@ public class ArrayInit extends Expr implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:186
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:188
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -883,6 +953,7 @@ public class ArrayInit extends Expr implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : typeProblems()) {

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -39,6 +41,7 @@ import soot.coffi.CoffiMethodSource;
  * IEEE 754 64-bit double-precision floating point number.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Literals.ast:54
+ * @astdecl DoubleLiteral : Literal;
  * @production DoubleLiteral : {@link Literal};
 
  */
@@ -52,18 +55,16 @@ public class DoubleLiteral extends Literal implements Cloneable {
   }
   /**
    * @aspect Java7Literals
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:901
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:898
+   */
+  protected Constant constant = null;
+  /**
+   * @aspect Java7Literals
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Literals.jrag:900
    */
   public DoubleLiteral(String literal, Constant constant) {
     this(literal);
     this.constant = constant;
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:71
-   */
-  public soot.Value eval(Body b) {
-    return b.setSrcLoc(soot.jimple.DoubleConstant.v(constant().doubleValue()), this);
   }
   /**
    * @declaredat ASTNode:1
@@ -83,30 +84,35 @@ public class DoubleLiteral extends Literal implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"LITERAL"},
+    type = {"String"},
+    kind = {"Token"}
+  )
   public DoubleLiteral(String p0) {
     setLITERAL(p0);
   }
   /**
-   * @declaredat ASTNode:15
+   * @declaredat ASTNode:20
    */
   public DoubleLiteral(beaver.Symbol p0) {
     setLITERAL(p0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -115,20 +121,20 @@ public class DoubleLiteral extends Literal implements Cloneable {
     constant_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public DoubleLiteral clone() throws CloneNotSupportedException {
     DoubleLiteral node = (DoubleLiteral) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public DoubleLiteral copy() {
     try {
@@ -148,7 +154,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:64
+   * @declaredat ASTNode:69
    */
   @Deprecated
   public DoubleLiteral fullCopy() {
@@ -159,7 +165,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   public DoubleLiteral treeCopyNoTransform() {
     DoubleLiteral tree = (DoubleLiteral) copy();
@@ -180,7 +186,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:94
+   * @declaredat ASTNode:99
    */
   public DoubleLiteral treeCopy() {
     DoubleLiteral tree = (DoubleLiteral) copy();
@@ -196,7 +202,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:108
+   * @declaredat ASTNode:113
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_LITERAL == ((DoubleLiteral) node).tokenString_LITERAL);    
@@ -236,7 +242,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -244,13 +250,13 @@ public class DoubleLiteral extends Literal implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = typeDouble();
@@ -258,7 +264,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -268,7 +274,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
     isZero_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isZero_computed = null;
+  protected ASTState.Cycle isZero_computed = null;
 
   /** @apilevel internal */
   protected boolean isZero_value;
@@ -282,8 +288,8 @@ public class DoubleLiteral extends Literal implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Java7Literals", declaredAt="/home/olivier/projects/extendj/java7/frontend/Literals.jrag:61")
   public boolean isZero() {
-    ASTNode$State state = state();
-    if (isZero_computed == ASTNode$State.NON_CYCLE || isZero_computed == state().cycle()) {
+    ASTState state = state();
+    if (isZero_computed == ASTState.NON_CYCLE || isZero_computed == state().cycle()) {
       return isZero_value;
     }
     isZero_value = isZero_compute();
@@ -291,7 +297,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
       isZero_computed = state().cycle();
     
     } else {
-      isZero_computed = ASTNode$State.NON_CYCLE;
+      isZero_computed = ASTState.NON_CYCLE;
     
     }
     return isZero_value;
@@ -316,7 +322,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
     constant_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle constant_computed = null;
+  protected ASTState.Cycle constant_computed = null;
 
   /** @apilevel internal */
   protected Constant constant_value;
@@ -329,8 +335,8 @@ public class DoubleLiteral extends Literal implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstantExpression", declaredAt="/home/olivier/projects/extendj/java4/frontend/ConstantExpression.jrag:38")
   public Constant constant() {
-    ASTNode$State state = state();
-    if (constant_computed == ASTNode$State.NON_CYCLE || constant_computed == state().cycle()) {
+    ASTState state = state();
+    if (constant_computed == ASTState.NON_CYCLE || constant_computed == state().cycle()) {
       return constant_value;
     }
     constant_value = constant_compute();
@@ -338,25 +344,35 @@ public class DoubleLiteral extends Literal implements Cloneable {
       constant_computed = state().cycle();
     
     } else {
-      constant_computed = ASTNode$State.NON_CYCLE;
+      constant_computed = ASTState.NON_CYCLE;
     
     }
     return constant_value;
   }
   /** @apilevel internal */
   private Constant constant_compute() {
-      if (constant == null) {
-        try {
-          constant = Constant.create(Double.parseDouble((isNegative() ? "-" : "") + normalizedDigits()));
-        } catch (NumberFormatException e) {
-          constant = Constant.create(0.0d);
-          constant.error = true;
-          return constant;
-        }
+      if (constant != null) {
+        return constant;
       }
-  
-      return constant;
+      try {
+        return Constant.create(Double.parseDouble(normalizedDigits()));
+      } catch (NumberFormatException e) {
+        Constant c = Constant.create(0.0d);
+        c.error = true;
+        return c;
+      }
     }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:53
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:53")
+  public soot.jimple.Constant eval(Body b) {
+    soot.jimple.Constant eval_Body_value = b.setSrcLoc(DoubleConstant.v(constant().doubleValue()), this);
+    return eval_Body_value;
+  }
   /** @apilevel internal */
   public ASTNode rewriteTo() {
     return super.rewriteTo();
@@ -365,8 +381,9 @@ public class DoubleLiteral extends Literal implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:778
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:780
     if (!isZero() && constant().doubleValue() == 0.0f) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -377,7 +394,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
         contributors.add(this);
       }
     }
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:783
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:785
     if (constant().doubleValue() == Double.NEGATIVE_INFINITY
               || constant().doubleValue() == Double.POSITIVE_INFINITY) {
       {
@@ -391,6 +408,7 @@ public class DoubleLiteral extends Literal implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!isZero() && constant().doubleValue() == 0.0f) {

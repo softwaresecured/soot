@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:79
+ * @astdecl GenericMethodDeclErased : GenericMethodDecl ::= <Original:GenericMethodDecl>;
  * @production GenericMethodDeclErased : {@link GenericMethodDecl} ::= <span class="component">&lt;Original:GenericMethodDecl&gt;</span>;
 
  */
@@ -63,6 +66,11 @@ public class GenericMethodDeclErased extends GenericMethodDecl implements Clonea
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID", "Parameter", "Exception", "Block", "TypeParameter", "Original"},
+    type = {"Modifiers", "Access", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Block>", "List<TypeVariable>", "GenericMethodDecl"},
+    kind = {"Child", "Child", "Token", "List", "List", "Opt", "List", "Token"}
+  )
   public GenericMethodDeclErased(Modifiers p0, Access p1, String p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<TypeVariable> p6, GenericMethodDecl p7) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -74,7 +82,7 @@ public class GenericMethodDeclErased extends GenericMethodDecl implements Clonea
     setOriginal(p7);
   }
   /**
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public GenericMethodDeclErased(Modifiers p0, Access p1, beaver.Symbol p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<TypeVariable> p6, GenericMethodDecl p7) {
     setChild(p0, 0);
@@ -87,40 +95,40 @@ public class GenericMethodDeclErased extends GenericMethodDecl implements Clonea
     setOriginal(p7);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   protected int numChildren() {
     return 6;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     lookupParMethodDecl_Collection_TypeDecl__reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:58
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:57
+   * @declaredat ASTNode:62
    */
   public GenericMethodDeclErased clone() throws CloneNotSupportedException {
     GenericMethodDeclErased node = (GenericMethodDeclErased) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:62
+   * @declaredat ASTNode:67
    */
   public GenericMethodDeclErased copy() {
     try {
@@ -140,7 +148,7 @@ public class GenericMethodDeclErased extends GenericMethodDecl implements Clonea
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:81
+   * @declaredat ASTNode:86
    */
   @Deprecated
   public GenericMethodDeclErased fullCopy() {
@@ -151,7 +159,7 @@ public class GenericMethodDeclErased extends GenericMethodDecl implements Clonea
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:91
+   * @declaredat ASTNode:96
    */
   public GenericMethodDeclErased treeCopyNoTransform() {
     GenericMethodDeclErased tree = (GenericMethodDeclErased) copy();
@@ -172,7 +180,7 @@ public class GenericMethodDeclErased extends GenericMethodDecl implements Clonea
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:111
+   * @declaredat ASTNode:116
    */
   public GenericMethodDeclErased treeCopy() {
     GenericMethodDeclErased tree = (GenericMethodDeclErased) copy();
@@ -188,7 +196,7 @@ public class GenericMethodDeclErased extends GenericMethodDecl implements Clonea
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:125
+   * @declaredat ASTNode:130
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((GenericMethodDeclErased) node).tokenString_ID) && (tokenGenericMethodDecl_Original == ((GenericMethodDeclErased) node).tokenGenericMethodDecl_Original);    
@@ -678,10 +686,10 @@ public class GenericMethodDeclErased extends GenericMethodDecl implements Clonea
   /** @apilevel internal */
   private void lookupParMethodDecl_Collection_TypeDecl__reset() {
     lookupParMethodDecl_Collection_TypeDecl__values = null;
-    lookupParMethodDecl_Collection_TypeDecl__list = null;
+    lookupParMethodDecl_Collection_TypeDecl__proxy = null;
   }
   /** @apilevel internal */
-  protected List lookupParMethodDecl_Collection_TypeDecl__list;
+  protected ASTNode lookupParMethodDecl_Collection_TypeDecl__proxy;
   /** @apilevel internal */
   protected java.util.Map lookupParMethodDecl_Collection_TypeDecl__values;
 
@@ -696,19 +704,22 @@ public class GenericMethodDeclErased extends GenericMethodDecl implements Clonea
   public ParMethodDecl lookupParMethodDecl(Collection<TypeDecl> typeArguments) {
     Object _parameters = typeArguments;
     if (lookupParMethodDecl_Collection_TypeDecl__values == null) lookupParMethodDecl_Collection_TypeDecl__values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (lookupParMethodDecl_Collection_TypeDecl__values.containsKey(_parameters)) {
       return (ParMethodDecl) lookupParMethodDecl_Collection_TypeDecl__values.get(_parameters);
     }
     state().enterLazyAttribute();
     ParMethodDecl lookupParMethodDecl_Collection_TypeDecl__value = newParMethodDecl(Collections.<TypeDecl>emptyList());
-    if (lookupParMethodDecl_Collection_TypeDecl__list == null) {
-      lookupParMethodDecl_Collection_TypeDecl__list = new List();
-      lookupParMethodDecl_Collection_TypeDecl__list.setParent(this);
+    if (lookupParMethodDecl_Collection_TypeDecl__proxy == null) {
+      lookupParMethodDecl_Collection_TypeDecl__proxy = new ASTNode();
+      lookupParMethodDecl_Collection_TypeDecl__proxy.setParent(this);
     }
-    lookupParMethodDecl_Collection_TypeDecl__list.add(lookupParMethodDecl_Collection_TypeDecl__value);
     if (lookupParMethodDecl_Collection_TypeDecl__value != null) {
-      lookupParMethodDecl_Collection_TypeDecl__value = (ParMethodDecl) lookupParMethodDecl_Collection_TypeDecl__list.getChild(lookupParMethodDecl_Collection_TypeDecl__list.numChildren - 1);
+      lookupParMethodDecl_Collection_TypeDecl__value.setParent(lookupParMethodDecl_Collection_TypeDecl__proxy);
+      if (lookupParMethodDecl_Collection_TypeDecl__value.mayHaveRewrite()) {
+        lookupParMethodDecl_Collection_TypeDecl__value = (ParMethodDecl) lookupParMethodDecl_Collection_TypeDecl__value.rewrittenNode();
+        lookupParMethodDecl_Collection_TypeDecl__value.setParent(lookupParMethodDecl_Collection_TypeDecl__proxy);
+      }
     }
     lookupParMethodDecl_Collection_TypeDecl__values.put(_parameters, lookupParMethodDecl_Collection_TypeDecl__value);
     state().leaveLazyAttribute();

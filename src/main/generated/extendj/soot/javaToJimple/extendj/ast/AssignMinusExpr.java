@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,17 +38,11 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:207
+ * @astdecl AssignMinusExpr : AssignAdditiveExpr;
  * @production AssignMinusExpr : {@link AssignAdditiveExpr};
 
  */
 public class AssignMinusExpr extends AssignAdditiveExpr implements Cloneable {
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:210
-   */
-  public soot.Value createAssignOp(Body b, soot.Value fst, soot.Value snd) {
-    return b.newSubExpr(asImmediate(b, fst), asImmediate(b, snd), this);
-  }
   /**
    * @declaredat ASTNode:1
    */
@@ -66,44 +62,49 @@ public class AssignMinusExpr extends AssignAdditiveExpr implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Dest", "Source"},
+    type = {"Expr", "Expr"},
+    kind = {"Child", "Child"}
+  )
   public AssignMinusExpr(Expr p0, Expr p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public AssignMinusExpr clone() throws CloneNotSupportedException {
     AssignMinusExpr node = (AssignMinusExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public AssignMinusExpr copy() {
     try {
@@ -123,7 +124,7 @@ public class AssignMinusExpr extends AssignAdditiveExpr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:60
+   * @declaredat ASTNode:65
    */
   @Deprecated
   public AssignMinusExpr fullCopy() {
@@ -134,7 +135,7 @@ public class AssignMinusExpr extends AssignAdditiveExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:70
+   * @declaredat ASTNode:75
    */
   public AssignMinusExpr treeCopyNoTransform() {
     AssignMinusExpr tree = (AssignMinusExpr) copy();
@@ -155,7 +156,7 @@ public class AssignMinusExpr extends AssignAdditiveExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:90
+   * @declaredat ASTNode:95
    */
   public AssignMinusExpr treeCopy() {
     AssignMinusExpr tree = (AssignMinusExpr) copy();
@@ -171,7 +172,7 @@ public class AssignMinusExpr extends AssignAdditiveExpr implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:104
+   * @declaredat ASTNode:109
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -231,10 +232,10 @@ public class AssignMinusExpr extends AssignAdditiveExpr implements Cloneable {
   /** The operator string used for pretty printing this expression. 
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:288
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:367
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:288")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:367")
   public String printOp() {
     String printOp_value = "-=";
     return printOp_value;
@@ -242,10 +243,10 @@ public class AssignMinusExpr extends AssignAdditiveExpr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:77
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:79
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:77")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:79")
   public Collection<Problem> typeProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>(super.typeProblems());
@@ -254,6 +255,17 @@ public class AssignMinusExpr extends AssignAdditiveExpr implements Cloneable {
         }
         return problems;
       }
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:161
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:161")
+  public Value createAssignOp(Body b, Value op1, Value op2) {
+    Value createAssignOp_Body_Value_Value_value = b. newSubExpr(op1, op2, this);
+    return createAssignOp_Body_Value_Value_value;
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {

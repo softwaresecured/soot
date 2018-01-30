@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,11 +37,16 @@ import beaver.*;
 import soot.coffi.CoffiMethodSource;
 /**
  * @ast class
- * @declaredat ASTNode$State:2
+ * @declaredat ASTState:34
  */
-public class ASTNode$State extends java.lang.Object {
+public class ASTState extends java.lang.Object {
   
-  /** @apilevel internal */
+  /**
+   * This class stores an attribute value tagged with an iteration ID for
+   * a circular evaluation.
+   *
+   * @apilevel internal
+   */
   protected static class CircularValue {
     Object value;
     Cycle cycle;
@@ -48,7 +55,10 @@ public class ASTNode$State extends java.lang.Object {
   
 
   /**
-   * Instances of this class are used to uniquely identify circular evaluation cycles.
+   * Instances of this class are used to uniquely identify circular evaluation iterations.
+   * These iteration ID objects are created for each new fixed-point iteration in
+   * a circular evaluation.
+   *
    * @apilevel internal
    */
   protected static class Cycle {
@@ -56,7 +66,11 @@ public class ASTNode$State extends java.lang.Object {
 
   
 
-  /** The cycle ID used outside of circular evaluation. */
+  /**
+   * The iteration ID used outside of circular evaluation.
+   *
+   * <p>This is the iteration ID when no circular evaluation is ongoing.
+   */
   public static final Cycle NON_CYCLE = new Cycle();
 
   
@@ -65,11 +79,11 @@ public class ASTNode$State extends java.lang.Object {
    * Tracks the state of the current circular evaluation. This class defines a
    * stack structure where the next element on the stack is pointed to by the
    * {@code next} field.
+   *
    * @apilevel internal
    */
   protected static class CircleState {
     final CircleState next;
-    boolean inCircle = false;
     boolean change = false;
 
     /** Evaluation depth of lazy attributes. */
@@ -78,12 +92,14 @@ public class ASTNode$State extends java.lang.Object {
     /** Cycle ID of the latest cycle in this circular evaluation. */
     Cycle cycle = NON_CYCLE;
 
+
     protected CircleState(CircleState next) {
       this.next = next;
     }
   }
 
   
+
 
   /** Sentinel circle state representing non-circular evaluation. */
   private static final CircleState CIRCLE_BOTTOM = new CircleState(null);
@@ -100,7 +116,7 @@ public class ASTNode$State extends java.lang.Object {
 
   /** @apilevel internal */
   protected boolean inCircle() {
-    return circle.inCircle;
+    return circle != CIRCLE_BOTTOM;
   }
 
   
@@ -129,8 +145,50 @@ public class ASTNode$State extends java.lang.Object {
   /** @apilevel internal */
   protected void enterCircle() {
     CircleState next = new CircleState(circle);
-    next.inCircle = true;
     circle = next;
+  }
+
+  
+
+
+  /**
+   * Maps circular attribute to last evaluated cycle index.
+   * @apilevel internal
+   */
+  private java.util.Map<Object, Integer> visited = new java.util.IdentityHashMap<Object, Integer>();
+
+  
+
+  /**
+   * Check if attribute was already visited during the current cycle.
+   * @apilevel internal
+   * @return {@code true} if the attribute was already visited.
+   */
+  protected boolean checkAndSetVisited(Object attribute, int cycle) {
+    boolean result = visited.containsKey(attribute) && visited.get(attribute) == cycle;
+    visited.put(attribute, cycle);
+    return result;
+  }
+
+  
+
+  /**
+   * Reset visited cycle tracking for this thread.
+   * @apilevel internal
+   */
+  protected void clearVisited() {
+    visited.clear();
+  }
+
+  
+
+  // TODO(joqvist): may not be necessary.
+  /**
+   * Reset visit tracker for a single attribute.
+   * @apilevel internal
+   */
+  protected void resetVisited(Object attribute) {
+    visited.remove(attribute);
   }
 
   
@@ -190,7 +248,7 @@ public class ASTNode$State extends java.lang.Object {
   
 
 
-  protected ASTNode$State() {
+  protected ASTState() {
   }
 
   public void reset() {

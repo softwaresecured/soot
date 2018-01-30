@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/Lambda.ast:1
+ * @astdecl LambdaExpr : Expr ::= LambdaParameters LambdaBody;
  * @production LambdaExpr : {@link Expr} ::= <span class="component">{@link LambdaParameters}</span> <span class="component">{@link LambdaBody}</span>;
 
  */
@@ -52,8 +55,8 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     InterfaceDecl iDecl = targetInterface();
 
     // Compute the interface type implemented by the anonymous class:
-    TypeDecl nonWildcard = targetInterface().nonWildcardParameterization().getOrElse(unknownType());
-    implementsList.add(nonWildcard.createQualifiedAccess());
+    iDecl = (InterfaceDecl) iDecl.nonWildcardParameterization().getOrElse(iDecl);
+    implementsList.add(iDecl.createQualifiedAccess());
 
     // Now we will build the single method of the anonymous class.
     List<BodyDecl> bodyDecls = new List<BodyDecl>();
@@ -86,6 +89,13 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     return new LambdaAnonymousDecl(new Modifiers(), "Lambda", implementsList, bodyDecls);
   }
   /**
+   * @aspect LambdaExpr
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:31
+   */
+  public void collectBranches(Collection<Stmt> c) {
+    // Don't add branches inside the lambda.
+  }
+  /**
    * @aspect Java8PrettyPrint
    * @declaredat /home/olivier/projects/extendj/java8/frontend/PrettyPrint.jadd:113
    */
@@ -95,10 +105,14 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     out.print(getLambdaBody());
   }
   /**
-   * @aspect EmitJimpleJava8
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimpleJava8.jrag:3
+   * @aspect PrettyPrintUtil8
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/PrettyPrintUtil.jadd:35
    */
-  public soot.Value eval(Body b) { return toClass().eval(b); }
+  @Override public String toString() {
+    return String.format("%s->%s",
+        getLambdaParametersNoTransform().toString(),
+        getLambdaBodyNoTransform().toString());
+  }
   /**
    * @declaredat ASTNode:1
    */
@@ -118,25 +132,30 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"LambdaParameters", "LambdaBody"},
+    type = {"LambdaParameters", "LambdaBody"},
+    kind = {"Child", "Child"}
+  )
   public LambdaExpr(LambdaParameters p0, LambdaBody p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -154,24 +173,23 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     isPolyExpression_reset();
     assignConversionTo_TypeDecl_reset();
     targetInterface_reset();
-    type_reset();
     enclosingLambda_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:52
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:52
+   * @declaredat ASTNode:56
    */
   public LambdaExpr clone() throws CloneNotSupportedException {
     LambdaExpr node = (LambdaExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:57
+   * @declaredat ASTNode:61
    */
   public LambdaExpr copy() {
     try {
@@ -191,7 +209,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:76
+   * @declaredat ASTNode:80
    */
   @Deprecated
   public LambdaExpr fullCopy() {
@@ -202,7 +220,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:86
+   * @declaredat ASTNode:90
    */
   public LambdaExpr treeCopyNoTransform() {
     LambdaExpr tree = (LambdaExpr) copy();
@@ -223,7 +241,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:106
+   * @declaredat ASTNode:110
    */
   public LambdaExpr treeCopy() {
     LambdaExpr tree = (LambdaExpr) copy();
@@ -239,7 +257,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:120
+   * @declaredat ASTNode:124
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -327,7 +345,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="LambdaToClass", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaAnonymousDecl.jrag:31")
   public ClassInstanceExpr toClass() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (toClass_computed) {
       return toClass_value;
     }
@@ -357,7 +375,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     arity_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle arity_computed = null;
+  protected ASTState.Cycle arity_computed = null;
 
   /** @apilevel internal */
   protected int arity_value;
@@ -365,13 +383,13 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   /**
    * @attribute syn
    * @aspect LambdaExpr
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:41
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:45
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:41")
+  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:45")
   public int arity() {
-    ASTNode$State state = state();
-    if (arity_computed == ASTNode$State.NON_CYCLE || arity_computed == state().cycle()) {
+    ASTState state = state();
+    if (arity_computed == ASTState.NON_CYCLE || arity_computed == state().cycle()) {
       return arity_value;
     }
     arity_value = numParameters();
@@ -379,7 +397,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
       arity_computed = state().cycle();
     
     } else {
-      arity_computed = ASTNode$State.NON_CYCLE;
+      arity_computed = ASTState.NON_CYCLE;
     
     }
     return arity_value;
@@ -389,7 +407,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     numParameters_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle numParameters_computed = null;
+  protected ASTState.Cycle numParameters_computed = null;
 
   /** @apilevel internal */
   protected int numParameters_value;
@@ -397,13 +415,13 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   /**
    * @attribute syn
    * @aspect LambdaExpr
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:44
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:48
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:44")
+  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:48")
   public int numParameters() {
-    ASTNode$State state = state();
-    if (numParameters_computed == ASTNode$State.NON_CYCLE || numParameters_computed == state().cycle()) {
+    ASTState state = state();
+    if (numParameters_computed == ASTState.NON_CYCLE || numParameters_computed == state().cycle()) {
       return numParameters_value;
     }
     numParameters_value = getLambdaParameters().numParameters();
@@ -411,7 +429,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
       numParameters_computed = state().cycle();
     
     } else {
-      numParameters_computed = ASTNode$State.NON_CYCLE;
+      numParameters_computed = ASTState.NON_CYCLE;
     
     }
     return numParameters_value;
@@ -421,7 +439,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     isImplicit_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isImplicit_computed = null;
+  protected ASTState.Cycle isImplicit_computed = null;
 
   /** @apilevel internal */
   protected boolean isImplicit_value;
@@ -429,13 +447,13 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   /**
    * @attribute syn
    * @aspect LambdaExpr
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:80
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:84
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:80")
+  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:84")
   public boolean isImplicit() {
-    ASTNode$State state = state();
-    if (isImplicit_computed == ASTNode$State.NON_CYCLE || isImplicit_computed == state().cycle()) {
+    ASTState state = state();
+    if (isImplicit_computed == ASTState.NON_CYCLE || isImplicit_computed == state().cycle()) {
       return isImplicit_value;
     }
     isImplicit_value = getLambdaParameters() instanceof InferredLambdaParameters;
@@ -443,7 +461,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
       isImplicit_computed = state().cycle();
     
     } else {
-      isImplicit_computed = ASTNode$State.NON_CYCLE;
+      isImplicit_computed = ASTState.NON_CYCLE;
     
     }
     return isImplicit_value;
@@ -453,7 +471,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     isExplicit_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isExplicit_computed = null;
+  protected ASTState.Cycle isExplicit_computed = null;
 
   /** @apilevel internal */
   protected boolean isExplicit_value;
@@ -461,13 +479,13 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   /**
    * @attribute syn
    * @aspect LambdaExpr
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:83
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:87
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:83")
+  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:87")
   public boolean isExplicit() {
-    ASTNode$State state = state();
-    if (isExplicit_computed == ASTNode$State.NON_CYCLE || isExplicit_computed == state().cycle()) {
+    ASTState state = state();
+    if (isExplicit_computed == ASTState.NON_CYCLE || isExplicit_computed == state().cycle()) {
       return isExplicit_value;
     }
     isExplicit_value = !isImplicit();
@@ -475,14 +493,14 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
       isExplicit_computed = state().cycle();
     
     } else {
-      isExplicit_computed = ASTNode$State.NON_CYCLE;
+      isExplicit_computed = ASTState.NON_CYCLE;
     
     }
     return isExplicit_value;
   }
   /** @apilevel internal */
   private void congruentTo_FunctionDescriptor_reset() {
-    congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
+    congruentTo_FunctionDescriptor_computed = null;
     congruentTo_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -503,18 +521,18 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
    * function descriptor input to this method, then this check must be altered!
    * @attribute syn
    * @aspect LambdaExpr
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:136
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:140
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:136")
+  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:140")
   public boolean congruentTo(FunctionDescriptor fd) {
     Object _parameters = fd;
     if (congruentTo_FunctionDescriptor_computed == null) congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (congruentTo_FunctionDescriptor_values == null) congruentTo_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters) && congruentTo_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters)
         && congruentTo_FunctionDescriptor_computed.containsKey(_parameters)
-        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (Boolean) congruentTo_FunctionDescriptor_values.get(_parameters);
     }
     boolean congruentTo_FunctionDescriptor_value = !fd.isGeneric() && getLambdaParameters().congruentTo(fd) && getLambdaBody().congruentTo(fd);
@@ -524,14 +542,14 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     
     } else {
       congruentTo_FunctionDescriptor_values.put(_parameters, congruentTo_FunctionDescriptor_value);
-      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return congruentTo_FunctionDescriptor_value;
   }
   /** @apilevel internal */
   private void compatibleStrictContext_TypeDecl_reset() {
-    compatibleStrictContext_TypeDecl_computed = new java.util.HashMap(4);
+    compatibleStrictContext_TypeDecl_computed = null;
     compatibleStrictContext_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -541,18 +559,18 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   /** Used to compute compatibility during phase 1 of overload resolution. 
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:50
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:91
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:50")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:91")
   public boolean compatibleStrictContext(TypeDecl type) {
     Object _parameters = type;
     if (compatibleStrictContext_TypeDecl_computed == null) compatibleStrictContext_TypeDecl_computed = new java.util.HashMap(4);
     if (compatibleStrictContext_TypeDecl_values == null) compatibleStrictContext_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (compatibleStrictContext_TypeDecl_values.containsKey(_parameters) && compatibleStrictContext_TypeDecl_computed != null
+    ASTState state = state();
+    if (compatibleStrictContext_TypeDecl_values.containsKey(_parameters)
         && compatibleStrictContext_TypeDecl_computed.containsKey(_parameters)
-        && (compatibleStrictContext_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || compatibleStrictContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (compatibleStrictContext_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || compatibleStrictContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) compatibleStrictContext_TypeDecl_values.get(_parameters);
     }
     boolean compatibleStrictContext_TypeDecl_value = compatibleStrictContext_compute(type);
@@ -562,7 +580,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     
     } else {
       compatibleStrictContext_TypeDecl_values.put(_parameters, compatibleStrictContext_TypeDecl_value);
-      compatibleStrictContext_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      compatibleStrictContext_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return compatibleStrictContext_TypeDecl_value;
@@ -577,7 +595,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     }
   /** @apilevel internal */
   private void compatibleLooseContext_TypeDecl_reset() {
-    compatibleLooseContext_TypeDecl_computed = new java.util.HashMap(4);
+    compatibleLooseContext_TypeDecl_computed = null;
     compatibleLooseContext_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -587,18 +605,18 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:94
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:135
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:94")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:135")
   public boolean compatibleLooseContext(TypeDecl type) {
     Object _parameters = type;
     if (compatibleLooseContext_TypeDecl_computed == null) compatibleLooseContext_TypeDecl_computed = new java.util.HashMap(4);
     if (compatibleLooseContext_TypeDecl_values == null) compatibleLooseContext_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (compatibleLooseContext_TypeDecl_values.containsKey(_parameters) && compatibleLooseContext_TypeDecl_computed != null
+    ASTState state = state();
+    if (compatibleLooseContext_TypeDecl_values.containsKey(_parameters)
         && compatibleLooseContext_TypeDecl_computed.containsKey(_parameters)
-        && (compatibleLooseContext_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || compatibleLooseContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (compatibleLooseContext_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || compatibleLooseContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) compatibleLooseContext_TypeDecl_values.get(_parameters);
     }
     boolean compatibleLooseContext_TypeDecl_value = compatibleStrictContext(type);
@@ -608,14 +626,14 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     
     } else {
       compatibleLooseContext_TypeDecl_values.put(_parameters, compatibleLooseContext_TypeDecl_value);
-      compatibleLooseContext_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      compatibleLooseContext_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return compatibleLooseContext_TypeDecl_value;
   }
   /** @apilevel internal */
   private void pertinentToApplicability_Expr_BodyDecl_int_reset() {
-    pertinentToApplicability_Expr_BodyDecl_int_computed = new java.util.HashMap(4);
+    pertinentToApplicability_Expr_BodyDecl_int_computed = null;
     pertinentToApplicability_Expr_BodyDecl_int_values = null;
   }
   /** @apilevel internal */
@@ -625,10 +643,10 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:122
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:163
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:122")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:163")
   public boolean pertinentToApplicability(Expr access, BodyDecl decl, int argIndex) {
     java.util.List _parameters = new java.util.ArrayList(3);
     _parameters.add(access);
@@ -636,10 +654,10 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     _parameters.add(argIndex);
     if (pertinentToApplicability_Expr_BodyDecl_int_computed == null) pertinentToApplicability_Expr_BodyDecl_int_computed = new java.util.HashMap(4);
     if (pertinentToApplicability_Expr_BodyDecl_int_values == null) pertinentToApplicability_Expr_BodyDecl_int_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (pertinentToApplicability_Expr_BodyDecl_int_values.containsKey(_parameters) && pertinentToApplicability_Expr_BodyDecl_int_computed != null
+    ASTState state = state();
+    if (pertinentToApplicability_Expr_BodyDecl_int_values.containsKey(_parameters)
         && pertinentToApplicability_Expr_BodyDecl_int_computed.containsKey(_parameters)
-        && (pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == ASTNode$State.NON_CYCLE || pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == state().cycle())) {
+        && (pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == ASTState.NON_CYCLE || pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == state().cycle())) {
       return (Boolean) pertinentToApplicability_Expr_BodyDecl_int_values.get(_parameters);
     }
     boolean pertinentToApplicability_Expr_BodyDecl_int_value = pertinentToApplicability_compute(access, decl, argIndex);
@@ -649,7 +667,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     
     } else {
       pertinentToApplicability_Expr_BodyDecl_int_values.put(_parameters, pertinentToApplicability_Expr_BodyDecl_int_value);
-      pertinentToApplicability_Expr_BodyDecl_int_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      pertinentToApplicability_Expr_BodyDecl_int_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return pertinentToApplicability_Expr_BodyDecl_int_value;
@@ -703,7 +721,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     }
   /** @apilevel internal */
   private void moreSpecificThan_TypeDecl_TypeDecl_reset() {
-    moreSpecificThan_TypeDecl_TypeDecl_computed = new java.util.HashMap(4);
+    moreSpecificThan_TypeDecl_TypeDecl_computed = null;
     moreSpecificThan_TypeDecl_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -717,20 +735,20 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
    * @return {@code true} if type1 is more specific than type2, {@code false} otherwise
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:248
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:289
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:248")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:289")
   public boolean moreSpecificThan(TypeDecl type1, TypeDecl type2) {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(type1);
     _parameters.add(type2);
     if (moreSpecificThan_TypeDecl_TypeDecl_computed == null) moreSpecificThan_TypeDecl_TypeDecl_computed = new java.util.HashMap(4);
     if (moreSpecificThan_TypeDecl_TypeDecl_values == null) moreSpecificThan_TypeDecl_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (moreSpecificThan_TypeDecl_TypeDecl_values.containsKey(_parameters) && moreSpecificThan_TypeDecl_TypeDecl_computed != null
+    ASTState state = state();
+    if (moreSpecificThan_TypeDecl_TypeDecl_values.containsKey(_parameters)
         && moreSpecificThan_TypeDecl_TypeDecl_computed.containsKey(_parameters)
-        && (moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) moreSpecificThan_TypeDecl_TypeDecl_values.get(_parameters);
     }
     boolean moreSpecificThan_TypeDecl_TypeDecl_value = moreSpecificThan_compute(type1, type2);
@@ -740,7 +758,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     
     } else {
       moreSpecificThan_TypeDecl_TypeDecl_values.put(_parameters, moreSpecificThan_TypeDecl_TypeDecl_value);
-      moreSpecificThan_TypeDecl_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      moreSpecificThan_TypeDecl_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return moreSpecificThan_TypeDecl_TypeDecl_value;
@@ -854,7 +872,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     }
   /** @apilevel internal */
   private void potentiallyCompatible_TypeDecl_BodyDecl_reset() {
-    potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
+    potentiallyCompatible_TypeDecl_BodyDecl_computed = null;
     potentiallyCompatible_TypeDecl_BodyDecl_values = null;
   }
   /** @apilevel internal */
@@ -864,20 +882,20 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544")
   public boolean potentiallyCompatible(TypeDecl type, BodyDecl candidateDecl) {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(type);
     _parameters.add(candidateDecl);
     if (potentiallyCompatible_TypeDecl_BodyDecl_computed == null) potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
     if (potentiallyCompatible_TypeDecl_BodyDecl_values == null) potentiallyCompatible_TypeDecl_BodyDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters) && potentiallyCompatible_TypeDecl_BodyDecl_computed != null
+    ASTState state = state();
+    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters)
         && potentiallyCompatible_TypeDecl_BodyDecl_computed.containsKey(_parameters)
-        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
+        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTState.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) potentiallyCompatible_TypeDecl_BodyDecl_values.get(_parameters);
     }
     boolean potentiallyCompatible_TypeDecl_BodyDecl_value = potentiallyCompatible_compute(type, candidateDecl);
@@ -887,7 +905,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     
     } else {
       potentiallyCompatible_TypeDecl_BodyDecl_values.put(_parameters, potentiallyCompatible_TypeDecl_BodyDecl_value);
-      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return potentiallyCompatible_TypeDecl_BodyDecl_value;
@@ -952,7 +970,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     isPolyExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isPolyExpression_computed = null;
+  protected ASTState.Cycle isPolyExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isPolyExpression_value;
@@ -965,8 +983,8 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:86")
   public boolean isPolyExpression() {
-    ASTNode$State state = state();
-    if (isPolyExpression_computed == ASTNode$State.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isPolyExpression_computed == ASTState.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
       return isPolyExpression_value;
     }
     isPolyExpression_value = true;
@@ -974,14 +992,14 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
       isPolyExpression_computed = state().cycle();
     
     } else {
-      isPolyExpression_computed = ASTNode$State.NON_CYCLE;
+      isPolyExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isPolyExpression_value;
   }
   /** @apilevel internal */
   private void assignConversionTo_TypeDecl_reset() {
-    assignConversionTo_TypeDecl_computed = new java.util.HashMap(4);
+    assignConversionTo_TypeDecl_computed = null;
     assignConversionTo_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -999,10 +1017,10 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     Object _parameters = type;
     if (assignConversionTo_TypeDecl_computed == null) assignConversionTo_TypeDecl_computed = new java.util.HashMap(4);
     if (assignConversionTo_TypeDecl_values == null) assignConversionTo_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (assignConversionTo_TypeDecl_values.containsKey(_parameters) && assignConversionTo_TypeDecl_computed != null
+    ASTState state = state();
+    if (assignConversionTo_TypeDecl_values.containsKey(_parameters)
         && assignConversionTo_TypeDecl_computed.containsKey(_parameters)
-        && (assignConversionTo_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || assignConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (assignConversionTo_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || assignConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) assignConversionTo_TypeDecl_values.get(_parameters);
     }
     boolean assignConversionTo_TypeDecl_value = assignConversionTo_compute(type);
@@ -1012,7 +1030,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     
     } else {
       assignConversionTo_TypeDecl_values.put(_parameters, assignConversionTo_TypeDecl_value);
-      assignConversionTo_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      assignConversionTo_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return assignConversionTo_TypeDecl_value;
@@ -1031,7 +1049,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
     targetInterface_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle targetInterface_computed = null;
+  protected ASTState.Cycle targetInterface_computed = null;
 
   /** @apilevel internal */
   protected InterfaceDecl targetInterface_value;
@@ -1039,13 +1057,13 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
   /**
    * @attribute syn
    * @aspect TargetType
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:147
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:165
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:147")
+  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:165")
   public InterfaceDecl targetInterface() {
-    ASTNode$State state = state();
-    if (targetInterface_computed == ASTNode$State.NON_CYCLE || targetInterface_computed == state().cycle()) {
+    ASTState state = state();
+    if (targetInterface_computed == ASTState.NON_CYCLE || targetInterface_computed == state().cycle()) {
       return targetInterface_value;
     }
     targetInterface_value = targetInterface_compute();
@@ -1053,7 +1071,7 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
       targetInterface_computed = state().cycle();
     
     } else {
-      targetInterface_computed = ASTNode$State.NON_CYCLE;
+      targetInterface_computed = ASTState.NON_CYCLE;
     
     }
     return targetInterface_value;
@@ -1068,84 +1086,77 @@ public class LambdaExpr extends Expr implements Cloneable, VariableScope {
         return (InterfaceDecl) targetType();
       }
     }
-/** @apilevel internal */
-protected ASTNode$State.Cycle type_cycle = null;
-  /** @apilevel internal */
-  private void type_reset() {
-    type_computed = false;
-    type_initialized = false;
-    type_value = null;
-    type_cycle = null;
-  }
-  /** @apilevel internal */
-  protected boolean type_computed = false;
-
-  /** @apilevel internal */
-  protected TypeDecl type_value;
-  /** @apilevel internal */
-  protected boolean type_initialized = false;
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:61")
-  public TypeDecl type() {
-    if (type_computed) {
-      return type_value;
-    }
-    ASTNode$State state = state();
-    if (!type_initialized) {
-      type_initialized = true;
-      type_value = unknownType();
-    }
-    if (!state.inCircle() || state.calledByLazyAttribute()) {
-      state.enterCircle();
-      do {
-        type_cycle = state.nextCycle();
-        TypeDecl new_type_value = type_compute();
-        if ((new_type_value == null && type_value != null) || (new_type_value != null && !new_type_value.equals(type_value))) {
-          state.setChangeInCycle();
-        }
-        type_value = new_type_value;
-      } while (state.testAndClearChangeInCycle());
-      type_computed = true;
-
-      state.leaveCircle();
-    } else if (type_cycle != state.cycle()) {
-      type_cycle = state.cycle();
-      TypeDecl new_type_value = type_compute();
-      if ((new_type_value == null && type_value != null) || (new_type_value != null && !new_type_value.equals(type_value))) {
-        state.setChangeInCycle();
-      }
-      type_value = new_type_value;
-    } else {
-    }
-    return type_value;
-  }
-  /** @apilevel internal */
-  private TypeDecl type_compute() {
-      // 15.27.3
-      if (!assignmentContext() && !castContext() && !invocationContext()) {
-        return unknownType();
-      }
-      if (targetInterface() == null) {
-        return unknownType();
-      }
-  
-      InterfaceDecl iDecl = targetInterface();
-      if (!iDecl.isFunctional()) {
-        return unknownType();
-      }
-      if (congruentTo(iDecl.functionDescriptor())) {
-        return iDecl;
-      } else {
-        return unknownType();
-      }
-    }
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:122
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:61
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:122")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:61")
+  public TypeDecl type() {
+    {
+        // 15.27.3
+        if (!assignmentContext() && !castContext() && !invocationContext()) {
+          return unknownType();
+        }
+        if (targetInterface() == null) {
+          return unknownType();
+        }
+    
+        InterfaceDecl iDecl = targetInterface();
+        if (!iDecl.isFunctional()) {
+          return unknownType();
+        }
+    
+        InterfaceDecl iface = (InterfaceDecl) iDecl.original();
+        MethodDecl method = iface.functionDescriptor().method.get();
+        TypeDecl returnType = method.type();
+        if (!returnType.isVoid() && returnType.involvesTypeParameters()) {
+          Constraints constraints = new Constraints();
+          GenericInterfaceDecl genericInterface = (GenericInterfaceDecl) iface;
+          for (TypeVariable var : genericInterface.getTypeParameters()) {
+            constraints.addTypeVariable(var);
+          }
+          for (TypeDecl ret : getLambdaBody().returnTypes()) {
+            if (!ret.isUnknown()) {
+              if (ret.isPrimitiveType()) {
+                ret = ret.boxed();
+              }
+              constraints.convertibleTo(ret, returnType);
+            }
+          }
+          if (iDecl.functionDescriptor().method.hasValue()) {
+            TypeDecl supReturn = iDecl.functionDescriptor().method.get().type();
+            if (!supReturn.isTypeVariable()) {
+              constraints.convertibleTo(supReturn, returnType);
+            }
+          }
+          constraints.resolveEqualityConstraints();
+          constraints.resolveSupertypeConstraints();
+          constraints.resolveSubtypeConstraints();
+          Parameterization parameterization = ((ParInterfaceDecl) iDecl).getParameterization();
+          java.util.List<TypeDecl> args = new ArrayList<TypeDecl>(constraints.typeArguments());
+          for (int i = 0; i < args.size(); ++i) {
+            if (args.get(i) == null) {
+              args.set(i, parameterization.args.get(i));
+            }
+          }
+          iDecl = (InterfaceDecl) genericInterface.lookupParTypeDecl(args);
+        }
+    
+        if (!congruentTo(iDecl.functionDescriptor())) {
+          return unknownType();
+        }
+        return iDecl;
+      }
+  }
+  /**
+   * @attribute syn
+   * @aspect TypeCheck
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:158
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:158")
   public Collection<Problem> typeProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -1232,6 +1243,17 @@ protected ASTNode$State.Cycle type_cycle = null;
       }
   }
   /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    Value eval_Body_value = toClass().eval(b);
+    return eval_Body_value;
+  }
+  /**
    * @attribute inh
    * @aspect EnclosingLambda
    * @declaredat /home/olivier/projects/extendj/java8/frontend/EnclosingLambda.jrag:38
@@ -1239,8 +1261,8 @@ protected ASTNode$State.Cycle type_cycle = null;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="EnclosingLambda", declaredAt="/home/olivier/projects/extendj/java8/frontend/EnclosingLambda.jrag:38")
   public LambdaExpr enclosingLambda() {
-    ASTNode$State state = state();
-    if (enclosingLambda_computed == ASTNode$State.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
+    ASTState state = state();
+    if (enclosingLambda_computed == ASTState.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
       return enclosingLambda_value;
     }
     enclosingLambda_value = getParent().Define_enclosingLambda(this, null);
@@ -1248,7 +1270,7 @@ protected ASTNode$State.Cycle type_cycle = null;
       enclosingLambda_computed = state().cycle();
     
     } else {
-      enclosingLambda_computed = ASTNode$State.NON_CYCLE;
+      enclosingLambda_computed = ASTState.NON_CYCLE;
     
     }
     return enclosingLambda_value;
@@ -1259,7 +1281,7 @@ protected ASTNode$State.Cycle type_cycle = null;
     enclosingLambda_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle enclosingLambda_computed = null;
+  protected ASTState.Cycle enclosingLambda_computed = null;
 
   /** @apilevel internal */
   protected LambdaExpr enclosingLambda_value;
@@ -1277,6 +1299,11 @@ protected ASTNode$State.Cycle type_cycle = null;
       return getParent().Define_inhModifiedInScope(this, _callerNode, var);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inhModifiedInScope
+   */
   protected boolean canDefine_inhModifiedInScope(ASTNode _callerNode, ASTNode _childNode, Variable var) {
     return true;
   }
@@ -1301,6 +1328,11 @@ protected ASTNode$State.Cycle type_cycle = null;
       return getParent().Define_enclosingLambda(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/EnclosingLambda.jrag:37
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosingLambda
+   */
   protected boolean canDefine_enclosingLambda(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1312,6 +1344,11 @@ protected ASTNode$State.Cycle type_cycle = null;
     int childIndex = this.getIndexOfChild(_callerNode);
     return null;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:273
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosingFinally
+   */
   protected boolean canDefine_enclosingFinally(ASTNode _callerNode, ASTNode _childNode, Stmt branch) {
     return true;
   }
@@ -1325,6 +1362,11 @@ protected ASTNode$State.Cycle type_cycle = null;
         throw new Error("Found no branch targets for " + branch.getClass().getName());
       }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:230
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute branchTarget
+   */
   protected boolean canDefine_branchTarget(ASTNode _callerNode, ASTNode _childNode, Stmt branch) {
     return true;
   }
@@ -1336,16 +1378,21 @@ protected ASTNode$State.Cycle type_cycle = null;
     int childIndex = this.getIndexOfChild(_callerNode);
     return emptySet();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/NameCheck.jrag:680
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute otherLocalClassDecls
+   */
   protected boolean canDefine_otherLocalClassDecls(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:115
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
    * @apilevel internal
    */
   public boolean Define_handlesException(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
     if (getLambdaBodyNoTransform() != null && _callerNode == getLambdaBody()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:154
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:158
       {
           InterfaceDecl iDecl = targetInterface();
           if (iDecl == null) {
@@ -1365,6 +1412,11 @@ protected ASTNode$State.Cycle type_cycle = null;
       return getParent().Define_handlesException(this, _callerNode, exceptionType);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute handlesException
+   */
   protected boolean canDefine_handlesException(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
     return true;
   }
@@ -1376,6 +1428,11 @@ protected ASTNode$State.Cycle type_cycle = null;
     int childIndex = this.getIndexOfChild(_callerNode);
     return targetInterface();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/AnonymousClasses.jrag:33
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute superType
+   */
   protected boolean canDefine_superType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1407,6 +1464,11 @@ protected ASTNode$State.Cycle type_cycle = null;
       return getParent().Define_lookupVariable(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -1427,6 +1489,11 @@ protected ASTNode$State.Cycle type_cycle = null;
       return getParent().Define_outerScope(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/NameCheck.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute outerScope
+   */
   protected boolean canDefine_outerScope(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1447,6 +1514,11 @@ protected ASTNode$State.Cycle type_cycle = null;
       return getParent().Define_unknownType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:32
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unknownType
+   */
   protected boolean canDefine_unknownType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1458,6 +1530,11 @@ protected ASTNode$State.Cycle type_cycle = null;
     int childIndex = this.getIndexOfChild(_callerNode);
     return anonymousDecl();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/VariableDeclaration.jrag:77
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosingLambdaType
+   */
   protected boolean canDefine_enclosingLambdaType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1469,8 +1546,9 @@ protected ASTNode$State.Cycle type_cycle = null;
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:119
+    // @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:155
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -1481,7 +1559,26 @@ protected ASTNode$State.Cycle type_cycle = null;
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
+  protected void collect_contributors_BlockLambdaBody_lambdaReturns(BlockLambdaBody _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+
+
+  
+{ /* Ignore nested lambda returns. */ }
+  }
+  /** @apilevel internal */
+  protected void collect_contributors_TypeDecl_enumSwitchStatements(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+
+  
+{
+    // Note: we don't search the children of this lambda expression, because
+    // all nested types from children will be nested inside the toClass() NTA.
+    toClass().collect_contributors_TypeDecl_enumSwitchStatements(_root, _map);
+  }
+  }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_nestedTypes(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
+
 
   
 {
@@ -1490,6 +1587,7 @@ protected ASTNode$State.Cycle type_cycle = null;
     toClass().collect_contributors_TypeDecl_nestedTypes(_root, _map);
   }
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_accessors(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
 
 
@@ -1500,6 +1598,7 @@ protected ASTNode$State.Cycle type_cycle = null;
     toClass().collect_contributors_TypeDecl_accessors(_root, _map);
   }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : typeProblems()) {

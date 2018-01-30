@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:83
+ * @astdecl FieldDeclSubstituted : FieldDecl ::= <Original:FieldDecl>;
  * @production FieldDeclSubstituted : {@link FieldDecl} ::= <span class="component">&lt;Original:FieldDecl&gt;</span>;
 
  */
@@ -60,6 +63,11 @@ public class FieldDeclSubstituted extends FieldDecl implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "Declarator", "Original"},
+    type = {"Modifiers", "Access", "List<FieldDeclarator>", "FieldDecl"},
+    kind = {"Child", "Child", "List", "Token"}
+  )
   public FieldDeclSubstituted(Modifiers p0, Access p1, List<FieldDeclarator> p2, FieldDecl p3) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -67,39 +75,39 @@ public class FieldDeclSubstituted extends FieldDecl implements Cloneable {
     setOriginal(p3);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public FieldDeclSubstituted clone() throws CloneNotSupportedException {
     FieldDeclSubstituted node = (FieldDeclSubstituted) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public FieldDeclSubstituted copy() {
     try {
@@ -119,7 +127,7 @@ public class FieldDeclSubstituted extends FieldDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   @Deprecated
   public FieldDeclSubstituted fullCopy() {
@@ -130,7 +138,7 @@ public class FieldDeclSubstituted extends FieldDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:78
    */
   public FieldDeclSubstituted treeCopyNoTransform() {
     FieldDeclSubstituted tree = (FieldDeclSubstituted) copy();
@@ -151,7 +159,7 @@ public class FieldDeclSubstituted extends FieldDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:93
+   * @declaredat ASTNode:98
    */
   public FieldDeclSubstituted treeCopy() {
     FieldDeclSubstituted tree = (FieldDeclSubstituted) copy();
@@ -167,7 +175,7 @@ public class FieldDeclSubstituted extends FieldDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:107
+   * @declaredat ASTNode:112
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenFieldDecl_Original == ((FieldDeclSubstituted) node).tokenFieldDecl_Original);    
@@ -355,12 +363,12 @@ public class FieldDeclSubstituted extends FieldDecl implements Cloneable {
     return tokenFieldDecl_Original;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1644
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
    * @apilevel internal
    */
   public FieldDeclarator Define_erasedField(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getDeclaratorListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1648
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1647
       int index = _callerNode.getIndexOfChild(_childNode);
       return getOriginal().getDeclarator(index);
     }
@@ -368,6 +376,11 @@ public class FieldDeclSubstituted extends FieldDecl implements Cloneable {
       return super.Define_erasedField(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute erasedField
+   */
   protected boolean canDefine_erasedField(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

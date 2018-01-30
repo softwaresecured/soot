@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,7 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast class
  * @aspect StringsInSwitch
- * @declaredat /home/olivier/projects/extendj/jimple8/backend/StringsInSwitch.jrag:54
+ * @declaredat /home/olivier/projects/extendj/jimple8/backend/StringsInSwitch.jrag:51
  */
  class CaseLabel extends java.lang.Object {
   
@@ -54,10 +56,10 @@ import soot.coffi.CoffiMethodSource;
 
   
 
-    soot.jimple.Stmt label()  { return cc.label(); }
+    Body.Label label(Body b)  { return cc.label(b); }
 
   
-    String value()  { return cc.getValue().constant().stringValue(); }
+    String value()        { return cc.getValue().constant().stringValue(); }
 
 
 }

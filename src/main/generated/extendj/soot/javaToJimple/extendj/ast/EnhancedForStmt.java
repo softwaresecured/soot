@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/EnhancedFor.ast:1
+ * @astdecl EnhancedForStmt : BranchTargetStmt ::= Modifiers TypeAccess:Access VariableDecl:VariableDeclarator Expr Stmt;
  * @production EnhancedForStmt : {@link BranchTargetStmt} ::= <span class="component">{@link Modifiers}</span> <span class="component">TypeAccess:{@link Access}</span> <span class="component">VariableDecl:{@link VariableDeclarator}</span> <span class="component">{@link Expr}</span> <span class="component">{@link Stmt}</span>;
 
  */
@@ -67,112 +70,67 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
    * @aspect EnhancedForToBytecode
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:20
    */
-  public void jimplify2(Body b) {
-    if(getExpr().type().isArrayDecl()) {
-      soot.Local array = asLocal(b, getExpr().eval(b));
-      soot.Local index = asLocal(b, b.setSrcLoc(soot.jimple.IntConstant.v(0), this));
-      soot.Local parameter = b.newLocal(getVariableDecl().name(), getVariableDecl().type().getSootType(), getVariableDecl());
-      getVariableDecl().local = parameter;
-      b.addLabel(cond_label());
-      b.add(
-        b.newIfStmt(
-          b.newGeExpr(
-            asImmediate(b, index),
-            asImmediate(b, b.newLengthExpr(asImmediate(b, array), this)),
-            this
-          ),
-          end_label(),
-          this
-        )
-      );
-      b.add(
-        b.newAssignStmt(
-          parameter,
-          asRValue(b,
-            getExpr().type().elementType().emitCastTo(b,
-              asLocal(b,
-                b.newArrayRef(
-                  array,
-                  index,
-                  getExpr()
-                )
-              ),
-              getVariableDecl().type(),
-              getExpr()
-            )
-          ),
-          getExpr()
-        )
-      );
-      getStmt().jimplify2(b);
-      b.addLabel(update_label());
-      b.add(
-        b.newAssignStmt(
-          index,
-          b.newAddExpr(
-            index,
-            soot.jimple.IntConstant.v(1),
-            getExpr()
-          ),
-          getExpr()
-        )
-      );
-      b.add(b.newGotoStmt(cond_label(), this));
-      b.addLabel(end_label());
+  public void jimpleEmit(Body b) {
+    if (getExpr().type().isArrayDecl()) {
+      Local array      = b.asLocal(getExpr().eval(b));
+      Local index      = b.newTemp(b.setSrcLoc(soot.jimple.IntConstant.v(0), this));
+      Local parameter  = b.local(getVariableDecl());
+
+      b.addLabel(cond_label(b));
+      b.add(b.newIfStmt(
+        b.newGeExpr(index, b.newLengthExpr(array, this), this),
+        end_label(b).stmt,
+        this));
+
+      b.add(b.newAssignStmt(
+        parameter,
+        getExpr().type().elementType().emitCastTo(b,
+          b.newArrayRef(array, index, this),
+          getVariableDecl().type(),
+          this),
+        this));
+      getStmt().jimpleEmit(b);
+
+      b.addLabel(update_label(b));
+      b.add(b.newAssignStmt(
+        index,
+        b.newAddExpr(index, soot.jimple.IntConstant.v(1), this),
+        this));
+      b.addGoTo(cond_label(b), this);
+
+      b.addLabel(end_label(b));
+      return;
     }
-    else {
-      soot.Local iterator = asLocal(b,
-        b.newInterfaceInvokeExpr(
-          asLocal(b, getExpr().eval(b)),
-          iteratorMethod().sootRef(),
-          new ArrayList<soot.Value>(),
-          getExpr()
-        )
-      );
-      soot.Local parameter = b.newLocal(getVariableDecl().name(), getVariableDecl().type().getSootType(), getVariableDecl());
-      getVariableDecl().local = parameter;
-      b.addLabel(cond_label());
-      b.add(
-        b.newIfStmt(
-          b.newEqExpr(
-            asImmediate(b,
-              b.newInterfaceInvokeExpr(
-                iterator,
-                hasNextMethod().sootRef(),
-                new ArrayList<soot.Value>(),
-                this
-              )
-            ),
-            BooleanType.emitConstant(false, b, this),
-            this
-          ),
-          end_label(),
-          this
-        )
-      );
-      b.add(
-        b.newAssignStmt(
-          parameter,
-          nextMethod().type().emitCastTo(b,
-            b.newInterfaceInvokeExpr(
-              iterator,
-              nextMethod().sootRef(),
-              new ArrayList<soot.Value>(),
-              getExpr()
-            ),
-            getVariableDecl().type(),
-            getExpr()
-          ),
-          getExpr()
-        )
-      );
-      getStmt().jimplify2(b);
-      b.addLabel(update_label());
-      b.add(b.newGotoStmt(cond_label(), this));
-      b.addLabel(end_label());
 
+    Local iterator = b.asLocal(b.newInterfaceInvokeExpr(
+      b.asLocal(getExpr().eval(b)),
+      iteratorMethod().sootRef(),
+      new ArrayList<>(),
+      getExpr()));
 
+    Local parameter = b.local(getVariableDecl());
+    b.addLabel(cond_label(b));
+    b.add(b.newIfStmt(
+        b.newEqExpr(
+          b.newInterfaceInvokeExpr(iterator, hasNextMethod().sootRef(), new ArrayList<>(), this),
+          BooleanType.emitConstant(false, b, this),
+          this),
+        end_label(b).stmt,
+        this));
+    b.add(b.newAssignStmt(
+      parameter,
+      nextMethod().type().emitCastTo(b,
+        b.newInterfaceInvokeExpr(iterator, nextMethod().sootRef(), new ArrayList<>(), getExpr()),
+        getVariableDecl().type(),
+        getExpr()),
+      getExpr()));
 
+    getStmt().jimpleEmit(b);
+
+    b.addLabel(update_label(b));
+    b.addGoTo(cond_label(b), this);
+
+    b.addLabel(end_label(b));
       /*
       getExpr().createBCode(gen);
       iteratorMethod().emitInvokeMethod(gen, lookupType("java.lang", "Iterable"));
@@ -190,50 +148,36 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       gen.emitGoto(cond_label());
       gen.addLabel(end_label());
       */
-    }
   }
   /**
    * @aspect EnhancedForToBytecode
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:146
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:100
    */
-  private MethodDecl iteratorMethod() {
-    TypeDecl typeDecl = lookupType("java.lang", "Iterable");
-		for (Iterator iter = typeDecl.memberMethods("iterator").iterator(); iter.hasNext();) {
-			MethodDecl m = (MethodDecl)iter.next();
-			if (m.getNumParameter() == 0) {
-				return m;
-      }
-    }
-    throw new Error("Could not find java.lang.Iterable.iterator()");
+  private MethodDecl methodLookupHelper(String pkg, String klass, String method) {
+    TypeDecl typeDecl = lookupType(pkg, klass);
+		for (MethodDecl m : typeDecl.memberMethods(method))
+			if (m.getNumParameter() == 0) return m;
+
+    throw new Error("Could not find " + pkg + "." + klass + "." + method + "()");
   }
   /**
    * @aspect EnhancedForToBytecode
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:156
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:108
    */
-  private MethodDecl hasNextMethod() {
-    TypeDecl typeDecl = lookupType("java.util", "Iterator");
-		for (Iterator iter = typeDecl.memberMethods("hasNext").iterator(); iter.hasNext();) {
-			MethodDecl m = (MethodDecl)iter.next();
-			if (m.getNumParameter() == 0) {
-				return m;
-      }
-    }
-    throw new Error("Could not find java.util.Collection.hasNext()");
-  }
+  private MethodDecl iteratorMethod()
+  { return methodLookupHelper("java.lang", "Iterable", "iterator"); }
   /**
    * @aspect EnhancedForToBytecode
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:166
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:110
    */
-  private MethodDecl nextMethod() {
-    TypeDecl typeDecl = lookupType("java.util", "Iterator");
-		for (Iterator iter = typeDecl.memberMethods("next").iterator(); iter.hasNext();) {
-			MethodDecl m = (MethodDecl)iter.next();
-			if (m.getNumParameter() == 0) {
-				return m;
-      }
-    }
-    throw new Error("Could not find java.util.Collection.next()");
-  }
+  private MethodDecl hasNextMethod()
+  { return methodLookupHelper("java.util", "Iterator", "hasNext"); }
+  /**
+   * @aspect EnhancedForToBytecode
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:112
+   */
+  private MethodDecl nextMethod()
+  { return methodLookupHelper("java.util", "Iterator", "next"); }
   /**
    * @declaredat ASTNode:1
    */
@@ -253,6 +197,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "VariableDecl", "Expr", "Stmt"},
+    type = {"Modifiers", "Access", "VariableDeclarator", "Expr", "Stmt"},
+    kind = {"Child", "Child", "Child", "Child", "Child"}
+  )
   public EnhancedForStmt(Modifiers p0, Access p1, VariableDeclarator p2, Expr p3, Stmt p4) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -261,45 +210,46 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
     setChild(p4, 4);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   protected int numChildren() {
     return 5;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     canCompleteNormally_reset();
     assignedAfter_Variable_reset();
     unassignedAfter_Variable_reset();
-    cond_label_reset();
-    update_label_reset();
-    end_label_reset();
+    iterableTypeAccess_reset();
+    cond_label_Body_reset();
+    update_label_Body_reset();
+    end_label_Body_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:47
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:51
    */
   public EnhancedForStmt clone() throws CloneNotSupportedException {
     EnhancedForStmt node = (EnhancedForStmt) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:56
    */
   public EnhancedForStmt copy() {
     try {
@@ -319,7 +269,7 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:69
+   * @declaredat ASTNode:75
    */
   @Deprecated
   public EnhancedForStmt fullCopy() {
@@ -330,7 +280,7 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:79
+   * @declaredat ASTNode:85
    */
   public EnhancedForStmt treeCopyNoTransform() {
     EnhancedForStmt tree = (EnhancedForStmt) copy();
@@ -351,7 +301,7 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:99
+   * @declaredat ASTNode:105
    */
   public EnhancedForStmt treeCopy() {
     EnhancedForStmt tree = (EnhancedForStmt) copy();
@@ -367,7 +317,7 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:113
+   * @declaredat ASTNode:119
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -565,7 +515,7 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
     canCompleteNormally_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle canCompleteNormally_computed = null;
+  protected ASTState.Cycle canCompleteNormally_computed = null;
 
   /** @apilevel internal */
   protected boolean canCompleteNormally_value;
@@ -578,8 +528,8 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="UnreachableStatements", declaredAt="/home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:50")
   public boolean canCompleteNormally() {
-    ASTNode$State state = state();
-    if (canCompleteNormally_computed == ASTNode$State.NON_CYCLE || canCompleteNormally_computed == state().cycle()) {
+    ASTState state = state();
+    if (canCompleteNormally_computed == ASTState.NON_CYCLE || canCompleteNormally_computed == state().cycle()) {
       return canCompleteNormally_value;
     }
     canCompleteNormally_value = reachable();
@@ -587,7 +537,7 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       canCompleteNormally_computed = state().cycle();
     
     } else {
-      canCompleteNormally_computed = ASTNode$State.NON_CYCLE;
+      canCompleteNormally_computed = ASTState.NON_CYCLE;
     
     }
     return canCompleteNormally_value;
@@ -602,27 +552,27 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
   public boolean assignedAfter(Variable v) {
     Object _parameters = v;
     if (assignedAfter_Variable_values == null) assignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfter_Variable_value = assignedAfter_compute(v);
-        if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfter_Variable_value;
         }
@@ -634,7 +584,7 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfter_Variable_value = assignedAfter_compute(v);
-      if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfter_Variable_value;
       }
@@ -660,27 +610,27 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = unassignedAfter_compute(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -692,7 +642,7 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = unassignedAfter_compute(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -724,6 +674,42 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
     boolean continueLabel_value = true;
     return continueLabel_value;
   }
+  /** @apilevel internal */
+  private void iterableTypeAccess_reset() {
+    iterableTypeAccess_computed = false;
+    
+    iterableTypeAccess_value = null;
+  }
+  /** @apilevel internal */
+  protected boolean iterableTypeAccess_computed = false;
+
+  /** @apilevel internal */
+  protected Access iterableTypeAccess_value;
+
+  /**
+   * Creates a synthetic access to the type {@code java.lang.Iterable<X>},
+   * where {@code X} is the loop variable type.
+   * @attribute syn
+   * @aspect GenericMethodsInference
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:81
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
+  @ASTNodeAnnotation.Source(aspect="GenericMethodsInference", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:81")
+  public Access iterableTypeAccess() {
+    ASTState state = state();
+    if (iterableTypeAccess_computed) {
+      return iterableTypeAccess_value;
+    }
+    state().enterLazyAttribute();
+    iterableTypeAccess_value = new ParTypeAccess(
+              new TypeAccess("java.lang", "Iterable"),
+              new List<Access>(
+                  getTypeAccess().treeCopyNoTransform()));
+    iterableTypeAccess_value.setParent(this);
+    iterableTypeAccess_computed = true;
+    state().leaveLazyAttribute();
+    return iterableTypeAccess_value;
+  }
   /**
    * @attribute syn
    * @aspect PreciseRethrow
@@ -736,16 +722,14 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
     return modifiedInScope_Variable_value;
   }
   /** @apilevel internal */
-  private void cond_label_reset() {
-    cond_label_computed = null;
-    cond_label_value = null;
+  private void cond_label_Body_reset() {
+    cond_label_Body_computed = null;
+    cond_label_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle cond_label_computed = null;
-
+  protected java.util.Map cond_label_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt cond_label_value;
-
+  protected java.util.Map cond_label_Body_computed;
   /**
    * @attribute syn
    * @aspect EnhancedForToBytecode
@@ -753,32 +737,37 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="EnhancedForToBytecode", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:12")
-  public soot.jimple.Stmt cond_label() {
-    ASTNode$State state = state();
-    if (cond_label_computed == ASTNode$State.NON_CYCLE || cond_label_computed == state().cycle()) {
-      return cond_label_value;
+  public Body.Label cond_label(Body b) {
+    Object _parameters = b;
+    if (cond_label_Body_computed == null) cond_label_Body_computed = new java.util.HashMap(4);
+    if (cond_label_Body_values == null) cond_label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (cond_label_Body_values.containsKey(_parameters)
+        && cond_label_Body_computed.containsKey(_parameters)
+        && (cond_label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || cond_label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) cond_label_Body_values.get(_parameters);
     }
-    cond_label_value = newLabel();
+    Body.Label cond_label_Body_value = newLabel(b);
     if (state().inCircle()) {
-      cond_label_computed = state().cycle();
+      cond_label_Body_values.put(_parameters, cond_label_Body_value);
+      cond_label_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      cond_label_computed = ASTNode$State.NON_CYCLE;
+      cond_label_Body_values.put(_parameters, cond_label_Body_value);
+      cond_label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return cond_label_value;
+    return cond_label_Body_value;
   }
   /** @apilevel internal */
-  private void update_label_reset() {
-    update_label_computed = null;
-    update_label_value = null;
+  private void update_label_Body_reset() {
+    update_label_Body_computed = null;
+    update_label_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle update_label_computed = null;
-
+  protected java.util.Map update_label_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt update_label_value;
-
+  protected java.util.Map update_label_Body_computed;
   /**
    * @attribute syn
    * @aspect EnhancedForToBytecode
@@ -786,32 +775,37 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="EnhancedForToBytecode", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:13")
-  public soot.jimple.Stmt update_label() {
-    ASTNode$State state = state();
-    if (update_label_computed == ASTNode$State.NON_CYCLE || update_label_computed == state().cycle()) {
-      return update_label_value;
+  public Body.Label update_label(Body b) {
+    Object _parameters = b;
+    if (update_label_Body_computed == null) update_label_Body_computed = new java.util.HashMap(4);
+    if (update_label_Body_values == null) update_label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (update_label_Body_values.containsKey(_parameters)
+        && update_label_Body_computed.containsKey(_parameters)
+        && (update_label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || update_label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) update_label_Body_values.get(_parameters);
     }
-    update_label_value = newLabel();
+    Body.Label update_label_Body_value = newLabel(b);
     if (state().inCircle()) {
-      update_label_computed = state().cycle();
+      update_label_Body_values.put(_parameters, update_label_Body_value);
+      update_label_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      update_label_computed = ASTNode$State.NON_CYCLE;
+      update_label_Body_values.put(_parameters, update_label_Body_value);
+      update_label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return update_label_value;
+    return update_label_Body_value;
   }
   /** @apilevel internal */
-  private void end_label_reset() {
-    end_label_computed = null;
-    end_label_value = null;
+  private void end_label_Body_reset() {
+    end_label_Body_computed = null;
+    end_label_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle end_label_computed = null;
-
+  protected java.util.Map end_label_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt end_label_value;
-
+  protected java.util.Map end_label_Body_computed;
   /**
    * @attribute syn
    * @aspect EnhancedForToBytecode
@@ -819,31 +813,38 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="EnhancedForToBytecode", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EnhancedForCodegen.jrag:14")
-  public soot.jimple.Stmt end_label() {
-    ASTNode$State state = state();
-    if (end_label_computed == ASTNode$State.NON_CYCLE || end_label_computed == state().cycle()) {
-      return end_label_value;
+  public Body.Label end_label(Body b) {
+    Object _parameters = b;
+    if (end_label_Body_computed == null) end_label_Body_computed = new java.util.HashMap(4);
+    if (end_label_Body_values == null) end_label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (end_label_Body_values.containsKey(_parameters)
+        && end_label_Body_computed.containsKey(_parameters)
+        && (end_label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || end_label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) end_label_Body_values.get(_parameters);
     }
-    end_label_value = newLabel();
+    Body.Label end_label_Body_value = newLabel(b);
     if (state().inCircle()) {
-      end_label_computed = state().cycle();
+      end_label_Body_values.put(_parameters, end_label_Body_value);
+      end_label_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      end_label_computed = ASTNode$State.NON_CYCLE;
+      end_label_Body_values.put(_parameters, end_label_Body_value);
+      end_label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return end_label_value;
+    return end_label_Body_value;
   }
   /**
    * @attribute syn
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:224
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:235
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:224")
-  public soot.jimple.Stmt break_label() {
-    soot.jimple.Stmt break_label_value = end_label();
-    return break_label_value;
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:235")
+  public Body.Label break_label(Body b) {
+    Body.Label break_label_Body_value = end_label(b);
+    return break_label_Body_value;
   }
   /**
    * @attribute syn
@@ -852,9 +853,9 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:250")
-  public soot.jimple.Stmt continue_label() {
-    soot.jimple.Stmt continue_label_value = update_label();
-    return continue_label_value;
+  public Body.Label continue_label(Body b) {
+    Body.Label continue_label_Body_value = update_label(b);
+    return continue_label_Body_value;
   }
   /**
    * @attribute inh
@@ -875,6 +876,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
     int childIndex = this.getIndexOfChild(_callerNode);
     return branch.canBranchTo(this) ? this : branchTarget(branch);
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:230
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute branchTarget
+   */
   protected boolean canDefine_branchTarget(ASTNode _callerNode, ASTNode _childNode, Stmt branch) {
     return true;
   }
@@ -899,6 +905,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_lookupVariable(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -915,6 +926,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -939,11 +955,16 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_outerScope(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/NameCheck.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute outerScope
+   */
   protected boolean canDefine_outerScope(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:436
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
    * @apilevel internal
    */
   public boolean Define_mayBeFinal(ASTNode _callerNode, ASTNode _childNode) {
@@ -955,6 +976,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_mayBeFinal(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeFinal
+   */
   protected boolean canDefine_mayBeFinal(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -971,6 +997,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_isMethodParameter(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:44
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isMethodParameter
+   */
   protected boolean canDefine_isMethodParameter(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -987,6 +1018,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_isConstructorParameter(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:45
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isConstructorParameter
+   */
   protected boolean canDefine_isConstructorParameter(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1003,6 +1039,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_isExceptionHandlerParameter(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:46
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isExceptionHandlerParameter
+   */
   protected boolean canDefine_isExceptionHandlerParameter(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1019,6 +1060,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_declarationModifiers(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:133
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declarationModifiers
+   */
   protected boolean canDefine_declarationModifiers(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1035,6 +1081,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_declarationType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:144
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declarationType
+   */
   protected boolean canDefine_declarationType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1051,6 +1102,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_reachable(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:49
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reachable
+   */
   protected boolean canDefine_reachable(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1071,6 +1127,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -1091,6 +1152,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -1107,32 +1173,63 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_insideLoop(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/NameCheck.jrag:523
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute insideLoop
+   */
   protected boolean canDefine_insideLoop(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:69
+   * @apilevel internal
+   */
+  public TypeDecl Define_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
+    if (getExprNoTransform() != null && _callerNode == getExpr()) {
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:75
+      return iterableTypeAccess().type();
+    }
+    else {
+      return getParent().Define_assignConvertedType(this, _callerNode);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:69
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignConvertedType
+   */
+  protected boolean canDefine_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
    * @apilevel internal
    */
   public FieldDecl Define_fieldDecl(ASTNode _callerNode, ASTNode _childNode) {
     if (getVariableDeclNoTransform() != null && _callerNode == getVariableDecl()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1391
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1390
       return null;
     }
     else {
       return getParent().Define_fieldDecl(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute fieldDecl
+   */
   protected boolean canDefine_fieldDecl(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1644
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
    * @apilevel internal
    */
   public FieldDeclarator Define_erasedField(ASTNode _callerNode, ASTNode _childNode) {
     if (getVariableDeclNoTransform() != null && _callerNode == getVariableDecl()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1655
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1654
       {
           throw new Error("FieldDeclarator child of EnhancedForStmt");
         }
@@ -1141,6 +1238,11 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_erasedField(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute erasedField
+   */
   protected boolean canDefine_erasedField(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1161,7 +1263,33 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
       return getParent().Define_inhModifiedInScope(this, _callerNode, var);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inhModifiedInScope
+   */
   protected boolean canDefine_inhModifiedInScope(ASTNode _callerNode, ASTNode _childNode, Variable var) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   */
+  public TypeDecl Define_targetType(ASTNode _callerNode, ASTNode _childNode) {
+    if (getExprNoTransform() != null && _callerNode == getExpr()) {
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:44
+      return iterableTypeAccess().type();
+    }
+    else {
+      return getParent().Define_targetType(this, _callerNode);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
+  protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /** @apilevel internal */
@@ -1172,6 +1300,7 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java5/frontend/EnhancedFor.jrag:43
     {
@@ -1184,6 +1313,7 @@ public class EnhancedForStmt extends BranchTargetStmt implements Cloneable, Vari
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : typeProblems()) {

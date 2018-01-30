@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:175
+ * @astdecl FieldDeclarator : Declarator;
  * @production FieldDeclarator : {@link Declarator};
 
  */
@@ -62,71 +65,31 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * Copies the declarator without initializer.
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1487
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1486
    */
   public FieldDeclarator signatureCopy() {
     return new FieldDeclarator(getID(), getDimsList().treeCopyNoTransform(), new Opt<Expr>());
   }
   /**
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:269
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:246
    */
-  public void jimplify1() {
-    String name = name();
-    soot.Type type = type().getSootType();
-    int modifiers = flags();
-    if(!hostType().getSootClassDecl().declaresFieldByName(name)) {
-      SootField f = new SootField(name, type, modifiers);
-      hostType().getSootClassDecl().addField(f);
-      if(isStatic() && isFinal() && isConstant() && (type().isPrimitive() || type().isString())) {
-        if(type().isString())
-          f.addTag(new soot.tagkit.StringConstantValueTag(constant().stringValue()));
-        else if(type().isLong())
-          f.addTag(new soot.tagkit.LongConstantValueTag(constant().longValue()));
-        else if(type().isDouble())
-          f.addTag(new soot.tagkit.DoubleConstantValueTag(constant().doubleValue()));
-        else if(type().isFloat())
-          f.addTag(new soot.tagkit.FloatConstantValueTag(constant().floatValue()));
-        else if(type().isIntegralType())
-          f.addTag(new soot.tagkit.IntegerConstantValueTag(constant().intValue()));
-      }
-      sootField = f;
-    } else {
-  sootField = hostType().getSootClassDecl().getFieldByName(name);
-    }
-    addAttributes();
-  }
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:294
-   */
-  public SootField sootField;
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:317
-   */
-  public Local local;
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:318
-   */
-  public void jimplify2(Body b) {
-    //b.setLine(this);
-    local = b.newLocal(name(), type().getSootType(), this);
-    if(hasInit()) {
-      b.add(
-        b.newAssignStmt(
-          local,
-          asRValue(b,
-            getInit().type().emitCastTo(b, // Assign conversion
-              getInit(),
-              type()
-            )
-          ),
-          this
-        )
-      );
-    }
+  public void jimpleDeclare() {
+    if (hostType().sootClass().declaresFieldByName(name())) return;
+
+    TypeDecl  t = type();
+    SootField f = new SootField(name(), t.sootType(), flags());
+    hostType().sootClass().addField(f);
+
+    boolean is_const = isStatic() && isFinal() && isConstant() && (t.isPrimitive() || t.isString());
+    if (!is_const) return;
+
+    Constant  c = constant();
+         if (t.isString      ()) f.addTag(new soot.tagkit. StringConstantValueTag(c.stringValue()));
+    else if (t.isLong        ()) f.addTag(new soot.tagkit.   LongConstantValueTag(c.  longValue()));
+    else if (t.isDouble      ()) f.addTag(new soot.tagkit. DoubleConstantValueTag(c.doubleValue()));
+    else if (t.isFloat       ()) f.addTag(new soot.tagkit.  FloatConstantValueTag(c. floatValue()));
+    else if (t.isIntegralType()) f.addTag(new soot.tagkit.IntegerConstantValueTag(c.   intValue()));
   }
   /**
    * @declaredat ASTNode:1
@@ -149,13 +112,18 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Dims", "Init"},
+    type = {"String", "List<Dims>", "Opt<Expr>"},
+    kind = {"Token", "List", "Opt"}
+  )
   public FieldDeclarator(String p0, List<Dims> p1, Opt<Expr> p2) {
     setID(p0);
     setChild(p1, 0);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   public FieldDeclarator(beaver.Symbol p0, List<Dims> p1, Opt<Expr> p2) {
     setID(p0);
@@ -163,20 +131,20 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -191,20 +159,20 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     sootRef_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:58
    */
   public FieldDeclarator clone() throws CloneNotSupportedException {
     FieldDeclarator node = (FieldDeclarator) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:58
+   * @declaredat ASTNode:63
    */
   public FieldDeclarator copy() {
     try {
@@ -224,7 +192,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:77
+   * @declaredat ASTNode:82
    */
   @Deprecated
   public FieldDeclarator fullCopy() {
@@ -235,7 +203,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:87
+   * @declaredat ASTNode:92
    */
   public FieldDeclarator treeCopyNoTransform() {
     FieldDeclarator tree = (FieldDeclarator) copy();
@@ -261,7 +229,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:112
+   * @declaredat ASTNode:117
    */
   public FieldDeclarator treeCopy() {
     FieldDeclarator tree = (FieldDeclarator) copy();
@@ -282,7 +250,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:131
+   * @declaredat ASTNode:136
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((FieldDeclarator) node).tokenString_ID);    
@@ -496,7 +464,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   }
   /** @apilevel internal */
   private void accessibleFrom_TypeDecl_reset() {
-    accessibleFrom_TypeDecl_computed = new java.util.HashMap(4);
+    accessibleFrom_TypeDecl_computed = null;
     accessibleFrom_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -514,10 +482,10 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     Object _parameters = type;
     if (accessibleFrom_TypeDecl_computed == null) accessibleFrom_TypeDecl_computed = new java.util.HashMap(4);
     if (accessibleFrom_TypeDecl_values == null) accessibleFrom_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (accessibleFrom_TypeDecl_values.containsKey(_parameters) && accessibleFrom_TypeDecl_computed != null
+    ASTState state = state();
+    if (accessibleFrom_TypeDecl_values.containsKey(_parameters)
         && accessibleFrom_TypeDecl_computed.containsKey(_parameters)
-        && (accessibleFrom_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || accessibleFrom_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (accessibleFrom_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || accessibleFrom_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) accessibleFrom_TypeDecl_values.get(_parameters);
     }
     boolean accessibleFrom_TypeDecl_value = accessibleFrom_compute(type);
@@ -527,7 +495,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     
     } else {
       accessibleFrom_TypeDecl_values.put(_parameters, accessibleFrom_TypeDecl_value);
-      accessibleFrom_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      accessibleFrom_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return accessibleFrom_TypeDecl_value;
@@ -556,7 +524,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     exceptions_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle exceptions_computed = null;
+  protected ASTState.Cycle exceptions_computed = null;
 
   /** @apilevel internal */
   protected Collection<TypeDecl> exceptions_value;
@@ -570,8 +538,8 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="AnonymousClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/AnonymousClasses.jrag:100")
   public Collection<TypeDecl> exceptions() {
-    ASTNode$State state = state();
-    if (exceptions_computed == ASTNode$State.NON_CYCLE || exceptions_computed == state().cycle()) {
+    ASTState state = state();
+    if (exceptions_computed == ASTState.NON_CYCLE || exceptions_computed == state().cycle()) {
       return exceptions_value;
     }
     exceptions_value = exceptions_compute();
@@ -579,7 +547,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
       exceptions_computed = state().cycle();
     
     } else {
-      exceptions_computed = ASTNode$State.NON_CYCLE;
+      exceptions_computed = ASTState.NON_CYCLE;
     
     }
     return exceptions_value;
@@ -666,20 +634,20 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   public boolean assignedAfter(Variable v) {
     Object _parameters = v;
     if (assignedAfter_Variable_values == null) assignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfter_Variable_value;
@@ -688,7 +656,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
         new_assignedAfter_Variable_value = hasInit()
               ? v == this || getInit().assignedAfter(v)
               : assignedBefore(v);
-        if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfter_Variable_value;
         }
@@ -702,7 +670,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
       boolean new_assignedAfter_Variable_value = hasInit()
             ? v == this || getInit().assignedAfter(v)
             : assignedBefore(v);
-      if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfter_Variable_value;
       }
@@ -721,20 +689,20 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
@@ -743,7 +711,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
         new_unassignedAfter_Variable_value = hasInit()
               ? v != this && getInit().unassignedAfter(v)
               : v == this || unassignedBefore(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -757,7 +725,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
       boolean new_unassignedAfter_Variable_value = hasInit()
             ? v != this && getInit().unassignedAfter(v)
             : v == this || unassignedBefore(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -769,13 +737,24 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:275
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:273
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:275")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:273")
   public boolean isPublic() {
     boolean isPublic_value = getModifiers().isPublic() || hostType().isInterfaceDecl();
     return isPublic_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:292
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:292")
+  public boolean isStatic() {
+    boolean isStatic_value = getModifiers().isStatic() || hostType().isInterfaceDecl();
+    return isStatic_value;
   }
   /**
    * @attribute syn
@@ -784,9 +763,20 @@ public class FieldDeclarator extends Declarator implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:294")
-  public boolean isStatic() {
-    boolean isStatic_value = getModifiers().isStatic() || hostType().isInterfaceDecl();
-    return isStatic_value;
+  public boolean isFinal() {
+    boolean isFinal_value = getModifiers().isFinal() || hostType().isInterfaceDecl();
+    return isFinal_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:295
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:295")
+  public boolean isTransient() {
+    boolean isTransient_value = getModifiers().isTransient();
+    return isTransient_value;
   }
   /**
    * @attribute syn
@@ -795,28 +785,6 @@ public class FieldDeclarator extends Declarator implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:296")
-  public boolean isFinal() {
-    boolean isFinal_value = getModifiers().isFinal() || hostType().isInterfaceDecl();
-    return isFinal_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:297
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:297")
-  public boolean isTransient() {
-    boolean isTransient_value = getModifiers().isTransient();
-    return isTransient_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:298
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:298")
   public boolean isVolatile() {
     boolean isVolatile_value = getModifiers().isVolatile();
     return isVolatile_value;
@@ -843,10 +811,10 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:49
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:51
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:49")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:51")
   public Collection<Problem> typeProblems() {
     {
         if (hasInit()) {
@@ -977,7 +945,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     constant_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle constant_computed = null;
+  protected ASTState.Cycle constant_computed = null;
 
   /** @apilevel internal */
   protected Constant constant_value;
@@ -990,8 +958,8 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Variables", declaredAt="/home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:69")
   public Constant constant() {
-    ASTNode$State state = state();
-    if (constant_computed == ASTNode$State.NON_CYCLE || constant_computed == state().cycle()) {
+    ASTState state = state();
+    if (constant_computed == ASTState.NON_CYCLE || constant_computed == state().cycle()) {
       return constant_value;
     }
     constant_value = type().cast(getInit().constant());
@@ -999,7 +967,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
       constant_computed = state().cycle();
     
     } else {
-      constant_computed = ASTNode$State.NON_CYCLE;
+      constant_computed = ASTState.NON_CYCLE;
     
     }
     return constant_value;
@@ -1009,7 +977,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     flags_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle flags_computed = null;
+  protected ASTState.Cycle flags_computed = null;
 
   /** @apilevel internal */
   protected int flags_value;
@@ -1022,8 +990,8 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Flags", declaredAt="/home/olivier/projects/extendj/java4/backend/Flags.jrag:138")
   public int flags() {
-    ASTNode$State state = state();
-    if (flags_computed == ASTNode$State.NON_CYCLE || flags_computed == state().cycle()) {
+    ASTState state = state();
+    if (flags_computed == ASTState.NON_CYCLE || flags_computed == state().cycle()) {
       return flags_value;
     }
     flags_value = flags_compute();
@@ -1031,7 +999,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
       flags_computed = state().cycle();
     
     } else {
-      flags_computed = ASTNode$State.NON_CYCLE;
+      flags_computed = ASTState.NON_CYCLE;
     
     }
     return flags_value;
@@ -1070,7 +1038,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     usesTypeVariable_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle usesTypeVariable_computed = null;
+  protected ASTState.Cycle usesTypeVariable_computed = null;
 
   /** @apilevel internal */
   protected boolean usesTypeVariable_value;
@@ -1078,13 +1046,13 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1321
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1317
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1321")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1317")
   public boolean usesTypeVariable() {
-    ASTNode$State state = state();
-    if (usesTypeVariable_computed == ASTNode$State.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {
+    ASTState state = state();
+    if (usesTypeVariable_computed == ASTState.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {
       return usesTypeVariable_value;
     }
     usesTypeVariable_value = getTypeAccess().usesTypeVariable();
@@ -1092,7 +1060,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
       usesTypeVariable_computed = state().cycle();
     
     } else {
-      usesTypeVariable_computed = ASTNode$State.NON_CYCLE;
+      usesTypeVariable_computed = ASTState.NON_CYCLE;
     
     }
     return usesTypeVariable_value;
@@ -1102,7 +1070,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     isEffectivelyFinal_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isEffectivelyFinal_computed = null;
+  protected ASTState.Cycle isEffectivelyFinal_computed = null;
 
   /** @apilevel internal */
   protected boolean isEffectivelyFinal_value;
@@ -1115,8 +1083,8 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="EffectivelyFinal", declaredAt="/home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:139")
   public boolean isEffectivelyFinal() {
-    ASTNode$State state = state();
-    if (isEffectivelyFinal_computed == ASTNode$State.NON_CYCLE || isEffectivelyFinal_computed == state().cycle()) {
+    ASTState state = state();
+    if (isEffectivelyFinal_computed == ASTState.NON_CYCLE || isEffectivelyFinal_computed == state().cycle()) {
       return isEffectivelyFinal_value;
     }
     isEffectivelyFinal_value = isFinal();
@@ -1124,7 +1092,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
       isEffectivelyFinal_computed = state().cycle();
     
     } else {
-      isEffectivelyFinal_computed = ASTNode$State.NON_CYCLE;
+      isEffectivelyFinal_computed = ASTState.NON_CYCLE;
     
     }
     return isEffectivelyFinal_value;
@@ -1135,7 +1103,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     sootRef_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle sootRef_computed = null;
+  protected ASTState.Cycle sootRef_computed = null;
 
   /** @apilevel internal */
   protected SootFieldRef sootRef_value;
@@ -1143,21 +1111,21 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:295
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:264
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:295")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:264")
   public SootFieldRef sootRef() {
-    ASTNode$State state = state();
-    if (sootRef_computed == ASTNode$State.NON_CYCLE || sootRef_computed == state().cycle()) {
+    ASTState state = state();
+    if (sootRef_computed == ASTState.NON_CYCLE || sootRef_computed == state().cycle()) {
       return sootRef_value;
     }
-    sootRef_value = Scene.v().makeFieldRef(hostType().getSootClassDecl(), name(), type().getSootType(), isStatic());
+    sootRef_value = Scene.v().makeFieldRef(hostType().sootClass(), name(), sootType(), isStatic());
     if (state().inCircle()) {
       sootRef_computed = state().cycle();
     
     } else {
-      sootRef_computed = ASTNode$State.NON_CYCLE;
+      sootRef_computed = ASTState.NON_CYCLE;
     
     }
     return sootRef_value;
@@ -1165,10 +1133,10 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:265
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:273
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:265")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:273")
   public boolean needsSignatureAttribute() {
     boolean needsSignatureAttribute_value = type().needsSignatureAttribute();
     return needsSignatureAttribute_value;
@@ -1176,10 +1144,10 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1644
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1644")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643")
   public FieldDeclarator erasedField() {
     FieldDeclarator erasedField_value = getParent().Define_erasedField(this, null);
     return erasedField_value;
@@ -1197,6 +1165,11 @@ public class FieldDeclarator extends Declarator implements Cloneable {
       return super.Define_assignedBefore(_callerNode, _childNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -1208,6 +1181,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:195
     {
@@ -1227,7 +1201,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:47
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:49
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -1249,6 +1223,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : definiteAssignmentProblems()) {

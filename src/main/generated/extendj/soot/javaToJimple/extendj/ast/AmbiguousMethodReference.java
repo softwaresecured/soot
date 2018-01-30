@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/MethodReference.ast:5
+ * @astdecl AmbiguousMethodReference : MethodReference ::= AmbiguousName:Access;
  * @production AmbiguousMethodReference : {@link MethodReference} ::= <span class="component">AmbiguousName:{@link Access}</span>;
 
  */
@@ -60,13 +63,18 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"TypeArgument", "ID", "AmbiguousName"},
+    type = {"List<Access>", "String", "Access"},
+    kind = {"List", "Token", "Child"}
+  )
   public AmbiguousMethodReference(List<Access> p0, String p1, Access p2) {
     setChild(p0, 0);
     setID(p1);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   public AmbiguousMethodReference(List<Access> p0, beaver.Symbol p1, Access p2) {
     setChild(p0, 0);
@@ -74,20 +82,20 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public boolean mayHaveRewrite() {
     return true;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -97,20 +105,20 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
     exactCompileTimeDeclaration_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:52
    */
   public AmbiguousMethodReference clone() throws CloneNotSupportedException {
     AmbiguousMethodReference node = (AmbiguousMethodReference) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:52
+   * @declaredat ASTNode:57
    */
   public AmbiguousMethodReference copy() {
     try {
@@ -130,7 +138,7 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:71
+   * @declaredat ASTNode:76
    */
   @Deprecated
   public AmbiguousMethodReference fullCopy() {
@@ -141,7 +149,7 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:81
+   * @declaredat ASTNode:86
    */
   public AmbiguousMethodReference treeCopyNoTransform() {
     AmbiguousMethodReference tree = (AmbiguousMethodReference) copy();
@@ -162,7 +170,7 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:101
+   * @declaredat ASTNode:106
    */
   public AmbiguousMethodReference treeCopy() {
     AmbiguousMethodReference tree = (AmbiguousMethodReference) copy();
@@ -178,7 +186,7 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:115
+   * @declaredat ASTNode:120
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((AmbiguousMethodReference) node).tokenString_ID);    
@@ -350,7 +358,7 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
   }
   /** @apilevel internal */
   private void congruentTo_FunctionDescriptor_reset() {
-    congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
+    congruentTo_FunctionDescriptor_computed = null;
     congruentTo_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -360,18 +368,18 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
   /**
    * @attribute syn
    * @aspect MethodReference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:239
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:237
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:239")
+  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:237")
   public boolean congruentTo(FunctionDescriptor fd) {
     Object _parameters = fd;
     if (congruentTo_FunctionDescriptor_computed == null) congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (congruentTo_FunctionDescriptor_values == null) congruentTo_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters) && congruentTo_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters)
         && congruentTo_FunctionDescriptor_computed.containsKey(_parameters)
-        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (Boolean) congruentTo_FunctionDescriptor_values.get(_parameters);
     }
     boolean congruentTo_FunctionDescriptor_value = false;
@@ -381,14 +389,14 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
     
     } else {
       congruentTo_FunctionDescriptor_values.put(_parameters, congruentTo_FunctionDescriptor_value);
-      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return congruentTo_FunctionDescriptor_value;
   }
   /** @apilevel internal */
   private void potentiallyApplicableMethods_FunctionDescriptor_reset() {
-    potentiallyApplicableMethods_FunctionDescriptor_computed = new java.util.HashMap(4);
+    potentiallyApplicableMethods_FunctionDescriptor_computed = null;
     potentiallyApplicableMethods_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -398,18 +406,18 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
   /**
    * @attribute syn
    * @aspect MethodReference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:292
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:290
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:292")
+  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:290")
   public java.util.List<MethodDecl> potentiallyApplicableMethods(FunctionDescriptor fd) {
     Object _parameters = fd;
     if (potentiallyApplicableMethods_FunctionDescriptor_computed == null) potentiallyApplicableMethods_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (potentiallyApplicableMethods_FunctionDescriptor_values == null) potentiallyApplicableMethods_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (potentiallyApplicableMethods_FunctionDescriptor_values.containsKey(_parameters) && potentiallyApplicableMethods_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (potentiallyApplicableMethods_FunctionDescriptor_values.containsKey(_parameters)
         && potentiallyApplicableMethods_FunctionDescriptor_computed.containsKey(_parameters)
-        && (potentiallyApplicableMethods_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || potentiallyApplicableMethods_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (potentiallyApplicableMethods_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || potentiallyApplicableMethods_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (java.util.List<MethodDecl>) potentiallyApplicableMethods_FunctionDescriptor_values.get(_parameters);
     }
     java.util.List<MethodDecl> potentiallyApplicableMethods_FunctionDescriptor_value = Collections.emptyList();
@@ -419,7 +427,7 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
     
     } else {
       potentiallyApplicableMethods_FunctionDescriptor_values.put(_parameters, potentiallyApplicableMethods_FunctionDescriptor_value);
-      potentiallyApplicableMethods_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      potentiallyApplicableMethods_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return potentiallyApplicableMethods_FunctionDescriptor_value;
@@ -430,7 +438,7 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
     exactCompileTimeDeclaration_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle exactCompileTimeDeclaration_computed = null;
+  protected ASTState.Cycle exactCompileTimeDeclaration_computed = null;
 
   /** @apilevel internal */
   protected MethodDecl exactCompileTimeDeclaration_value;
@@ -438,13 +446,13 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
   /**
    * @attribute syn
    * @aspect MethodReference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:360
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:358
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:360")
+  @ASTNodeAnnotation.Source(aspect="MethodReference", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:358")
   public MethodDecl exactCompileTimeDeclaration() {
-    ASTNode$State state = state();
-    if (exactCompileTimeDeclaration_computed == ASTNode$State.NON_CYCLE || exactCompileTimeDeclaration_computed == state().cycle()) {
+    ASTState state = state();
+    if (exactCompileTimeDeclaration_computed == ASTState.NON_CYCLE || exactCompileTimeDeclaration_computed == state().cycle()) {
       return exactCompileTimeDeclaration_value;
     }
     exactCompileTimeDeclaration_value = unknownMethod();
@@ -452,10 +460,21 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
       exactCompileTimeDeclaration_computed = state().cycle();
     
     } else {
-      exactCompileTimeDeclaration_computed = ASTNode$State.NON_CYCLE;
+      exactCompileTimeDeclaration_computed = ASTState.NON_CYCLE;
     
     }
     return exactCompileTimeDeclaration_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    Value eval_Body_value = eval_fail_general();
+    return eval_Body_value;
   }
   /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
@@ -463,30 +482,35 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
    */
   public NameType Define_nameType(ASTNode _callerNode, ASTNode _childNode) {
     if (getAmbiguousNameNoTransform() != null && _callerNode == getAmbiguousName()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:217
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:215
       return NameType.AMBIGUOUS_NAME;
     }
     else {
       return super.Define_nameType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {
-    // Declared at /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:220
+    // Declared at /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:218
     if (!getAmbiguousName().isTypeAccess()) {
       return rewriteRule0();
     }
-    // Declared at /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:230
+    // Declared at /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:228
     if (getAmbiguousName().isTypeAccess()) {
       return rewriteRule1();
     }
     return super.rewriteTo();
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:220
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:218
    * @apilevel internal
    */
   private ExprMethodReference rewriteRule0() {
@@ -497,7 +521,7 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
             (Access) getAmbiguousName().treeCopy());
       }  }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:230
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:228
    * @apilevel internal
    */
   private TypeMethodReference rewriteRule1() {
@@ -509,11 +533,11 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
       }  }
   /** @apilevel internal */
   public boolean canRewrite() {
-    // Declared at /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:220
+    // Declared at /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:218
     if (!getAmbiguousName().isTypeAccess()) {
       return true;
     }
-    // Declared at /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:230
+    // Declared at /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:228
     if (getAmbiguousName().isTypeAccess()) {
       return true;
     }
@@ -527,7 +551,7 @@ public class AmbiguousMethodReference extends MethodReference implements Cloneab
     rewrittenNode_cycle = null;
   }
 /** @apilevel internal */
-protected ASTNode$State.Cycle rewrittenNode_cycle = null;
+protected ASTState.Cycle rewrittenNode_cycle = null;
   /** @apilevel internal */
   protected boolean rewrittenNode_computed = false;
 
@@ -541,7 +565,7 @@ protected ASTNode$State.Cycle rewrittenNode_cycle = null;
     if (rewrittenNode_computed) {
       return rewrittenNode_value;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!rewrittenNode_initialized) {
       rewrittenNode_initialized = true;
       rewrittenNode_value = this;

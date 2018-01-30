@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,23 +38,38 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/GenericMethods.ast:4
+ * @astdecl ParMethodDecl : MethodDecl ::= TypeArgument:Access* <GenericMethodDecl:GenericMethodDecl> TypeParameter:TypeVariable* <Parameterization:Parameterization>;
  * @production ParMethodDecl : {@link MethodDecl} ::= <span class="component">TypeArgument:{@link Access}*</span> <span class="component">&lt;GenericMethodDecl:GenericMethodDecl&gt;</span> <span class="component">TypeParameter:{@link TypeVariable}*</span> <span class="component">&lt;Parameterization:Parameterization&gt;</span>;
 
  */
 public class ParMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1278
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1274
    */
   public int numTypeParameter() {
     return genericMethodDecl().original().getNumTypeParameter();
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1286
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1282
    */
   public TypeVariable typeParameter(int index) {
     return genericMethodDecl().original().getTypeParameter(index);
+  }
+  /**
+   * @aspect PrettyPrintUtil5
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/PrettyPrintUtil.jrag:46
+   */
+  @Override public String toString() {
+    StringBuilder params = new StringBuilder();
+    for (Access arg : getTypeArgumentListNoTransform()) {
+      if (params.length() > 0) {
+        params.append(", ");
+      }
+      params.append(arg.toString());
+    }
+    return String.format("<%s>%s", params.toString(), super.toString());
   }
   /**
    * @declaredat ASTNode:1
@@ -78,6 +95,11 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @declaredat ASTNode:18
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID", "Parameter", "Exception", "Block", "TypeArgument", "GenericMethodDecl", "TypeParameter", "Parameterization"},
+    type = {"Modifiers", "Access", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Block>", "List<Access>", "GenericMethodDecl", "List<TypeVariable>", "Parameterization"},
+    kind = {"Child", "Child", "Token", "List", "List", "Opt", "List", "Token", "List", "Token"}
+  )
   public ParMethodDecl(Modifiers p0, Access p1, String p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<Access> p6, GenericMethodDecl p7, List<TypeVariable> p8, Parameterization p9) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -91,7 +113,7 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
     setParameterization(p9);
   }
   /**
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   public ParMethodDecl(Modifiers p0, Access p1, beaver.Symbol p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<Access> p6, GenericMethodDecl p7, List<TypeVariable> p8, Parameterization p9) {
     setChild(p0, 0);
@@ -106,20 +128,20 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
     setParameterization(p9);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   protected int numChildren() {
     return 7;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:58
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -128,20 +150,20 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
     lessSpecificThan_MethodDecl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:60
+   * @declaredat ASTNode:65
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:64
+   * @declaredat ASTNode:69
    */
   public ParMethodDecl clone() throws CloneNotSupportedException {
     ParMethodDecl node = (ParMethodDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:69
+   * @declaredat ASTNode:74
    */
   public ParMethodDecl copy() {
     try {
@@ -161,7 +183,7 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:88
+   * @declaredat ASTNode:93
    */
   @Deprecated
   public ParMethodDecl fullCopy() {
@@ -172,7 +194,7 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:98
+   * @declaredat ASTNode:103
    */
   public ParMethodDecl treeCopyNoTransform() {
     ParMethodDecl tree = (ParMethodDecl) copy();
@@ -193,7 +215,7 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:118
+   * @declaredat ASTNode:123
    */
   public ParMethodDecl treeCopy() {
     ParMethodDecl tree = (ParMethodDecl) copy();
@@ -209,7 +231,7 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:132
+   * @declaredat ASTNode:137
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ParMethodDecl) node).tokenString_ID) && (tokenGenericMethodDecl_GenericMethodDecl == ((ParMethodDecl) node).tokenGenericMethodDecl_GenericMethodDecl) && (tokenParameterization_Parameterization == ((ParMethodDecl) node).tokenParameterization_Parameterization);    
@@ -832,7 +854,7 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
     genericMethodDecl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle genericMethodDecl_computed = null;
+  protected ASTState.Cycle genericMethodDecl_computed = null;
 
   /** @apilevel internal */
   protected GenericMethodDecl genericMethodDecl_value;
@@ -845,8 +867,8 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="GenericMethods", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:52")
   public GenericMethodDecl genericMethodDecl() {
-    ASTNode$State state = state();
-    if (genericMethodDecl_computed == ASTNode$State.NON_CYCLE || genericMethodDecl_computed == state().cycle()) {
+    ASTState state = state();
+    if (genericMethodDecl_computed == ASTState.NON_CYCLE || genericMethodDecl_computed == state().cycle()) {
       return genericMethodDecl_value;
     }
     genericMethodDecl_value = getGenericMethodDecl();
@@ -854,7 +876,7 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
       genericMethodDecl_computed = state().cycle();
     
     } else {
-      genericMethodDecl_computed = ASTNode$State.NON_CYCLE;
+      genericMethodDecl_computed = ASTState.NON_CYCLE;
     
     }
     return genericMethodDecl_value;
@@ -862,10 +884,10 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1659
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1659")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658")
   public MethodDecl erasedMethod() {
     MethodDecl erasedMethod_value = genericMethodDecl().erasedMethod();
     return erasedMethod_value;
@@ -876,7 +898,7 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
     sourceMethodDecl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle sourceMethodDecl_computed = null;
+  protected ASTState.Cycle sourceMethodDecl_computed = null;
 
   /** @apilevel internal */
   protected MethodDecl sourceMethodDecl_value;
@@ -884,13 +906,13 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1887
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1887")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886")
   public MethodDecl sourceMethodDecl() {
-    ASTNode$State state = state();
-    if (sourceMethodDecl_computed == ASTNode$State.NON_CYCLE || sourceMethodDecl_computed == state().cycle()) {
+    ASTState state = state();
+    if (sourceMethodDecl_computed == ASTState.NON_CYCLE || sourceMethodDecl_computed == state().cycle()) {
       return sourceMethodDecl_value;
     }
     sourceMethodDecl_value = genericMethodDecl().original().sourceMethodDecl();
@@ -898,14 +920,14 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
       sourceMethodDecl_computed = state().cycle();
     
     } else {
-      sourceMethodDecl_computed = ASTNode$State.NON_CYCLE;
+      sourceMethodDecl_computed = ASTState.NON_CYCLE;
     
     }
     return sourceMethodDecl_value;
   }
   /** @apilevel internal */
   private void lessSpecificThan_MethodDecl_reset() {
-    lessSpecificThan_MethodDecl_computed = new java.util.HashMap(4);
+    lessSpecificThan_MethodDecl_computed = null;
     lessSpecificThan_MethodDecl_values = null;
   }
   /** @apilevel internal */
@@ -925,18 +947,18 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
    * method.
    * @attribute syn
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:348
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:375
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:348")
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:375")
   public boolean lessSpecificThan(MethodDecl m) {
     Object _parameters = m;
     if (lessSpecificThan_MethodDecl_computed == null) lessSpecificThan_MethodDecl_computed = new java.util.HashMap(4);
     if (lessSpecificThan_MethodDecl_values == null) lessSpecificThan_MethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (lessSpecificThan_MethodDecl_values.containsKey(_parameters) && lessSpecificThan_MethodDecl_computed != null
+    ASTState state = state();
+    if (lessSpecificThan_MethodDecl_values.containsKey(_parameters)
         && lessSpecificThan_MethodDecl_computed.containsKey(_parameters)
-        && (lessSpecificThan_MethodDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || lessSpecificThan_MethodDecl_computed.get(_parameters) == state().cycle())) {
+        && (lessSpecificThan_MethodDecl_computed.get(_parameters) == ASTState.NON_CYCLE || lessSpecificThan_MethodDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) lessSpecificThan_MethodDecl_values.get(_parameters);
     }
     boolean lessSpecificThan_MethodDecl_value = genericMethodDecl().lessSpecificThan(m instanceof ParMethodDecl
@@ -947,7 +969,7 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
     
     } else {
       lessSpecificThan_MethodDecl_values.put(_parameters, lessSpecificThan_MethodDecl_value);
-      lessSpecificThan_MethodDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      lessSpecificThan_MethodDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return lessSpecificThan_MethodDecl_value;
@@ -966,6 +988,11 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
         return lookupType(name);
       }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }

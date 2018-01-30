@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +39,7 @@ import soot.coffi.CoffiMethodSource;
  * An erased class declaration. All parameterized type accesses are erased.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:97
+ * @astdecl ClassDeclErased : ClassDeclSubstituted;
  * @production ClassDeclErased : {@link ClassDeclSubstituted};
 
  */
@@ -64,6 +67,11 @@ public class ClassDeclErased extends ClassDeclSubstituted implements Cloneable {
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "SuperClass", "Implements", "Original"},
+    type = {"Modifiers", "String", "Opt<Access>", "List<Access>", "TypeDecl"},
+    kind = {"Child", "Token", "Opt", "List", "Token"}
+  )
   public ClassDeclErased(Modifiers p0, String p1, Opt<Access> p2, List<Access> p3, TypeDecl p4) {
     setChild(p0, 0);
     setID(p1);
@@ -72,7 +80,7 @@ public class ClassDeclErased extends ClassDeclSubstituted implements Cloneable {
     setOriginal(p4);
   }
   /**
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public ClassDeclErased(Modifiers p0, beaver.Symbol p1, Opt<Access> p2, List<Access> p3, TypeDecl p4) {
     setChild(p0, 0);
@@ -82,40 +90,40 @@ public class ClassDeclErased extends ClassDeclSubstituted implements Cloneable {
     setOriginal(p4);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     getBodyDeclList_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:52
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:56
    */
   public ClassDeclErased clone() throws CloneNotSupportedException {
     ClassDeclErased node = (ClassDeclErased) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:56
+   * @declaredat ASTNode:61
    */
   public ClassDeclErased copy() {
     try {
@@ -135,7 +143,7 @@ public class ClassDeclErased extends ClassDeclSubstituted implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:75
+   * @declaredat ASTNode:80
    */
   @Deprecated
   public ClassDeclErased fullCopy() {
@@ -146,7 +154,7 @@ public class ClassDeclErased extends ClassDeclSubstituted implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:85
+   * @declaredat ASTNode:90
    */
   public ClassDeclErased treeCopyNoTransform() {
     ClassDeclErased tree = (ClassDeclErased) copy();
@@ -175,7 +183,7 @@ public class ClassDeclErased extends ClassDeclSubstituted implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:113
+   * @declaredat ASTNode:118
    */
   public ClassDeclErased treeCopy() {
     ClassDeclErased tree = (ClassDeclErased) copy();
@@ -199,7 +207,7 @@ public class ClassDeclErased extends ClassDeclSubstituted implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:135
+   * @declaredat ASTNode:140
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ClassDeclErased) node).tokenString_ID) && (tokenTypeDecl_Original == ((ClassDeclErased) node).tokenTypeDecl_Original);    
@@ -602,12 +610,12 @@ public class ClassDeclErased extends ClassDeclSubstituted implements Cloneable {
   /**
    * @attribute syn nta
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1675
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1674
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1675")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1674")
   public List<BodyDecl> getBodyDeclList() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getBodyDeclList_computed) {
       return (List<BodyDecl>) getChild(getBodyDeclListChildPosition());
     }

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/GenericMethods.ast:17
+ * @astdecl ParMethodAccess : MethodAccess ::= TypeArgument:Access*;
  * @production ParMethodAccess : {@link MethodAccess} ::= <span class="component">TypeArgument:{@link Access}*</span>;
 
  */
@@ -54,6 +57,59 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
     }
     out.print(">");
     super.prettyPrint(out);
+  }
+  /**
+   * @aspect PrettyPrintUtil5
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/PrettyPrintUtil.jrag:114
+   */
+  @Override public String toString() {
+    StringBuilder params = new StringBuilder();
+    for (Access arg : getTypeArgumentListNoTransform()) {
+      if (params.length() > 0) {
+        params.append(", ");
+      }
+      params.append(arg.toString());
+    }
+    return String.format("<%s>%s", params.toString(), super.toString());
+  }
+  /**
+   * @aspect MethodSignature18
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:951
+   */
+  protected SimpleSet<MethodDecl> potentiallyApplicable(
+      Iterable<MethodDecl> candidates) {
+    SimpleSet<MethodDecl> potentiallyApplicable = emptySet();
+    // Select potentially applicable methods.
+    for (MethodDecl method : candidates) {
+      if (potentiallyApplicable(method) && accessible(method)) {
+        if (!method.isGeneric()) {
+          potentiallyApplicable = potentiallyApplicable.add(method);
+        } else {
+          GenericMethodDecl gm = method.genericDecl();
+          if (getNumTypeArgument() == gm.getNumTypeParameter()) {
+            java.util.List<TypeDecl> typeArgs = new ArrayList<TypeDecl>();
+            for (Access arg : getTypeArgumentList()) {
+              typeArgs.add(arg.type());
+            }
+            ParMethodDecl parMethod = gm.lookupParMethodDecl(typeArgs);
+            boolean withinBounds = true;
+            for (int i = 0; i < gm.getNumTypeParameter(); i++) {
+              if (!typeArgs.get(i).withinBounds(parMethod.getTypeParameter(i))) {
+                withinBounds = false;
+                break;
+              }
+            }
+            if (withinBounds) {
+              potentiallyApplicable = potentiallyApplicable.add(parMethod);
+            }
+          } else if (getNumTypeArgument() == 0) {
+            // Raw parameterization.
+            potentiallyApplicable = potentiallyApplicable.add(gm.rawMethodDecl());
+          }
+        }
+      }
+    }
+    return potentiallyApplicable;
   }
   /**
    * @declaredat ASTNode:1
@@ -76,13 +132,18 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Arg", "TypeArgument"},
+    type = {"String", "List<Expr>", "List<Access>"},
+    kind = {"Token", "List", "List"}
+  )
   public ParMethodAccess(String p0, List<Expr> p1, List<Access> p2) {
     setID(p0);
     setChild(p1, 0);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   public ParMethodAccess(beaver.Symbol p0, List<Expr> p1, List<Access> p2) {
     setID(p0);
@@ -90,20 +151,20 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -111,20 +172,20 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
     isPolyExpression_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public ParMethodAccess clone() throws CloneNotSupportedException {
     ParMethodAccess node = (ParMethodAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:56
    */
   public ParMethodAccess copy() {
     try {
@@ -144,7 +205,7 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:70
+   * @declaredat ASTNode:75
    */
   @Deprecated
   public ParMethodAccess fullCopy() {
@@ -155,7 +216,7 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:80
+   * @declaredat ASTNode:85
    */
   public ParMethodAccess treeCopyNoTransform() {
     ParMethodAccess tree = (ParMethodAccess) copy();
@@ -176,7 +237,7 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:100
+   * @declaredat ASTNode:105
    */
   public ParMethodAccess treeCopy() {
     ParMethodAccess tree = (ParMethodAccess) copy();
@@ -192,7 +253,7 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:114
+   * @declaredat ASTNode:119
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ParMethodAccess) node).tokenString_ID);    
@@ -470,7 +531,7 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
   }
   /** @apilevel internal */
   private void inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__reset() {
-    inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed = new java.util.HashMap(4);
+    inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed = null;
     inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values = null;
   }
   /** @apilevel internal */
@@ -481,10 +542,10 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
    * Infers type arguments for a generic method invocation.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:452
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:545
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:452")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:545")
   public ArrayList<TypeDecl> inferTypeArguments(TypeDecl resultType, List<ParameterDeclaration> params, List<Expr> args, List<TypeVariable> typeParams) {
     java.util.List _parameters = new java.util.ArrayList(4);
     _parameters.add(resultType);
@@ -493,10 +554,10 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
     _parameters.add(typeParams);
     if (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed == null) inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed = new java.util.HashMap(4);
     if (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values == null) inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values.containsKey(_parameters) && inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed != null
+    ASTState state = state();
+    if (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values.containsKey(_parameters)
         && inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.containsKey(_parameters)
-        && (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.get(_parameters) == ASTNode$State.NON_CYCLE || inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.get(_parameters) == state().cycle())) {
+        && (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.get(_parameters) == ASTState.NON_CYCLE || inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.get(_parameters) == state().cycle())) {
       return (ArrayList<TypeDecl>) inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values.get(_parameters);
     }
     ArrayList<TypeDecl> inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__value = inferTypeArguments_compute(resultType, params, args, typeParams);
@@ -506,7 +567,7 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
     
     } else {
       inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values.put(_parameters, inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__value);
-      inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__value;
@@ -524,7 +585,7 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
     isPolyExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isPolyExpression_computed = null;
+  protected ASTState.Cycle isPolyExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isPolyExpression_value;
@@ -537,8 +598,8 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:86")
   public boolean isPolyExpression() {
-    ASTNode$State state = state();
-    if (isPolyExpression_computed == ASTNode$State.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isPolyExpression_computed == ASTState.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
       return isPolyExpression_value;
     }
     isPolyExpression_value = false;
@@ -546,7 +607,7 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
       isPolyExpression_computed = state().cycle();
     
     } else {
-      isPolyExpression_computed = ASTNode$State.NON_CYCLE;
+      isPolyExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isPolyExpression_value;
@@ -565,6 +626,11 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
       return super.Define_isRightChildOfDot(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:101
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isRightChildOfDot
+   */
   protected boolean canDefine_isRightChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -582,6 +648,11 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
       return super.Define_nameType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -599,6 +670,11 @@ public class ParMethodAccess extends MethodAccess implements Cloneable {
       return super.Define_lookupType(_callerNode, _childNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }

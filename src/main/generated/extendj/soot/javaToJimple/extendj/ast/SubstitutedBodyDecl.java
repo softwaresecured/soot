@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:75
+ * @astdecl SubstitutedBodyDecl : BodyDecl ::= <Original:BodyDecl> <Parameterization:Parameterization>;
  * @production SubstitutedBodyDecl : {@link BodyDecl} ::= <span class="component">&lt;Original:BodyDecl&gt;</span> <span class="component">&lt;Parameterization:Parameterization&gt;</span>;
 
  */
@@ -58,44 +61,49 @@ public class SubstitutedBodyDecl extends BodyDecl implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Original", "Parameterization"},
+    type = {"BodyDecl", "Parameterization"},
+    kind = {"Token", "Token"}
+  )
   public SubstitutedBodyDecl(BodyDecl p0, Parameterization p1) {
     setOriginal(p0);
     setParameterization(p1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public SubstitutedBodyDecl clone() throws CloneNotSupportedException {
     SubstitutedBodyDecl node = (SubstitutedBodyDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public SubstitutedBodyDecl copy() {
     try {
@@ -115,7 +123,7 @@ public class SubstitutedBodyDecl extends BodyDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   @Deprecated
   public SubstitutedBodyDecl fullCopy() {
@@ -126,7 +134,7 @@ public class SubstitutedBodyDecl extends BodyDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:69
+   * @declaredat ASTNode:74
    */
   public SubstitutedBodyDecl treeCopyNoTransform() {
     SubstitutedBodyDecl tree = (SubstitutedBodyDecl) copy();
@@ -147,7 +155,7 @@ public class SubstitutedBodyDecl extends BodyDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:89
+   * @declaredat ASTNode:94
    */
   public SubstitutedBodyDecl treeCopy() {
     SubstitutedBodyDecl tree = (SubstitutedBodyDecl) copy();
@@ -163,7 +171,7 @@ public class SubstitutedBodyDecl extends BodyDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:103
+   * @declaredat ASTNode:108
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenBodyDecl_Original == ((SubstitutedBodyDecl) node).tokenBodyDecl_Original) && (tokenParameterization_Parameterization == ((SubstitutedBodyDecl) node).tokenParameterization_Parameterization);    

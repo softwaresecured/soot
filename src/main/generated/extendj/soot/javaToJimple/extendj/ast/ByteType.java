@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:144
+ * @astdecl ByteType : IntegralType;
  * @production ByteType : {@link IntegralType};
 
  */
@@ -68,6 +71,11 @@ public class ByteType extends IntegralType implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "SuperClass", "BodyDecl"},
+    type = {"Modifiers", "String", "Opt<Access>", "List<BodyDecl>"},
+    kind = {"Child", "Token", "Opt", "List"}
+  )
   public ByteType(Modifiers p0, String p1, Opt<Access> p2, List<BodyDecl> p3) {
     setChild(p0, 0);
     setID(p1);
@@ -75,7 +83,7 @@ public class ByteType extends IntegralType implements Cloneable {
     setChild(p3, 2);
   }
   /**
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   public ByteType(Modifiers p0, beaver.Symbol p1, Opt<Access> p2, List<BodyDecl> p3) {
     setChild(p0, 0);
@@ -84,20 +92,20 @@ public class ByteType extends IntegralType implements Cloneable {
     setChild(p3, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -105,23 +113,22 @@ public class ByteType extends IntegralType implements Cloneable {
     unaryNumericPromotion_reset();
     typeDescriptor_reset();
     boxed_reset();
-    getSootType_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:51
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:55
    */
   public ByteType clone() throws CloneNotSupportedException {
     ByteType node = (ByteType) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:56
+   * @declaredat ASTNode:60
    */
   public ByteType copy() {
     try {
@@ -141,7 +148,7 @@ public class ByteType extends IntegralType implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:75
+   * @declaredat ASTNode:79
    */
   @Deprecated
   public ByteType fullCopy() {
@@ -152,7 +159,7 @@ public class ByteType extends IntegralType implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:85
+   * @declaredat ASTNode:89
    */
   public ByteType treeCopyNoTransform() {
     ByteType tree = (ByteType) copy();
@@ -173,7 +180,7 @@ public class ByteType extends IntegralType implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:105
+   * @declaredat ASTNode:109
    */
   public ByteType treeCopy() {
     ByteType tree = (ByteType) copy();
@@ -189,7 +196,7 @@ public class ByteType extends IntegralType implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:119
+   * @declaredat ASTNode:123
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ByteType) node).tokenString_ID);    
@@ -423,7 +430,7 @@ public class ByteType extends IntegralType implements Cloneable {
   }
   /** @apilevel internal */
   private void narrowingConversionTo_TypeDecl_reset() {
-    narrowingConversionTo_TypeDecl_computed = new java.util.HashMap(4);
+    narrowingConversionTo_TypeDecl_computed = null;
     narrowingConversionTo_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -441,10 +448,10 @@ public class ByteType extends IntegralType implements Cloneable {
     Object _parameters = type;
     if (narrowingConversionTo_TypeDecl_computed == null) narrowingConversionTo_TypeDecl_computed = new java.util.HashMap(4);
     if (narrowingConversionTo_TypeDecl_values == null) narrowingConversionTo_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (narrowingConversionTo_TypeDecl_values.containsKey(_parameters) && narrowingConversionTo_TypeDecl_computed != null
+    ASTState state = state();
+    if (narrowingConversionTo_TypeDecl_values.containsKey(_parameters)
         && narrowingConversionTo_TypeDecl_computed.containsKey(_parameters)
-        && (narrowingConversionTo_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || narrowingConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (narrowingConversionTo_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || narrowingConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) narrowingConversionTo_TypeDecl_values.get(_parameters);
     }
     boolean narrowingConversionTo_TypeDecl_value = type.isChar();
@@ -454,7 +461,7 @@ public class ByteType extends IntegralType implements Cloneable {
     
     } else {
       narrowingConversionTo_TypeDecl_values.put(_parameters, narrowingConversionTo_TypeDecl_value);
-      narrowingConversionTo_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      narrowingConversionTo_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return narrowingConversionTo_TypeDecl_value;
@@ -465,7 +472,7 @@ public class ByteType extends IntegralType implements Cloneable {
     unaryNumericPromotion_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle unaryNumericPromotion_computed = null;
+  protected ASTState.Cycle unaryNumericPromotion_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl unaryNumericPromotion_value;
@@ -473,13 +480,13 @@ public class ByteType extends IntegralType implements Cloneable {
   /**
    * @attribute syn
    * @aspect NumericPromotion
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:160
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:159
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NumericPromotion", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:160")
+  @ASTNodeAnnotation.Source(aspect="NumericPromotion", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:159")
   public TypeDecl unaryNumericPromotion() {
-    ASTNode$State state = state();
-    if (unaryNumericPromotion_computed == ASTNode$State.NON_CYCLE || unaryNumericPromotion_computed == state().cycle()) {
+    ASTState state = state();
+    if (unaryNumericPromotion_computed == ASTState.NON_CYCLE || unaryNumericPromotion_computed == state().cycle()) {
       return unaryNumericPromotion_value;
     }
     unaryNumericPromotion_value = typeInt();
@@ -487,7 +494,7 @@ public class ByteType extends IntegralType implements Cloneable {
       unaryNumericPromotion_computed = state().cycle();
     
     } else {
-      unaryNumericPromotion_computed = ASTNode$State.NON_CYCLE;
+      unaryNumericPromotion_computed = ASTState.NON_CYCLE;
     
     }
     return unaryNumericPromotion_value;
@@ -495,10 +502,10 @@ public class ByteType extends IntegralType implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:199
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:198
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:199")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:198")
   public boolean isByte() {
     boolean isByte_value = true;
     return isByte_value;
@@ -509,7 +516,7 @@ public class ByteType extends IntegralType implements Cloneable {
     typeDescriptor_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle typeDescriptor_computed = null;
+  protected ASTState.Cycle typeDescriptor_computed = null;
 
   /** @apilevel internal */
   protected String typeDescriptor_value;
@@ -522,8 +529,8 @@ public class ByteType extends IntegralType implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstantPoolNames", declaredAt="/home/olivier/projects/extendj/java4/backend/ConstantPoolNames.jrag:78")
   public String typeDescriptor() {
-    ASTNode$State state = state();
-    if (typeDescriptor_computed == ASTNode$State.NON_CYCLE || typeDescriptor_computed == state().cycle()) {
+    ASTState state = state();
+    if (typeDescriptor_computed == ASTState.NON_CYCLE || typeDescriptor_computed == state().cycle()) {
       return typeDescriptor_value;
     }
     typeDescriptor_value = "B";
@@ -531,7 +538,7 @@ public class ByteType extends IntegralType implements Cloneable {
       typeDescriptor_computed = state().cycle();
     
     } else {
-      typeDescriptor_computed = ASTNode$State.NON_CYCLE;
+      typeDescriptor_computed = ASTState.NON_CYCLE;
     
     }
     return typeDescriptor_value;
@@ -553,7 +560,7 @@ public class ByteType extends IntegralType implements Cloneable {
     boxed_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle boxed_computed = null;
+  protected ASTState.Cycle boxed_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl boxed_value;
@@ -566,8 +573,8 @@ public class ByteType extends IntegralType implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="AutoBoxing", declaredAt="/home/olivier/projects/extendj/java5/frontend/AutoBoxing.jrag:53")
   public TypeDecl boxed() {
-    ASTNode$State state = state();
-    if (boxed_computed == ASTNode$State.NON_CYCLE || boxed_computed == state().cycle()) {
+    ASTState state = state();
+    if (boxed_computed == ASTState.NON_CYCLE || boxed_computed == state().cycle()) {
       return boxed_value;
     }
     boxed_value = lookupType("java.lang", "Byte");
@@ -575,43 +582,21 @@ public class ByteType extends IntegralType implements Cloneable {
       boxed_computed = state().cycle();
     
     } else {
-      boxed_computed = ASTNode$State.NON_CYCLE;
+      boxed_computed = ASTState.NON_CYCLE;
     
     }
     return boxed_value;
   }
-  /** @apilevel internal */
-  private void getSootType_reset() {
-    getSootType_computed = null;
-    getSootType_value = null;
-  }
-  /** @apilevel internal */
-  protected ASTNode$State.Cycle getSootType_computed = null;
-
-  /** @apilevel internal */
-  protected Type getSootType_value;
-
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:42
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:77
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:42")
-  public Type getSootType() {
-    ASTNode$State state = state();
-    if (getSootType_computed == ASTNode$State.NON_CYCLE || getSootType_computed == state().cycle()) {
-      return getSootType_value;
-    }
-    getSootType_value = soot.ByteType.v();
-    if (state().inCircle()) {
-      getSootType_computed = state().cycle();
-    
-    } else {
-      getSootType_computed = ASTNode$State.NON_CYCLE;
-    
-    }
-    return getSootType_value;
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:77")
+  public soot.Type sootType() {
+    soot.Type sootType_value = soot.ByteType.v();
+    return sootType_value;
   }
   /**
    * @attribute syn

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:190
+ * @astdecl MemberInterfaceDecl : MemberTypeDecl ::= InterfaceDecl;
  * @production MemberInterfaceDecl : {@link MemberTypeDecl} ::= <span class="component">{@link InterfaceDecl}</span>;
 
  */
@@ -66,43 +69,48 @@ public class MemberInterfaceDecl extends MemberTypeDecl implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"InterfaceDecl"},
+    type = {"InterfaceDecl"},
+    kind = {"Child"}
+  )
   public MemberInterfaceDecl(InterfaceDecl p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public MemberInterfaceDecl clone() throws CloneNotSupportedException {
     MemberInterfaceDecl node = (MemberInterfaceDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public MemberInterfaceDecl copy() {
     try {
@@ -122,7 +130,7 @@ public class MemberInterfaceDecl extends MemberTypeDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   @Deprecated
   public MemberInterfaceDecl fullCopy() {
@@ -133,7 +141,7 @@ public class MemberInterfaceDecl extends MemberTypeDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:69
+   * @declaredat ASTNode:74
    */
   public MemberInterfaceDecl treeCopyNoTransform() {
     MemberInterfaceDecl tree = (MemberInterfaceDecl) copy();
@@ -154,7 +162,7 @@ public class MemberInterfaceDecl extends MemberTypeDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:89
+   * @declaredat ASTNode:94
    */
   public MemberInterfaceDecl treeCopy() {
     MemberInterfaceDecl tree = (MemberInterfaceDecl) copy();
@@ -170,7 +178,7 @@ public class MemberInterfaceDecl extends MemberTypeDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:103
+   * @declaredat ASTNode:108
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -204,10 +212,10 @@ public class MemberInterfaceDecl extends MemberTypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:658
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:662
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:658")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:662")
   public TypeDecl typeDecl() {
     TypeDecl typeDecl_value = getInterfaceDecl();
     return typeDecl_value;
@@ -224,18 +232,23 @@ public class MemberInterfaceDecl extends MemberTypeDecl implements Cloneable {
     return modifiedInScope_Variable_value;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:588
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:584
    * @apilevel internal
    */
   public boolean Define_isMemberType(ASTNode _callerNode, ASTNode _childNode) {
     if (getInterfaceDeclNoTransform() != null && _callerNode == getInterfaceDecl()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:590
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:586
       return true;
     }
     else {
       return getParent().Define_isMemberType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:584
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isMemberType
+   */
   protected boolean canDefine_isMemberType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -247,8 +260,9 @@ public class MemberInterfaceDecl extends MemberTypeDecl implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:222
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:220
     if (hostType().isInnerClass()) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -261,6 +275,7 @@ public class MemberInterfaceDecl extends MemberTypeDecl implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (hostType().isInnerClass()) {

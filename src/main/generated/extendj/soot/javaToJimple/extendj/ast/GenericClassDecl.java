@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,13 +38,14 @@ import soot.coffi.CoffiMethodSource;
 /** A generic class declaration. 
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:2
+ * @astdecl GenericClassDecl : ClassDecl ::= Modifiers <ID:String> [SuperClass:Access] Implements:Access* BodyDecl* TypeParameter:TypeVariable*;
  * @production GenericClassDecl : {@link ClassDecl} ::= <span class="component">{@link Modifiers}</span> <span class="component">&lt;ID:String&gt;</span> <span class="component">[SuperClass:{@link Access}]</span> <span class="component">Implements:{@link Access}*</span> <span class="component">{@link BodyDecl}*</span> <span class="component">TypeParameter:{@link TypeVariable}*</span>;
 
  */
 public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTypeDecl {
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1504
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1503
    */
   public ClassDecl signatureCopy() {
     return new GenericClassDeclSubstituted(
@@ -104,6 +107,20 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
     out.print("}");
   }
   /**
+   * @aspect PrettyPrintUtil5
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/PrettyPrintUtil.jrag:57
+   */
+  @Override public String toString() {
+    StringBuilder params = new StringBuilder();
+    for (TypeVariable var : getTypeParameterListNoTransform()) {
+      if (params.length() > 0) {
+        params.append(", ");
+      }
+      params.append(var.toString());
+    }
+    return String.format("%s<%s>", getID(), params.toString());
+  }
+  /**
    * @aspect Generics
    * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:333
    */
@@ -119,7 +136,7 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
    * exists a type variable with the given name. If so, that type variable is
    * the target for the lookup.
    * @aspect GenericsNameBinding
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:777
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:769
    */
   public SimpleSet<TypeDecl> addTypeVariables(SimpleSet<TypeDecl> types,
       String name) {
@@ -156,6 +173,11 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
   /**
    * @declaredat ASTNode:18
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "SuperClass", "Implements", "BodyDecl", "TypeParameter"},
+    type = {"Modifiers", "String", "Opt<Access>", "List<Access>", "List<BodyDecl>", "List<TypeVariable>"},
+    kind = {"Child", "Token", "Opt", "List", "List", "List"}
+  )
   public GenericClassDecl(Modifiers p0, String p1, Opt<Access> p2, List<Access> p3, List<BodyDecl> p4, List<TypeVariable> p5) {
     setChild(p0, 0);
     setID(p1);
@@ -165,7 +187,7 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
     setChild(p5, 4);
   }
   /**
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   public GenericClassDecl(Modifiers p0, beaver.Symbol p1, Opt<Access> p2, List<Access> p3, List<BodyDecl> p4, List<TypeVariable> p5) {
     setChild(p0, 0);
@@ -176,49 +198,47 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
     setChild(p5, 4);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   protected int numChildren() {
     return 5;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     rawType_reset();
     lookupParTypeDecl_Collection_TypeDecl__reset();
     usesTypeVariable_reset();
-    subtype_TypeDecl_reset();
     instanceOf_TypeDecl_reset();
     getStandInMethodList_reset();
-    strictSubtype_TypeDecl_reset();
     needsSignatureAttribute_reset();
     classSignature_reset();
     lookupParTypeDecl_ParTypeAccess_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:62
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:66
    */
   public GenericClassDecl clone() throws CloneNotSupportedException {
     GenericClassDecl node = (GenericClassDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:68
+   * @declaredat ASTNode:71
    */
   public GenericClassDecl copy() {
     try {
@@ -238,7 +258,7 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:87
+   * @declaredat ASTNode:90
    */
   @Deprecated
   public GenericClassDecl fullCopy() {
@@ -249,7 +269,7 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:97
+   * @declaredat ASTNode:100
    */
   public GenericClassDecl treeCopyNoTransform() {
     GenericClassDecl tree = (GenericClassDecl) copy();
@@ -275,7 +295,7 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:122
+   * @declaredat ASTNode:125
    */
   public GenericClassDecl treeCopy() {
     GenericClassDecl tree = (GenericClassDecl) copy();
@@ -296,7 +316,7 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:141
+   * @declaredat ASTNode:144
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((GenericClassDecl) node).tokenString_ID);    
@@ -784,7 +804,7 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
     rawType_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle rawType_computed = null;
+  protected ASTState.Cycle rawType_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl rawType_value;
@@ -797,8 +817,8 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Generics", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:248")
   public TypeDecl rawType() {
-    ASTNode$State state = state();
-    if (rawType_computed == ASTNode$State.NON_CYCLE || rawType_computed == state().cycle()) {
+    ASTState state = state();
+    if (rawType_computed == ASTState.NON_CYCLE || rawType_computed == state().cycle()) {
       return rawType_value;
     }
     rawType_value = lookupParTypeDecl(Collections.<TypeDecl>emptyList());
@@ -806,7 +826,7 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
       rawType_computed = state().cycle();
     
     } else {
-      rawType_computed = ASTNode$State.NON_CYCLE;
+      rawType_computed = ASTState.NON_CYCLE;
     
     }
     return rawType_value;
@@ -814,36 +834,39 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
   /** @apilevel internal */
   private void lookupParTypeDecl_Collection_TypeDecl__reset() {
     lookupParTypeDecl_Collection_TypeDecl__values = null;
-    lookupParTypeDecl_Collection_TypeDecl__list = null;
+    lookupParTypeDecl_Collection_TypeDecl__proxy = null;
   }
   /** @apilevel internal */
-  protected List lookupParTypeDecl_Collection_TypeDecl__list;
+  protected ASTNode lookupParTypeDecl_Collection_TypeDecl__proxy;
   /** @apilevel internal */
   protected java.util.Map lookupParTypeDecl_Collection_TypeDecl__values;
 
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:953
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:945
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:953")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:945")
   public TypeDecl lookupParTypeDecl(Collection<TypeDecl> typeArgs) {
     Object _parameters = typeArgs;
     if (lookupParTypeDecl_Collection_TypeDecl__values == null) lookupParTypeDecl_Collection_TypeDecl__values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (lookupParTypeDecl_Collection_TypeDecl__values.containsKey(_parameters)) {
       return (TypeDecl) lookupParTypeDecl_Collection_TypeDecl__values.get(_parameters);
     }
     state().enterLazyAttribute();
     TypeDecl lookupParTypeDecl_Collection_TypeDecl__value = lookupParTypeDecl_compute(typeArgs);
-    if (lookupParTypeDecl_Collection_TypeDecl__list == null) {
-      lookupParTypeDecl_Collection_TypeDecl__list = new List();
-      lookupParTypeDecl_Collection_TypeDecl__list.setParent(this);
+    if (lookupParTypeDecl_Collection_TypeDecl__proxy == null) {
+      lookupParTypeDecl_Collection_TypeDecl__proxy = new ASTNode();
+      lookupParTypeDecl_Collection_TypeDecl__proxy.setParent(this);
     }
-    lookupParTypeDecl_Collection_TypeDecl__list.add(lookupParTypeDecl_Collection_TypeDecl__value);
     if (lookupParTypeDecl_Collection_TypeDecl__value != null) {
-      lookupParTypeDecl_Collection_TypeDecl__value = (TypeDecl) lookupParTypeDecl_Collection_TypeDecl__list.getChild(lookupParTypeDecl_Collection_TypeDecl__list.numChildren - 1);
+      lookupParTypeDecl_Collection_TypeDecl__value.setParent(lookupParTypeDecl_Collection_TypeDecl__proxy);
+      if (lookupParTypeDecl_Collection_TypeDecl__value.mayHaveRewrite()) {
+        lookupParTypeDecl_Collection_TypeDecl__value = (TypeDecl) lookupParTypeDecl_Collection_TypeDecl__value.rewrittenNode();
+        lookupParTypeDecl_Collection_TypeDecl__value.setParent(lookupParTypeDecl_Collection_TypeDecl__proxy);
+      }
     }
     lookupParTypeDecl_Collection_TypeDecl__values.put(_parameters, lookupParTypeDecl_Collection_TypeDecl__value);
     state().leaveLazyAttribute();
@@ -875,7 +898,7 @@ public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTyp
       return typeDecl;
     }
 /** @apilevel internal */
-protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
+protected ASTState.Cycle usesTypeVariable_cycle = null;
   /** @apilevel internal */
   private void usesTypeVariable_reset() {
     usesTypeVariable_computed = false;
@@ -890,12 +913,12 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
   /** @apilevel internal */
   protected boolean usesTypeVariable_initialized = false;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1325")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1321")
   public boolean usesTypeVariable() {
     if (usesTypeVariable_computed) {
       return usesTypeVariable_value;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!usesTypeVariable_initialized) {
       usesTypeVariable_initialized = true;
       usesTypeVariable_value = false;
@@ -905,7 +928,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
       do {
         usesTypeVariable_cycle = state.nextCycle();
         boolean new_usesTypeVariable_value = true;
-        if (new_usesTypeVariable_value != usesTypeVariable_value) {
+        if (usesTypeVariable_value != new_usesTypeVariable_value) {
           state.setChangeInCycle();
         }
         usesTypeVariable_value = new_usesTypeVariable_value;
@@ -916,7 +939,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
     } else if (usesTypeVariable_cycle != state.cycle()) {
       usesTypeVariable_cycle = state.cycle();
       boolean new_usesTypeVariable_value = true;
-      if (new_usesTypeVariable_value != usesTypeVariable_value) {
+      if (usesTypeVariable_value != new_usesTypeVariable_value) {
         state.setChangeInCycle();
       }
       usesTypeVariable_value = new_usesTypeVariable_value;
@@ -924,56 +947,16 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
     }
     return usesTypeVariable_value;
   }
-  /** @apilevel internal */
-  private void subtype_TypeDecl_reset() {
-    subtype_TypeDecl_values = null;
-  }
-  protected java.util.Map subtype_TypeDecl_values;
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
+  /**
+   * @attribute syn
+   * @aspect GenericsSubtype
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:492
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:492")
   public boolean subtype(TypeDecl type) {
-    Object _parameters = type;
-    if (subtype_TypeDecl_values == null) subtype_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
-    if (subtype_TypeDecl_values.containsKey(_parameters)) {
-      Object _cache = subtype_TypeDecl_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
-        return (Boolean) _cache;
-      } else {
-        _value = (ASTNode$State.CircularValue) _cache;
-      }
-    } else {
-      _value = new ASTNode$State.CircularValue();
-      subtype_TypeDecl_values.put(_parameters, _value);
-      _value.value = true;
-    }
-    ASTNode$State state = state();
-    if (!state.inCircle() || state.calledByLazyAttribute()) {
-      state.enterCircle();
-      boolean new_subtype_TypeDecl_value;
-      do {
-        _value.cycle = state.nextCycle();
-        new_subtype_TypeDecl_value = type.supertypeGenericClassDecl(this);
-        if (new_subtype_TypeDecl_value != ((Boolean)_value.value)) {
-          state.setChangeInCycle();
-          _value.value = new_subtype_TypeDecl_value;
-        }
-      } while (state.testAndClearChangeInCycle());
-      subtype_TypeDecl_values.put(_parameters, new_subtype_TypeDecl_value);
-
-      state.leaveCircle();
-      return new_subtype_TypeDecl_value;
-    } else if (_value.cycle != state.cycle()) {
-      _value.cycle = state.cycle();
-      boolean new_subtype_TypeDecl_value = type.supertypeGenericClassDecl(this);
-      if (new_subtype_TypeDecl_value != ((Boolean)_value.value)) {
-        state.setChangeInCycle();
-        _value.value = new_subtype_TypeDecl_value;
-      }
-      return new_subtype_TypeDecl_value;
-    } else {
-      return (Boolean) _value.value;
-    }
+    boolean subtype_TypeDecl_value = type.supertypeGenericClassDecl(this);
+    return subtype_TypeDecl_value;
   }
   /**
    * @attribute syn
@@ -999,7 +982,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
   }
   /** @apilevel internal */
   private void instanceOf_TypeDecl_reset() {
-    instanceOf_TypeDecl_computed = new java.util.HashMap(4);
+    instanceOf_TypeDecl_computed = null;
     instanceOf_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1009,18 +992,18 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute syn
    * @aspect TypeWideningAndIdentity
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:443
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:442
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeWideningAndIdentity", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:443")
+  @ASTNodeAnnotation.Source(aspect="TypeWideningAndIdentity", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:442")
   public boolean instanceOf(TypeDecl type) {
     Object _parameters = type;
     if (instanceOf_TypeDecl_computed == null) instanceOf_TypeDecl_computed = new java.util.HashMap(4);
     if (instanceOf_TypeDecl_values == null) instanceOf_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (instanceOf_TypeDecl_values.containsKey(_parameters) && instanceOf_TypeDecl_computed != null
+    ASTState state = state();
+    if (instanceOf_TypeDecl_values.containsKey(_parameters)
         && instanceOf_TypeDecl_computed.containsKey(_parameters)
-        && (instanceOf_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || instanceOf_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (instanceOf_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || instanceOf_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) instanceOf_TypeDecl_values.get(_parameters);
     }
     boolean instanceOf_TypeDecl_value = subtype(type);
@@ -1030,7 +1013,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
     
     } else {
       instanceOf_TypeDecl_values.put(_parameters, instanceOf_TypeDecl_value);
-      instanceOf_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      instanceOf_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return instanceOf_TypeDecl_value;
@@ -1061,7 +1044,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
   protected boolean getStandInMethodList_computed = false;
 
   /** @apilevel internal */
-  protected List<StandInMethodDecl> getStandInMethodList_value;
+  protected List<MethodDecl> getStandInMethodList_value;
 
   /**
    * The stand-in method list for the constructors of this generic
@@ -1071,12 +1054,12 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
    * @return list of stand-in methods
    * @attribute syn
    * @aspect Diamond
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:164
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:137
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="Diamond", declaredAt="/home/olivier/projects/extendj/java7/frontend/Diamond.jrag:164")
-  public List<StandInMethodDecl> getStandInMethodList() {
-    ASTNode$State state = state();
+  @ASTNodeAnnotation.Source(aspect="Diamond", declaredAt="/home/olivier/projects/extendj/java7/frontend/Diamond.jrag:137")
+  public List<MethodDecl> getStandInMethodList() {
+    ASTState state = state();
     if (getStandInMethodList_computed) {
       return getStandInMethodList_value;
     }
@@ -1088,8 +1071,8 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
     return getStandInMethodList_value;
   }
   /** @apilevel internal */
-  private List<StandInMethodDecl> getStandInMethodList_compute() {
-      List<StandInMethodDecl> methods = new List<StandInMethodDecl>();
+  private List<MethodDecl> getStandInMethodList_compute() {
+      List<MethodDecl> methods = new List<MethodDecl>();
       List<TypeVariable> typeParams = getTypeParameterList();
       List<TypeVariable> classTypeVars = new List<TypeVariable>();
       List<Access> typeArgs = new List<Access>();
@@ -1176,56 +1159,16 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
       }
       return methods;
     }
-  /** @apilevel internal */
-  private void strictSubtype_TypeDecl_reset() {
-    strictSubtype_TypeDecl_values = null;
-  }
-  protected java.util.Map strictSubtype_TypeDecl_values;
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
+  /**
+   * @attribute syn
+   * @aspect StrictSubtype
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:363
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:363")
   public boolean strictSubtype(TypeDecl type) {
-    Object _parameters = type;
-    if (strictSubtype_TypeDecl_values == null) strictSubtype_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
-    if (strictSubtype_TypeDecl_values.containsKey(_parameters)) {
-      Object _cache = strictSubtype_TypeDecl_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
-        return (Boolean) _cache;
-      } else {
-        _value = (ASTNode$State.CircularValue) _cache;
-      }
-    } else {
-      _value = new ASTNode$State.CircularValue();
-      strictSubtype_TypeDecl_values.put(_parameters, _value);
-      _value.value = true;
-    }
-    ASTNode$State state = state();
-    if (!state.inCircle() || state.calledByLazyAttribute()) {
-      state.enterCircle();
-      boolean new_strictSubtype_TypeDecl_value;
-      do {
-        _value.cycle = state.nextCycle();
-        new_strictSubtype_TypeDecl_value = type.strictSupertypeGenericClassDecl(this);
-        if (new_strictSubtype_TypeDecl_value != ((Boolean)_value.value)) {
-          state.setChangeInCycle();
-          _value.value = new_strictSubtype_TypeDecl_value;
-        }
-      } while (state.testAndClearChangeInCycle());
-      strictSubtype_TypeDecl_values.put(_parameters, new_strictSubtype_TypeDecl_value);
-
-      state.leaveCircle();
-      return new_strictSubtype_TypeDecl_value;
-    } else if (_value.cycle != state.cycle()) {
-      _value.cycle = state.cycle();
-      boolean new_strictSubtype_TypeDecl_value = type.strictSupertypeGenericClassDecl(this);
-      if (new_strictSubtype_TypeDecl_value != ((Boolean)_value.value)) {
-        state.setChangeInCycle();
-        _value.value = new_strictSubtype_TypeDecl_value;
-      }
-      return new_strictSubtype_TypeDecl_value;
-    } else {
-      return (Boolean) _value.value;
-    }
+    boolean strictSubtype_TypeDecl_value = type.strictSupertypeGenericClassDecl(this);
+    return strictSubtype_TypeDecl_value;
   }
   /**
    * @attribute syn
@@ -1254,7 +1197,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
     needsSignatureAttribute_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle needsSignatureAttribute_computed = null;
+  protected ASTState.Cycle needsSignatureAttribute_computed = null;
 
   /** @apilevel internal */
   protected boolean needsSignatureAttribute_value;
@@ -1262,13 +1205,13 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:209
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:217
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:209")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:217")
   public boolean needsSignatureAttribute() {
-    ASTNode$State state = state();
-    if (needsSignatureAttribute_computed == ASTNode$State.NON_CYCLE || needsSignatureAttribute_computed == state().cycle()) {
+    ASTState state = state();
+    if (needsSignatureAttribute_computed == ASTState.NON_CYCLE || needsSignatureAttribute_computed == state().cycle()) {
       return needsSignatureAttribute_value;
     }
     needsSignatureAttribute_value = true;
@@ -1276,7 +1219,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
       needsSignatureAttribute_computed = state().cycle();
     
     } else {
-      needsSignatureAttribute_computed = ASTNode$State.NON_CYCLE;
+      needsSignatureAttribute_computed = ASTState.NON_CYCLE;
     
     }
     return needsSignatureAttribute_value;
@@ -1287,7 +1230,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
     classSignature_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle classSignature_computed = null;
+  protected ASTState.Cycle classSignature_computed = null;
 
   /** @apilevel internal */
   protected String classSignature_value;
@@ -1295,13 +1238,13 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:268
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:276
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:268")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:276")
   public String classSignature() {
-    ASTNode$State state = state();
-    if (classSignature_computed == ASTNode$State.NON_CYCLE || classSignature_computed == state().cycle()) {
+    ASTState state = state();
+    if (classSignature_computed == ASTState.NON_CYCLE || classSignature_computed == state().cycle()) {
       return classSignature_value;
     }
     classSignature_value = classSignature_compute();
@@ -1309,7 +1252,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
       classSignature_computed = state().cycle();
     
     } else {
-      classSignature_computed = ASTNode$State.NON_CYCLE;
+      classSignature_computed = ASTState.NON_CYCLE;
     
     }
     return classSignature_value;
@@ -1338,7 +1281,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
   }
   /** @apilevel internal */
   private void lookupParTypeDecl_ParTypeAccess_reset() {
-    lookupParTypeDecl_ParTypeAccess_computed = new java.util.HashMap(4);
+    lookupParTypeDecl_ParTypeAccess_computed = null;
     lookupParTypeDecl_ParTypeAccess_values = null;
   }
   /** @apilevel internal */
@@ -1348,18 +1291,18 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
   /** Transforms the parameter and calls the lookupParTypeDecl attribute for ArrayList arguments. 
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:945
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:937
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:945")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:937")
   public TypeDecl lookupParTypeDecl(ParTypeAccess p) {
     Object _parameters = p;
     if (lookupParTypeDecl_ParTypeAccess_computed == null) lookupParTypeDecl_ParTypeAccess_computed = new java.util.HashMap(4);
     if (lookupParTypeDecl_ParTypeAccess_values == null) lookupParTypeDecl_ParTypeAccess_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (lookupParTypeDecl_ParTypeAccess_values.containsKey(_parameters) && lookupParTypeDecl_ParTypeAccess_computed != null
+    ASTState state = state();
+    if (lookupParTypeDecl_ParTypeAccess_values.containsKey(_parameters)
         && lookupParTypeDecl_ParTypeAccess_computed.containsKey(_parameters)
-        && (lookupParTypeDecl_ParTypeAccess_computed.get(_parameters) == ASTNode$State.NON_CYCLE || lookupParTypeDecl_ParTypeAccess_computed.get(_parameters) == state().cycle())) {
+        && (lookupParTypeDecl_ParTypeAccess_computed.get(_parameters) == ASTState.NON_CYCLE || lookupParTypeDecl_ParTypeAccess_computed.get(_parameters) == state().cycle())) {
       return (TypeDecl) lookupParTypeDecl_ParTypeAccess_values.get(_parameters);
     }
     TypeDecl lookupParTypeDecl_ParTypeAccess_value = lookupParTypeDecl_compute(p);
@@ -1369,7 +1312,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
     
     } else {
       lookupParTypeDecl_ParTypeAccess_values.put(_parameters, lookupParTypeDecl_ParTypeAccess_value);
-      lookupParTypeDecl_ParTypeAccess_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      lookupParTypeDecl_ParTypeAccess_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return lookupParTypeDecl_ParTypeAccess_value;
@@ -1385,21 +1328,21 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute inh
    * @aspect GenericsTypeCheck
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:684
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:676
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="GenericsTypeCheck", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:684")
+  @ASTNodeAnnotation.Source(aspect="GenericsTypeCheck", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:676")
   public TypeDecl typeThrowable() {
     TypeDecl typeThrowable_value = getParent().Define_typeThrowable(this, null);
     return typeThrowable_value;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:580
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:576
    * @apilevel internal
    */
   public boolean Define_isNestedType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getTypeParameterListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:762
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:754
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return true;
     }
@@ -1407,16 +1350,21 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
       return super.Define_isNestedType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:576
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isNestedType
+   */
   protected boolean canDefine_isNestedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:555
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:551
    * @apilevel internal
    */
   public TypeDecl Define_enclosingType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getTypeParameterListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:763
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:755
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return this;
     }
@@ -1424,6 +1372,11 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
       return super.Define_enclosingType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:551
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosingType
+   */
   protected boolean canDefine_enclosingType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1433,7 +1386,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
    */
   public SimpleSet<TypeDecl> Define_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     if (_callerNode == getBodyDeclListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:826
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:818
       int index = _callerNode.getIndexOfChild(_childNode);
       {
           SimpleSet<TypeDecl> result = memberTypes(name);
@@ -1461,7 +1414,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
         }
     }
     else if (_callerNode == getTypeParameterListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:804
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:796
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       {
           SimpleSet<TypeDecl> result = memberTypes(name);
@@ -1486,7 +1439,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
         }
     }
     else if (_callerNode == getImplementsListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:799
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:791
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       {
           SimpleSet<TypeDecl> result = addTypeVariables(ASTNode.<TypeDecl>emptySet(), name);
@@ -1494,7 +1447,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
         }
     }
     else if (_callerNode == getSuperClassOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:794
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:786
       {
           SimpleSet<TypeDecl> result = addTypeVariables(ASTNode.<TypeDecl>emptySet(), name);
           return !result.isEmpty() ? result : lookupType(name);
@@ -1504,6 +1457,11 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
       return super.Define_lookupType(_callerNode, _childNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -1515,6 +1473,11 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
     int childIndex = this.getIndexOfChild(_callerNode);
     return this;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsParTypeDecl.jrag:74
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute genericDecl
+   */
   protected boolean canDefine_genericDecl(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1532,6 +1495,11 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
       return getParent().Define_typeVarPosition(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeVariablePositions.jrag:29
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute typeVarPosition
+   */
   protected boolean canDefine_typeVarPosition(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1549,6 +1517,11 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
       return getParent().Define_typeVarInMethod(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeVariablePositions.jrag:32
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute typeVarInMethod
+   */
   protected boolean canDefine_typeVarInMethod(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1560,8 +1533,9 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:672
+    // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:664
     if (instanceOf(typeThrowable())) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -1574,6 +1548,7 @@ protected ASTNode$State.Cycle usesTypeVariable_cycle = null;
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (instanceOf(typeThrowable())) {

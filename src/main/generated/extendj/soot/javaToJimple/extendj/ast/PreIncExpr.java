@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:227
+ * @astdecl PreIncExpr : Unary;
  * @production PreIncExpr : {@link Unary};
 
  */
@@ -52,11 +55,6 @@ public class PreIncExpr extends Unary implements Cloneable {
     }
     return super.checkDUeverywhere(v);
   }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:820
-   */
-  public soot.Value eval(Body b) { return emitPrefix(b, 1); }
   /**
    * @declaredat ASTNode:1
    */
@@ -76,44 +74,49 @@ public class PreIncExpr extends Unary implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Operand"},
+    type = {"Expr"},
+    kind = {"Child"}
+  )
   public PreIncExpr(Expr p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     stmtCompatible_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public PreIncExpr clone() throws CloneNotSupportedException {
     PreIncExpr node = (PreIncExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public PreIncExpr copy() {
     try {
@@ -133,7 +136,7 @@ public class PreIncExpr extends Unary implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:60
+   * @declaredat ASTNode:65
    */
   @Deprecated
   public PreIncExpr fullCopy() {
@@ -144,7 +147,7 @@ public class PreIncExpr extends Unary implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:70
+   * @declaredat ASTNode:75
    */
   public PreIncExpr treeCopyNoTransform() {
     PreIncExpr tree = (PreIncExpr) copy();
@@ -165,7 +168,7 @@ public class PreIncExpr extends Unary implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:90
+   * @declaredat ASTNode:95
    */
   public PreIncExpr treeCopy() {
     PreIncExpr tree = (PreIncExpr) copy();
@@ -181,7 +184,7 @@ public class PreIncExpr extends Unary implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:104
+   * @declaredat ASTNode:109
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -215,10 +218,10 @@ public class PreIncExpr extends Unary implements Cloneable {
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:306
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:385
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:306")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:385")
   public String printPreOp() {
     String printPreOp_value = "++";
     return printPreOp_value;
@@ -239,7 +242,7 @@ public class PreIncExpr extends Unary implements Cloneable {
     stmtCompatible_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle stmtCompatible_computed = null;
+  protected ASTState.Cycle stmtCompatible_computed = null;
 
   /** @apilevel internal */
   protected boolean stmtCompatible_value;
@@ -247,13 +250,13 @@ public class PreIncExpr extends Unary implements Cloneable {
   /**
    * @attribute syn
    * @aspect StmtCompatible
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:147
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:151
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:147")
+  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:151")
   public boolean stmtCompatible() {
-    ASTNode$State state = state();
-    if (stmtCompatible_computed == ASTNode$State.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
+    ASTState state = state();
+    if (stmtCompatible_computed == ASTState.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
       return stmtCompatible_value;
     }
     stmtCompatible_value = true;
@@ -261,10 +264,20 @@ public class PreIncExpr extends Unary implements Cloneable {
       stmtCompatible_computed = state().cycle();
     
     } else {
-      stmtCompatible_computed = ASTNode$State.NON_CYCLE;
+      stmtCompatible_computed = ASTState.NON_CYCLE;
     
     }
     return stmtCompatible_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:702
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:702")
+  public Immediate eval(Body b) {
+    { return emitPrefix (b,  1); }
   }
   /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:34
@@ -279,6 +292,11 @@ public class PreIncExpr extends Unary implements Cloneable {
       return getParent().Define_isDest(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:34
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isDest
+   */
   protected boolean canDefine_isDest(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -295,6 +313,11 @@ public class PreIncExpr extends Unary implements Cloneable {
       return getParent().Define_isIncOrDec(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:66
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isIncOrDec
+   */
   protected boolean canDefine_isIncOrDec(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -306,6 +329,7 @@ public class PreIncExpr extends Unary implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:89
     if (getOperand().isVariable()
@@ -320,7 +344,7 @@ public class PreIncExpr extends Unary implements Cloneable {
         contributors.add(this);
       }
     }
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:412
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:414
     if (!getOperand().isVariable()) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -331,7 +355,7 @@ public class PreIncExpr extends Unary implements Cloneable {
         contributors.add(this);
       }
     }
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:417
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:419
     if (!getOperand().type().isNumericType()) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -344,6 +368,7 @@ public class PreIncExpr extends Unary implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (getOperand().isVariable()

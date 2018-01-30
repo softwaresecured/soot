@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:196
+ * @astdecl AssignExpr : Expr ::= Dest:Expr Source:Expr;
  * @production AssignExpr : {@link Expr} ::= <span class="component">Dest:{@link Expr}</span> <span class="component">Source:{@link Expr}</span>;
 
  */
@@ -72,53 +75,28 @@ public abstract class AssignExpr extends Expr implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:109
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:96
    */
-  public soot.Value eval(Body b) {
-    TypeDecl dest   = getDest().type();
-    TypeDecl source = getSource().type();
-    TypeDecl type   = dest;
-    if (dest.isNumericType() && source.isNumericType())
-      type = dest.binaryNumericPromotion(source);
-
-    Value lvalue = getDest().eval(b);
-    Value  v     = lvalue instanceof Local ? lvalue : b.setSrcLoc((Value)lvalue.clone(), lvalue);
-    Value  value = b.newTemp(dest.emitCastTo(b, v, type, this));
-    Value rvalue = source.emitCastTo(b, getSource(), type);
-    Value result = source.asImmediate(b, type.emitCastTo(b,
-      createAssignOp(b, value, rvalue),
-      dest,
-      getDest()
-    ));
-    getDest().emitStore(b, lvalue, result, this);
-    return result;
-  }
+  protected Immediate emitShiftExpr(Body b)
+  { return eval(b, typeInt(), getDest().type().unaryNumericPromotion()); }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:172
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:99
    */
-  public soot.Value emitShiftExpr(Body b) {
-    TypeDecl dest = getDest().type();
-    TypeDecl type = dest.unaryNumericPromotion();
-
-    Value lvalue = getDest().eval(b);
-    Value v = lvalue instanceof Local ? lvalue : b.setSrcLoc((Value)lvalue.clone(), lvalue);
-    Value value = b.newTemp(dest.emitCastTo(b, v, type, getDest()));
-    Value rvalue = getSource().type().emitCastTo(b, getSource(), typeInt());
-    Value result = getSource().asImmediate(b, type.emitCastTo(b,
-      createAssignOp(b, value, rvalue),
-      dest,
-      getDest()
+  private Immediate eval(Body b, TypeDecl typ_lhs, TypeDecl typ_rhs) {
+    Value     dst     = getDest().eval(b);
+    Value     lhs     = getDest().type().emitCastTo(b,
+      b.dstRead(dst),
+      typ_lhs,
+      this);
+    Value     rhs     = getSource().evalAndCast(b, typ_rhs);
+    Immediate result  = b.asImmediate(typ_lhs.emitCastTo(b,
+      createAssignOp(b, lhs, rhs),
+      getDest().type(),
+      this
     ));
-    getDest().emitStore(b, lvalue, result, this);
+    getDest().emitStore(b, dst, result, this);
     return result;
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:195
-   */
-  public soot.Value createAssignOp(Body b, soot.Value fst, soot.Value snd) {
-    throw new Error("Operation createAssignOp is not implemented for " + getClass().getName());
   }
   /**
    * @declaredat ASTNode:1
@@ -139,25 +117,30 @@ public abstract class AssignExpr extends Expr implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Dest", "Source"},
+    type = {"Expr", "Expr"},
+    kind = {"Child", "Child"}
+  )
   public AssignExpr(Expr p0, Expr p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -168,13 +151,13 @@ public abstract class AssignExpr extends Expr implements Cloneable {
     stmtCompatible_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public AssignExpr clone() throws CloneNotSupportedException {
     AssignExpr node = (AssignExpr) super.clone();
@@ -186,7 +169,7 @@ public abstract class AssignExpr extends Expr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:52
+   * @declaredat ASTNode:57
    */
   @Deprecated
   public abstract AssignExpr fullCopy();
@@ -195,7 +178,7 @@ public abstract class AssignExpr extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:60
+   * @declaredat ASTNode:65
    */
   public abstract AssignExpr treeCopyNoTransform();
   /**
@@ -204,7 +187,7 @@ public abstract class AssignExpr extends Expr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:68
+   * @declaredat ASTNode:73
    */
   public abstract AssignExpr treeCopy();
   /**
@@ -262,10 +245,10 @@ public abstract class AssignExpr extends Expr implements Cloneable {
   /** The operator string used for pretty printing this expression. 
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:288
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:367
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:288")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:367")
   public abstract String printOp();
   /**
    * @attribute syn
@@ -310,27 +293,27 @@ public abstract class AssignExpr extends Expr implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = unassignedAfter_compute(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -342,7 +325,7 @@ public abstract class AssignExpr extends Expr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = unassignedAfter_compute(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -369,27 +352,27 @@ public abstract class AssignExpr extends Expr implements Cloneable {
   public boolean unassignedAfterTrue(Variable v) {
     Object _parameters = v;
     if (unassignedAfterTrue_Variable_values == null) unassignedAfterTrue_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterTrue_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterTrue_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterTrue_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterTrue_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterTrue_Variable_value = unassignedAfter(v);
-        if (new_unassignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterTrue_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterTrue_Variable_value;
         }
@@ -401,7 +384,7 @@ public abstract class AssignExpr extends Expr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterTrue_Variable_value = unassignedAfter(v);
-      if (new_unassignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterTrue_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterTrue_Variable_value;
       }
@@ -420,27 +403,27 @@ public abstract class AssignExpr extends Expr implements Cloneable {
   public boolean unassignedAfterFalse(Variable v) {
     Object _parameters = v;
     if (unassignedAfterFalse_Variable_values == null) unassignedAfterFalse_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterFalse_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterFalse_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterFalse_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterFalse_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterFalse_Variable_value = unassignedAfter(v);
-        if (new_unassignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterFalse_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterFalse_Variable_value;
         }
@@ -452,7 +435,7 @@ public abstract class AssignExpr extends Expr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterFalse_Variable_value = unassignedAfter(v);
-      if (new_unassignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterFalse_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterFalse_Variable_value;
       }
@@ -467,7 +450,7 @@ public abstract class AssignExpr extends Expr implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -475,13 +458,13 @@ public abstract class AssignExpr extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = getDest().type();
@@ -489,7 +472,7 @@ public abstract class AssignExpr extends Expr implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -497,10 +480,10 @@ public abstract class AssignExpr extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:77
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:79
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:77")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:79")
   public Collection<Problem> typeProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -548,7 +531,7 @@ public abstract class AssignExpr extends Expr implements Cloneable {
     stmtCompatible_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle stmtCompatible_computed = null;
+  protected ASTState.Cycle stmtCompatible_computed = null;
 
   /** @apilevel internal */
   protected boolean stmtCompatible_value;
@@ -556,13 +539,13 @@ public abstract class AssignExpr extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect StmtCompatible
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:144
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:148
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:144")
+  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:148")
   public boolean stmtCompatible() {
-    ASTNode$State state = state();
-    if (stmtCompatible_computed == ASTNode$State.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
+    ASTState state = state();
+    if (stmtCompatible_computed == ASTState.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
       return stmtCompatible_value;
     }
     stmtCompatible_value = true;
@@ -570,10 +553,38 @@ public abstract class AssignExpr extends Expr implements Cloneable {
       stmtCompatible_computed = state().cycle();
     
     } else {
-      stmtCompatible_computed = ASTNode$State.NON_CYCLE;
+      stmtCompatible_computed = ASTState.NON_CYCLE;
     
     }
     return stmtCompatible_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:85
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:85")
+  public Immediate eval(Body b) {
+    {
+        TypeDecl typ_lhs    = getDest()  .type();
+        TypeDecl typ_rhs    = getSource().type();
+        TypeDecl typ_result = typ_lhs;
+        if (typ_lhs.isNumericType() && typ_rhs.isNumericType())
+          typ_result = typ_lhs.binaryNumericPromotion(typ_rhs);
+    
+        return eval(b, typ_result, typ_result);
+      }
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:161
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:161")
+  public Value createAssignOp(Body b, Value op1, Value op2) {
+    { throw new Error("Operation createAssignOp is not implemented for " + getClass().getName()); }
   }
   /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:34
@@ -592,6 +603,11 @@ public abstract class AssignExpr extends Expr implements Cloneable {
       return getParent().Define_isDest(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:34
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isDest
+   */
   protected boolean canDefine_isDest(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -612,6 +628,11 @@ public abstract class AssignExpr extends Expr implements Cloneable {
       return getParent().Define_isSource(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:44
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isSource
+   */
   protected boolean canDefine_isSource(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -632,6 +653,11 @@ public abstract class AssignExpr extends Expr implements Cloneable {
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -652,6 +678,11 @@ public abstract class AssignExpr extends Expr implements Cloneable {
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -668,6 +699,11 @@ public abstract class AssignExpr extends Expr implements Cloneable {
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -677,113 +713,143 @@ public abstract class AssignExpr extends Expr implements Cloneable {
    */
   public TypeDecl Define_targetType(ASTNode _callerNode, ASTNode _childNode) {
     if (getSourceNoTransform() != null && _callerNode == getSource()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:39
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:40
       return getDest().type();
     }
     else {
       return getParent().Define_targetType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
   protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getSourceNoTransform() != null && _callerNode == getSource()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:337
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:521
       return true;
     }
     else if (getDestNoTransform() != null && _callerNode == getDest()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:331
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:515
       return false;
     }
     else {
       return getParent().Define_assignmentContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getSourceNoTransform() != null && _callerNode == getSource()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:338
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:522
       return false;
     }
     else if (getDestNoTransform() != null && _callerNode == getDest()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:332
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:516
       return false;
     }
     else {
       return getParent().Define_invocationContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getSourceNoTransform() != null && _callerNode == getSource()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:339
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:523
       return false;
     }
     else if (getDestNoTransform() != null && _callerNode == getDest()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:333
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:517
       return false;
     }
     else {
       return getParent().Define_castContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getSourceNoTransform() != null && _callerNode == getSource()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:341
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:525
       return false;
     }
     else if (getDestNoTransform() != null && _callerNode == getDest()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:334
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:518
       return false;
     }
     else {
       return getParent().Define_numericContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getSourceNoTransform() != null && _callerNode == getSource()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:340
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:524
       return false;
     }
     else if (getDestNoTransform() != null && _callerNode == getDest()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:335
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:519
       return false;
     }
     else {
       return getParent().Define_stringContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -795,8 +861,9 @@ public abstract class AssignExpr extends Expr implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:75
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:77
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -807,6 +874,7 @@ public abstract class AssignExpr extends Expr implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : typeProblems()) {

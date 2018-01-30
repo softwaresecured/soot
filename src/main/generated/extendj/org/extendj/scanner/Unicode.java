@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package soot.javaToJimple.extendj.scanner;
+package org.extendj.scanner;
 
 import java.io.FilterReader;
 import java.io.IOException;

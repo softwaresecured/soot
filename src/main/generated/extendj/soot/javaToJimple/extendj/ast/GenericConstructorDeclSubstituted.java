@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:81
+ * @astdecl GenericConstructorDeclSubstituted : GenericConstructorDecl ::= <Original:GenericConstructorDecl>;
  * @production GenericConstructorDeclSubstituted : {@link GenericConstructorDecl} ::= <span class="component">&lt;Original:GenericConstructorDecl&gt;</span>;
 
  */
@@ -63,6 +66,11 @@ public class GenericConstructorDeclSubstituted extends GenericConstructorDecl im
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "Parameter", "Exception", "ParsedConstructorInvocation", "Block", "TypeParameter", "Original"},
+    type = {"Modifiers", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Stmt>", "Block", "List<TypeVariable>", "GenericConstructorDecl"},
+    kind = {"Child", "Token", "List", "List", "Opt", "Child", "List", "Token"}
+  )
   public GenericConstructorDeclSubstituted(Modifiers p0, String p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, List<TypeVariable> p6, GenericConstructorDecl p7) {
     setChild(p0, 0);
     setID(p1);
@@ -74,7 +82,7 @@ public class GenericConstructorDeclSubstituted extends GenericConstructorDecl im
     setOriginal(p7);
   }
   /**
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public GenericConstructorDeclSubstituted(Modifiers p0, beaver.Symbol p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, List<TypeVariable> p6, GenericConstructorDecl p7) {
     setChild(p0, 0);
@@ -87,39 +95,39 @@ public class GenericConstructorDeclSubstituted extends GenericConstructorDecl im
     setOriginal(p7);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   protected int numChildren() {
     return 6;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:52
+   * @declaredat ASTNode:57
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:56
+   * @declaredat ASTNode:61
    */
   public GenericConstructorDeclSubstituted clone() throws CloneNotSupportedException {
     GenericConstructorDeclSubstituted node = (GenericConstructorDeclSubstituted) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:66
    */
   public GenericConstructorDeclSubstituted copy() {
     try {
@@ -139,7 +147,7 @@ public class GenericConstructorDeclSubstituted extends GenericConstructorDecl im
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:80
+   * @declaredat ASTNode:85
    */
   @Deprecated
   public GenericConstructorDeclSubstituted fullCopy() {
@@ -150,7 +158,7 @@ public class GenericConstructorDeclSubstituted extends GenericConstructorDecl im
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:90
+   * @declaredat ASTNode:95
    */
   public GenericConstructorDeclSubstituted treeCopyNoTransform() {
     GenericConstructorDeclSubstituted tree = (GenericConstructorDeclSubstituted) copy();
@@ -176,7 +184,7 @@ public class GenericConstructorDeclSubstituted extends GenericConstructorDecl im
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:115
+   * @declaredat ASTNode:120
    */
   public GenericConstructorDeclSubstituted treeCopy() {
     GenericConstructorDeclSubstituted tree = (GenericConstructorDeclSubstituted) copy();
@@ -197,7 +205,7 @@ public class GenericConstructorDeclSubstituted extends GenericConstructorDecl im
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:134
+   * @declaredat ASTNode:139
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((GenericConstructorDeclSubstituted) node).tokenString_ID) && (tokenGenericConstructorDecl_Original == ((GenericConstructorDeclSubstituted) node).tokenGenericConstructorDecl_Original);    
@@ -707,10 +715,10 @@ public class GenericConstructorDeclSubstituted extends GenericConstructorDecl im
    * @return original generic declaration of this constructor.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:342
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:435
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:342")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:435")
   public GenericConstructorDecl genericDecl() {
     GenericConstructorDecl genericDecl_value = this;
     return genericDecl_value;

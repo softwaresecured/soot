@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,13 +40,14 @@ import soot.coffi.CoffiMethodSource;
  * or as a catch clause parameter.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:181
+ * @astdecl ParameterDeclaration : ASTNode ::= Modifiers TypeAccess:Access <ID:String>;
  * @production ParameterDeclaration : {@link ASTNode} ::= <span class="component">{@link Modifiers}</span> <span class="component">TypeAccess:{@link Access}</span> <span class="component">&lt;ID:String&gt;</span>;
 
  */
 public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable, SimpleSet<Variable>, Variable {
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:369
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:370
    */
   @Override
   public int size() {
@@ -52,7 +55,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:374
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:375
    */
   @Override
   public boolean isEmpty() {
@@ -60,7 +63,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:379
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:380
    */
   @Override
   public SimpleSet<Variable> add(Variable o) {
@@ -68,7 +71,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:384
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:385
    */
   @Override
   public boolean contains(Object o) {
@@ -76,7 +79,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:389
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:390
    */
   @Override
   public boolean isSingleton() {
@@ -84,7 +87,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:394
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:395
    */
   @Override
   public boolean isSingleton(Variable o) {
@@ -92,7 +95,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:399
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:400
    */
   @Override
   public Variable singletonValue() {
@@ -100,7 +103,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   }
   /**
    * @aspect DataStructures
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:404
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:405
    */
   @Override
   public Iterator<Variable> iterator() {
@@ -131,6 +134,15 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
     out.print(getID());
   }
   /**
+   * @aspect PrettyPrintUtil
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:137
+   */
+  @Override public String toString() {
+    return String.format("%s %s",
+        getTypeAccessNoTransform().toString(),
+        getID());
+  }
+  /**
    * Builds a copy of this ParameterDeclaration node where all occurrences
    * of type variables in the original type parameter list have been replaced
    * by the substitution type parameters.
@@ -140,7 +152,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
    * 
    * @return the substituted ParameterDeclaration node
    * @aspect Diamond
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:370
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:236
    */
   public ParameterDeclaration substituted(Collection<TypeVariable> original,
       List<TypeVariable> substitution) {
@@ -151,18 +163,14 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   }
   /**
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:344
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:362
    */
-  public Local local;
-  /**
-   * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:345
-   */
-  public void jimplify2(Body b) {
-    assert local == null;
+  public void jimpleEmit(Body b) {
     //b.setLine(this);
-    local = b.newLocal(name(), type().getSootType(), this);
-    b.add(b.newIdentityStmt(local, b.newParameterRef(type().getSootType(), paramIdx(), this),this));
+    b.add(b.newIdentityStmt(
+      b.local(this),
+      b.newParameterRef(type().sootType(), paramIdx(), this),
+      this));
   }
   /**
    * @aspect EnclosingCapture
@@ -192,13 +200,18 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID"},
+    type = {"Modifiers", "Access", "String"},
+    kind = {"Child", "Child", "Token"}
+  )
   public ParameterDeclaration(Modifiers p0, Access p1, String p2) {
     setChild(p0, 0);
     setChild(p1, 1);
     setID(p2);
   }
   /**
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   public ParameterDeclaration(Modifiers p0, Access p1, beaver.Symbol p2) {
     setChild(p0, 0);
@@ -206,20 +219,20 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
     setID(p2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -229,20 +242,20 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
     enclosingLambda_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public ParameterDeclaration clone() throws CloneNotSupportedException {
     ParameterDeclaration node = (ParameterDeclaration) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:56
    */
   public ParameterDeclaration copy() {
     try {
@@ -262,7 +275,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:70
+   * @declaredat ASTNode:75
    */
   @Deprecated
   public ParameterDeclaration fullCopy() {
@@ -273,7 +286,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:80
+   * @declaredat ASTNode:85
    */
   public ParameterDeclaration treeCopyNoTransform() {
     ParameterDeclaration tree = (ParameterDeclaration) copy();
@@ -294,7 +307,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:100
+   * @declaredat ASTNode:105
    */
   public ParameterDeclaration treeCopy() {
     ParameterDeclaration tree = (ParameterDeclaration) copy();
@@ -310,7 +323,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:114
+   * @declaredat ASTNode:119
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ParameterDeclaration) node).tokenString_ID);    
@@ -408,10 +421,10 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:255
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:253
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:255")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:253")
   public boolean isSynthetic() {
     boolean isSynthetic_value = getModifiers().isSynthetic();
     return isSynthetic_value;
@@ -461,10 +474,10 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:245
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:324
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:245")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:324")
   public boolean hasModifiers() {
     boolean hasModifiers_value = getModifiers().getNumModifier() > 0;
     return hasModifiers_value;
@@ -475,7 +488,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -483,13 +496,13 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:273
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:272
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:273")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:272")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = getTypeAccess().type();
@@ -497,7 +510,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -684,10 +697,10 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
    * Creates a copy of this parameter declaration where parameterized types have been erased.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1610
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1609
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1610")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1609")
   public ParameterDeclaration erasedCopy() {
     ParameterDeclaration erasedCopy_value = new ParameterDeclaration(
               getModifiers().treeCopyNoTransform(),
@@ -712,7 +725,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
     throwTypes_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle throwTypes_computed = null;
+  protected ASTState.Cycle throwTypes_computed = null;
 
   /** @apilevel internal */
   protected Collection<TypeDecl> throwTypes_value;
@@ -725,8 +738,8 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PreciseRethrow", declaredAt="/home/olivier/projects/extendj/java7/frontend/PreciseRethrow.jrag:47")
   public Collection<TypeDecl> throwTypes() {
-    ASTNode$State state = state();
-    if (throwTypes_computed == ASTNode$State.NON_CYCLE || throwTypes_computed == state().cycle()) {
+    ASTState state = state();
+    if (throwTypes_computed == ASTState.NON_CYCLE || throwTypes_computed == state().cycle()) {
       return throwTypes_value;
     }
     throwTypes_value = throwTypes_compute();
@@ -734,7 +747,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
       throwTypes_computed = state().cycle();
     
     } else {
-      throwTypes_computed = ASTNode$State.NON_CYCLE;
+      throwTypes_computed = ASTState.NON_CYCLE;
     
     }
     return throwTypes_value;
@@ -766,10 +779,10 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   /** @apilevel internal */
   private void inferredReferenceAccess_TypeAccess_reset() {
     inferredReferenceAccess_TypeAccess_values = null;
-    inferredReferenceAccess_TypeAccess_list = null;
+    inferredReferenceAccess_TypeAccess_proxy = null;
   }
   /** @apilevel internal */
-  protected List inferredReferenceAccess_TypeAccess_list;
+  protected ASTNode inferredReferenceAccess_TypeAccess_proxy;
   /** @apilevel internal */
   protected java.util.Map inferredReferenceAccess_TypeAccess_values;
 
@@ -783,19 +796,22 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   public ParTypeAccess inferredReferenceAccess(TypeAccess typeAccess) {
     Object _parameters = typeAccess;
     if (inferredReferenceAccess_TypeAccess_values == null) inferredReferenceAccess_TypeAccess_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (inferredReferenceAccess_TypeAccess_values.containsKey(_parameters)) {
       return (ParTypeAccess) inferredReferenceAccess_TypeAccess_values.get(_parameters);
     }
     state().enterLazyAttribute();
     ParTypeAccess inferredReferenceAccess_TypeAccess_value = inferredReferenceAccess_compute(typeAccess);
-    if (inferredReferenceAccess_TypeAccess_list == null) {
-      inferredReferenceAccess_TypeAccess_list = new List();
-      inferredReferenceAccess_TypeAccess_list.setParent(this);
+    if (inferredReferenceAccess_TypeAccess_proxy == null) {
+      inferredReferenceAccess_TypeAccess_proxy = new ASTNode();
+      inferredReferenceAccess_TypeAccess_proxy.setParent(this);
     }
-    inferredReferenceAccess_TypeAccess_list.add(inferredReferenceAccess_TypeAccess_value);
     if (inferredReferenceAccess_TypeAccess_value != null) {
-      inferredReferenceAccess_TypeAccess_value = (ParTypeAccess) inferredReferenceAccess_TypeAccess_list.getChild(inferredReferenceAccess_TypeAccess_list.numChildren - 1);
+      inferredReferenceAccess_TypeAccess_value.setParent(inferredReferenceAccess_TypeAccess_proxy);
+      if (inferredReferenceAccess_TypeAccess_value.mayHaveRewrite()) {
+        inferredReferenceAccess_TypeAccess_value = (ParTypeAccess) inferredReferenceAccess_TypeAccess_value.rewrittenNode();
+        inferredReferenceAccess_TypeAccess_value.setParent(inferredReferenceAccess_TypeAccess_proxy);
+      }
     }
     inferredReferenceAccess_TypeAccess_values.put(_parameters, inferredReferenceAccess_TypeAccess_value);
     state().leaveLazyAttribute();
@@ -813,13 +829,24 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:338
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:356
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:338")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:356")
   public int paramIdx() {
     int paramIdx_value = getParent().getIndexOfChild(this);
     return paramIdx_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:278
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:278")
+  public boolean isProtected() {
+    boolean isProtected_value = getModifiers().isProtected();
+    return isProtected_value;
   }
   /**
    * @attribute syn
@@ -828,20 +855,20 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280")
-  public boolean isProtected() {
-    boolean isProtected_value = getModifiers().isProtected();
-    return isProtected_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282")
   public boolean isPrivate() {
     boolean isPrivate_value = getModifiers().isPrivate();
     return isPrivate_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:74
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:74")
+  public soot.Type sootType() {
+    soot.Type sootType_value = type().sootType();
+    return sootType_value;
   }
   /**
    * @attribute syn
@@ -890,10 +917,10 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:660
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:656
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:660")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:656")
   public TypeDecl hostType() {
     TypeDecl hostType_value = getParent().Define_hostType(this, null);
     return hostType_value;
@@ -974,8 +1001,8 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="EnclosingLambda", declaredAt="/home/olivier/projects/extendj/java8/frontend/EnclosingLambda.jrag:34")
   public LambdaExpr enclosingLambda() {
-    ASTNode$State state = state();
-    if (enclosingLambda_computed == ASTNode$State.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
+    ASTState state = state();
+    if (enclosingLambda_computed == ASTState.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
       return enclosingLambda_value;
     }
     enclosingLambda_value = getParent().Define_enclosingLambda(this, null);
@@ -983,7 +1010,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
       enclosingLambda_computed = state().cycle();
     
     } else {
-      enclosingLambda_computed = ASTNode$State.NON_CYCLE;
+      enclosingLambda_computed = ASTState.NON_CYCLE;
     
     }
     return enclosingLambda_value;
@@ -994,7 +1021,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
     enclosingLambda_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle enclosingLambda_computed = null;
+  protected ASTState.Cycle enclosingLambda_computed = null;
 
   /** @apilevel internal */
   protected LambdaExpr enclosingLambda_value;
@@ -1002,10 +1029,10 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:641
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:637
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:641")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:637")
   public String hostPackage() {
     String hostPackage_value = getParent().Define_hostPackage(this, null);
     return hostPackage_value;
@@ -1013,27 +1040,32 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384")
   public FieldDecl fieldDecl() {
     FieldDecl fieldDecl_value = getParent().Define_fieldDecl(this, null);
     return fieldDecl_value;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:436
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
    * @apilevel internal
    */
   public boolean Define_mayBeFinal(ASTNode _callerNode, ASTNode _childNode) {
     if (getModifiersNoTransform() != null && _callerNode == getModifiers()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:341
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:339
       return true;
     }
     else {
       return getParent().Define_mayBeFinal(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayBeFinal
+   */
   protected boolean canDefine_mayBeFinal(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1050,6 +1082,11 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
       return getParent().Define_mayUseAnnotationTarget(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:131
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayUseAnnotationTarget
+   */
   protected boolean canDefine_mayUseAnnotationTarget(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -1066,6 +1103,11 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1077,6 +1119,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java4/frontend/NameCheck.jrag:482
     {
@@ -1089,6 +1132,7 @@ public class ParameterDeclaration extends ASTNode<ASTNode> implements Cloneable,
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : nameProblems()) {

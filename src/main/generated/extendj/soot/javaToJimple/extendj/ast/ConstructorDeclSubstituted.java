@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:80
+ * @astdecl ConstructorDeclSubstituted : ConstructorDecl ::= <Original:ConstructorDecl>;
  * @production ConstructorDeclSubstituted : {@link ConstructorDecl} ::= <span class="component">&lt;Original:ConstructorDecl&gt;</span>;
 
  */
@@ -62,6 +65,11 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
   /**
    * @declaredat ASTNode:16
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "Parameter", "Exception", "ParsedConstructorInvocation", "Block", "Original"},
+    type = {"Modifiers", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Stmt>", "Block", "ConstructorDecl"},
+    kind = {"Child", "Token", "List", "List", "Opt", "Child", "Token"}
+  )
   public ConstructorDeclSubstituted(Modifiers p0, String p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, ConstructorDecl p6) {
     setChild(p0, 0);
     setID(p1);
@@ -72,7 +80,7 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
     setOriginal(p6);
   }
   /**
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public ConstructorDeclSubstituted(Modifiers p0, beaver.Symbol p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, ConstructorDecl p6) {
     setChild(p0, 0);
@@ -84,40 +92,40 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
     setOriginal(p6);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   protected int numChildren() {
     return 5;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     sourceConstructorDecl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:54
+   * @declaredat ASTNode:59
    */
   public ConstructorDeclSubstituted clone() throws CloneNotSupportedException {
     ConstructorDeclSubstituted node = (ConstructorDeclSubstituted) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:59
+   * @declaredat ASTNode:64
    */
   public ConstructorDeclSubstituted copy() {
     try {
@@ -137,7 +145,7 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:78
+   * @declaredat ASTNode:83
    */
   @Deprecated
   public ConstructorDeclSubstituted fullCopy() {
@@ -148,7 +156,7 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:88
+   * @declaredat ASTNode:93
    */
   public ConstructorDeclSubstituted treeCopyNoTransform() {
     ConstructorDeclSubstituted tree = (ConstructorDeclSubstituted) copy();
@@ -174,7 +182,7 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:113
+   * @declaredat ASTNode:118
    */
   public ConstructorDeclSubstituted treeCopy() {
     ConstructorDeclSubstituted tree = (ConstructorDeclSubstituted) copy();
@@ -195,7 +203,7 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:132
+   * @declaredat ASTNode:137
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ConstructorDeclSubstituted) node).tokenString_ID) && (tokenConstructorDecl_Original == ((ConstructorDeclSubstituted) node).tokenConstructorDecl_Original);    
@@ -595,7 +603,7 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
     sourceConstructorDecl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle sourceConstructorDecl_computed = null;
+  protected ASTState.Cycle sourceConstructorDecl_computed = null;
 
   /** @apilevel internal */
   protected ConstructorDecl sourceConstructorDecl_value;
@@ -603,13 +611,13 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1891
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1890
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1891")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1890")
   public ConstructorDecl sourceConstructorDecl() {
-    ASTNode$State state = state();
-    if (sourceConstructorDecl_computed == ASTNode$State.NON_CYCLE || sourceConstructorDecl_computed == state().cycle()) {
+    ASTState state = state();
+    if (sourceConstructorDecl_computed == ASTState.NON_CYCLE || sourceConstructorDecl_computed == state().cycle()) {
       return sourceConstructorDecl_value;
     }
     sourceConstructorDecl_value = getOriginal().sourceConstructorDecl();
@@ -617,7 +625,7 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
       sourceConstructorDecl_computed = state().cycle();
     
     } else {
-      sourceConstructorDecl_computed = ASTNode$State.NON_CYCLE;
+      sourceConstructorDecl_computed = ASTState.NON_CYCLE;
     
     }
     return sourceConstructorDecl_value;
@@ -628,10 +636,10 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
    * @return type parameters for this declaration.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:355
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:448
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:355")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:448")
   public List<TypeVariable> typeParameters() {
     List<TypeVariable> typeParameters_value = sourceConstructorDecl().typeParameters();
     return typeParameters_value;
@@ -650,10 +658,10 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:90
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:98
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:90")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:98")
   public ConstructorDecl erasedConstructor() {
     ConstructorDecl erasedConstructor_value = getOriginal().erasedConstructor();
     return erasedConstructor_value;

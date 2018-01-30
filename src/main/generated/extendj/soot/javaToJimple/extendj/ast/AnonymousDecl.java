@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:158
+ * @astdecl AnonymousDecl : ClassDecl ::= Modifiers <ID:String> [SuperClass:Access] Implements:Access* BodyDecl*;
  * @production AnonymousDecl : {@link ClassDecl} ::= <span class="component">{@link Modifiers}</span> <span class="component">&lt;ID:String&gt;</span> <span class="component">[SuperClass:{@link Access}]</span> <span class="component">Implements:{@link Access}*</span> <span class="component">{@link BodyDecl}*</span>;
 
  */
@@ -63,13 +66,18 @@ public class AnonymousDecl extends ClassDecl implements Cloneable {
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "BodyDecl"},
+    type = {"Modifiers", "String", "List<BodyDecl>"},
+    kind = {"Child", "Token", "List"}
+  )
   public AnonymousDecl(Modifiers p0, String p1, List<BodyDecl> p2) {
     setChild(p0, 0);
     setID(p1);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:22
+   * @declaredat ASTNode:27
    */
   public AnonymousDecl(Modifiers p0, beaver.Symbol p1, List<BodyDecl> p2) {
     setChild(p0, 0);
@@ -77,20 +85,20 @@ public class AnonymousDecl extends ClassDecl implements Cloneable {
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -100,20 +108,20 @@ public class AnonymousDecl extends ClassDecl implements Cloneable {
     getImplicitConstructorOpt_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   public AnonymousDecl clone() throws CloneNotSupportedException {
     AnonymousDecl node = (AnonymousDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:55
+   * @declaredat ASTNode:60
    */
   public AnonymousDecl copy() {
     try {
@@ -133,7 +141,7 @@ public class AnonymousDecl extends ClassDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   @Deprecated
   public AnonymousDecl fullCopy() {
@@ -144,7 +152,7 @@ public class AnonymousDecl extends ClassDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:84
+   * @declaredat ASTNode:89
    */
   public AnonymousDecl treeCopyNoTransform() {
     AnonymousDecl tree = (AnonymousDecl) copy();
@@ -174,7 +182,7 @@ public class AnonymousDecl extends ClassDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:113
+   * @declaredat ASTNode:118
    */
   public AnonymousDecl treeCopy() {
     AnonymousDecl tree = (AnonymousDecl) copy();
@@ -199,7 +207,7 @@ public class AnonymousDecl extends ClassDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:136
+   * @declaredat ASTNode:141
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((AnonymousDecl) node).tokenString_ID);    
@@ -597,7 +605,7 @@ public class AnonymousDecl extends ClassDecl implements Cloneable {
     return parameterList;
   }
 /** @apilevel internal */
-protected ASTNode$State.Cycle isCircular_cycle = null;
+protected ASTState.Cycle isCircular_cycle = null;
   /** @apilevel internal */
   private void isCircular_reset() {
     isCircular_computed = false;
@@ -612,12 +620,12 @@ protected ASTNode$State.Cycle isCircular_cycle = null;
   /** @apilevel internal */
   protected boolean isCircular_initialized = false;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="Circularity", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:728")
+  @ASTNodeAnnotation.Source(aspect="Circularity", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:720")
   public boolean isCircular() {
     if (isCircular_computed) {
       return isCircular_value;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!isCircular_initialized) {
       isCircular_initialized = true;
       isCircular_value = true;
@@ -627,7 +635,7 @@ protected ASTNode$State.Cycle isCircular_cycle = null;
       do {
         isCircular_cycle = state.nextCycle();
         boolean new_isCircular_value = false;
-        if (new_isCircular_value != isCircular_value) {
+        if (isCircular_value != new_isCircular_value) {
           state.setChangeInCycle();
         }
         isCircular_value = new_isCircular_value;
@@ -638,7 +646,7 @@ protected ASTNode$State.Cycle isCircular_cycle = null;
     } else if (isCircular_cycle != state.cycle()) {
       isCircular_cycle = state.cycle();
       boolean new_isCircular_value = false;
-      if (new_isCircular_value != isCircular_value) {
+      if (isCircular_value != new_isCircular_value) {
         state.setChangeInCycle();
       }
       isCircular_value = new_isCircular_value;
@@ -666,7 +674,7 @@ protected ASTNode$State.Cycle isCircular_cycle = null;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="AnonymousClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/AnonymousClasses.jrag:56")
   public Opt getSuperClassOpt() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getSuperClassOpt_computed) {
       return (Opt) getChild(getSuperClassOptChildPosition());
     }
@@ -706,7 +714,7 @@ protected ASTNode$State.Cycle isCircular_cycle = null;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="AnonymousClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/AnonymousClasses.jrag:64")
   public List getImplementsList() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getImplementsList_computed) {
       return (List) getChild(getImplementsListChildPosition());
     }
@@ -746,7 +754,7 @@ protected ASTNode$State.Cycle isCircular_cycle = null;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="ImplicitConstructor", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupConstructor.jrag:274")
   public Opt<ConstructorDecl> getImplicitConstructorOpt() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getImplicitConstructorOpt_computed) {
       return (Opt<ConstructorDecl>) getChild(getImplicitConstructorOptChildPosition());
     }

@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,9 +38,9 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast interface
  * @aspect DataStructures
- * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:39
+ * @declaredat /home/olivier/projects/extendj/java4/frontend/DataStructures.jrag:40
  */
- interface SimpleSet<T> extends Iterable<T> {
+public interface SimpleSet<T> extends Iterable<T> {
 
      
     int size();
@@ -202,7 +204,7 @@ import soot.coffi.CoffiMethodSource;
       private java.util.Set<T> internalSet;
 
       public SimpleSetImpl() {
-        internalSet = new HashSet<T>(4);
+        internalSet = new LinkedHashSet<T>(4);
       }
 
       public SimpleSetImpl(T a) {
@@ -210,24 +212,24 @@ import soot.coffi.CoffiMethodSource;
       }
 
       public SimpleSetImpl(T a, T b) {
-        internalSet = new HashSet<T>(2);
+        internalSet = new LinkedHashSet<T>(2);
         internalSet.add(a);
         internalSet.add(b);
       }
 
       public SimpleSetImpl(T... set) {
-        internalSet = new HashSet<T>(set.length);
+        internalSet = new LinkedHashSet<T>(set.length);
         for (T item : set) {
           internalSet.add(item);
         }
       }
 
       public SimpleSetImpl(java.util.Collection<? extends T> c) {
-        internalSet = new HashSet<T>(c);
+        internalSet = new LinkedHashSet<T>(c);
       }
 
       private SimpleSetImpl(SimpleSetImpl<? extends T> set) {
-        this.internalSet = new HashSet<T>(set.internalSet);
+        this.internalSet = new LinkedHashSet<T>(set.internalSet);
       }
 
       @Override

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,18 +38,19 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/MethodReference.ast:7
+ * @astdecl MethodReferenceAccess : MethodAccess;
  * @production MethodReferenceAccess : {@link MethodAccess};
 
  */
 public class MethodReferenceAccess extends MethodAccess implements Cloneable {
   /**
    * @aspect Synthetics
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:431
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:430
    */
   private FunctionDescriptor targetDescriptor;
   /**
    * @aspect Synthetics
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:432
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodReference.jrag:431
    */
   public MethodReferenceAccess(String name,
       List<Expr> args, FunctionDescriptor fd) {
@@ -74,52 +77,57 @@ public class MethodReferenceAccess extends MethodAccess implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Arg"},
+    type = {"String", "List<Expr>"},
+    kind = {"Token", "List"}
+  )
   public MethodReferenceAccess(String p0, List<Expr> p1) {
     setID(p0);
     setChild(p1, 0);
   }
   /**
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   public MethodReferenceAccess(beaver.Symbol p0, List<Expr> p1) {
     setID(p0);
     setChild(p1, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     assignConvertedType_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public MethodReferenceAccess clone() throws CloneNotSupportedException {
     MethodReferenceAccess node = (MethodReferenceAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:52
    */
   public MethodReferenceAccess copy() {
     try {
@@ -139,7 +147,7 @@ public class MethodReferenceAccess extends MethodAccess implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:71
    */
   @Deprecated
   public MethodReferenceAccess fullCopy() {
@@ -150,7 +158,7 @@ public class MethodReferenceAccess extends MethodAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:76
+   * @declaredat ASTNode:81
    */
   public MethodReferenceAccess treeCopyNoTransform() {
     MethodReferenceAccess tree = (MethodReferenceAccess) copy();
@@ -171,7 +179,7 @@ public class MethodReferenceAccess extends MethodAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:96
+   * @declaredat ASTNode:101
    */
   public MethodReferenceAccess treeCopy() {
     MethodReferenceAccess tree = (MethodReferenceAccess) copy();
@@ -187,7 +195,7 @@ public class MethodReferenceAccess extends MethodAccess implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:110
+   * @declaredat ASTNode:115
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((MethodReferenceAccess) node).tokenString_ID);    
@@ -337,7 +345,7 @@ public class MethodReferenceAccess extends MethodAccess implements Cloneable {
     assignConvertedType_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle assignConvertedType_computed = null;
+  protected ASTState.Cycle assignConvertedType_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl assignConvertedType_value;
@@ -345,13 +353,13 @@ public class MethodReferenceAccess extends MethodAccess implements Cloneable {
   /**
    * @attribute syn
    * @aspect TargetType
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:187
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:371
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:187")
+  @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:371")
   public TypeDecl assignConvertedType() {
-    ASTNode$State state = state();
-    if (assignConvertedType_computed == ASTNode$State.NON_CYCLE || assignConvertedType_computed == state().cycle()) {
+    ASTState state = state();
+    if (assignConvertedType_computed == ASTState.NON_CYCLE || assignConvertedType_computed == state().cycle()) {
       return assignConvertedType_value;
     }
     assignConvertedType_value = assignConvertedType_compute();
@@ -359,7 +367,7 @@ public class MethodReferenceAccess extends MethodAccess implements Cloneable {
       assignConvertedType_computed = state().cycle();
     
     } else {
-      assignConvertedType_computed = ASTNode$State.NON_CYCLE;
+      assignConvertedType_computed = ASTState.NON_CYCLE;
     
     }
     return assignConvertedType_value;

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +39,7 @@ import soot.coffi.CoffiMethodSource;
  * A catch parameter with disjunct exception type.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java7/grammar/MultiCatch.ast:19
+ * @astdecl CatchParameterDeclaration : ASTNode ::= Modifiers TypeAccess:Access* <ID:String>;
  * @production CatchParameterDeclaration : {@link ASTNode} ::= <span class="component">{@link Modifiers}</span> <span class="component">TypeAccess:{@link Access}*</span> <span class="component">&lt;ID:String&gt;</span>;
 
  */
@@ -140,13 +143,18 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID"},
+    type = {"Modifiers", "List<Access>", "String"},
+    kind = {"Child", "List", "Token"}
+  )
   public CatchParameterDeclaration(Modifiers p0, List<Access> p1, String p2) {
     setChild(p0, 0);
     setChild(p1, 1);
     setID(p2);
   }
   /**
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   public CatchParameterDeclaration(Modifiers p0, List<Access> p1, beaver.Symbol p2) {
     setChild(p0, 0);
@@ -154,20 +162,20 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
     setID(p2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -175,20 +183,20 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
     isEffectivelyFinal_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public CatchParameterDeclaration clone() throws CloneNotSupportedException {
     CatchParameterDeclaration node = (CatchParameterDeclaration) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   public CatchParameterDeclaration copy() {
     try {
@@ -208,7 +216,7 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:69
+   * @declaredat ASTNode:74
    */
   @Deprecated
   public CatchParameterDeclaration fullCopy() {
@@ -219,7 +227,7 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:79
+   * @declaredat ASTNode:84
    */
   public CatchParameterDeclaration treeCopyNoTransform() {
     CatchParameterDeclaration tree = (CatchParameterDeclaration) copy();
@@ -240,7 +248,7 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:99
+   * @declaredat ASTNode:104
    */
   public CatchParameterDeclaration treeCopy() {
     CatchParameterDeclaration tree = (CatchParameterDeclaration) copy();
@@ -256,7 +264,7 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:113
+   * @declaredat ASTNode:118
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((CatchParameterDeclaration) node).tokenString_ID);    
@@ -724,7 +732,7 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
     throwTypes_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle throwTypes_computed = null;
+  protected ASTState.Cycle throwTypes_computed = null;
 
   /** @apilevel internal */
   protected Collection<TypeDecl> throwTypes_value;
@@ -737,8 +745,8 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PreciseRethrow", declaredAt="/home/olivier/projects/extendj/java7/frontend/PreciseRethrow.jrag:56")
   public Collection<TypeDecl> throwTypes() {
-    ASTNode$State state = state();
-    if (throwTypes_computed == ASTNode$State.NON_CYCLE || throwTypes_computed == state().cycle()) {
+    ASTState state = state();
+    if (throwTypes_computed == ASTState.NON_CYCLE || throwTypes_computed == state().cycle()) {
       return throwTypes_value;
     }
     throwTypes_value = catchClause().caughtExceptions();
@@ -746,7 +754,7 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
       throwTypes_computed = state().cycle();
     
     } else {
-      throwTypes_computed = ASTNode$State.NON_CYCLE;
+      throwTypes_computed = ASTState.NON_CYCLE;
     
     }
     return throwTypes_value;
@@ -756,7 +764,7 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
     isEffectivelyFinal_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isEffectivelyFinal_computed = null;
+  protected ASTState.Cycle isEffectivelyFinal_computed = null;
 
   /** @apilevel internal */
   protected boolean isEffectivelyFinal_value;
@@ -769,8 +777,8 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="EffectivelyFinal", declaredAt="/home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:144")
   public boolean isEffectivelyFinal() {
-    ASTNode$State state = state();
-    if (isEffectivelyFinal_computed == ASTNode$State.NON_CYCLE || isEffectivelyFinal_computed == state().cycle()) {
+    ASTState state = state();
+    if (isEffectivelyFinal_computed == ASTState.NON_CYCLE || isEffectivelyFinal_computed == state().cycle()) {
       return isEffectivelyFinal_value;
     }
     isEffectivelyFinal_value = true;
@@ -778,10 +786,21 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
       isEffectivelyFinal_computed = state().cycle();
     
     } else {
-      isEffectivelyFinal_computed = ASTNode$State.NON_CYCLE;
+      isEffectivelyFinal_computed = ASTState.NON_CYCLE;
     
     }
     return isEffectivelyFinal_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:278
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:278")
+  public boolean isProtected() {
+    boolean isProtected_value = getModifiers().isProtected();
+    return isProtected_value;
   }
   /**
    * @attribute syn
@@ -790,20 +809,20 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280")
-  public boolean isProtected() {
-    boolean isProtected_value = getModifiers().isProtected();
-    return isProtected_value;
-  }
-  /**
-   * @attribute syn
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282")
   public boolean isPrivate() {
     boolean isPrivate_value = getModifiers().isPrivate();
     return isPrivate_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:74
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:74")
+  public soot.Type sootType() {
+    soot.Type sootType_value = type().sootType();
+    return sootType_value;
   }
   /**
    * @attribute syn
@@ -919,10 +938,10 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:641
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:637
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:641")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:637")
   public String hostPackage() {
     String hostPackage_value = getParent().Define_hostPackage(this, null);
     return hostPackage_value;
@@ -930,10 +949,10 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384")
   public FieldDecl fieldDecl() {
     FieldDecl fieldDecl_value = getParent().Define_fieldDecl(this, null);
     return fieldDecl_value;
@@ -952,6 +971,11 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -963,6 +987,7 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:151
     {
@@ -984,6 +1009,7 @@ public class CatchParameterDeclaration extends ASTNode<ASTNode> implements Clone
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : typeProblems()) {

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,6 +40,7 @@ import soot.coffi.CoffiMethodSource;
  * Concrete subclasses include field, method, and type access.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:69
+ * @astdecl Access : Expr;
  * @production Access : {@link Expr};
 
  */
@@ -45,7 +48,7 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * Used by the parser to build a method access from a parsed, potentially qualified, name.
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:451
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:271
    */
   public Access buildMethodAccess(List<Expr> arguments) {
     throw new Error("Can not build method access from access of type "
@@ -53,7 +56,7 @@ public abstract class Access extends Expr implements Cloneable {
   }
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:474
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:294
    */
   public Access addArrayDims(List list) {
     Access a = this;
@@ -80,7 +83,7 @@ public abstract class Access extends Expr implements Cloneable {
    * 
    * @return the substituted Access node
    * @aspect Diamond
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:397
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:263
    */
   public Access substituted(Collection<TypeVariable> original,
       List<TypeVariable> substitution) {
@@ -115,50 +118,49 @@ public abstract class Access extends Expr implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:473
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:410
    */
-  public soot.Local emitThis(Body b, TypeDecl targetDecl) {
+  protected Local emitThis(Body b, TypeDecl targetDecl) {
     //b.setLine(this);
-    if(targetDecl == hostType())
+    if (targetDecl == hostType())
       return b.emitThis(hostType(), this);
-    else {
-      TypeDecl enclosing = hostType();
-      Local base;
-      if(inExplicitConstructorInvocation()) {
-        base = asLocal(b,
-          hostingCtorHack().getExplicitisedParameters().getChild(0).local
-          //b.newParameterRef(enclosing.enclosingType().getSootType(), 0, this)
-        );
-        enclosing = enclosing.enclosing();
-      }
-      else {
-        base = b.emitThis(hostType(), this);
-      }
-      while(enclosing != targetDecl) {
-        Local next = b.newTemp(enclosing.enclosingType().getSootType(), this);
-        b.add(
-          b.newAssignStmt(
-            next,
-            b.newInstanceFieldRef(
-              base,
-              enclosing.getSootField("this$0", enclosing.enclosingType()).makeRef(),
-              this
-            ),
-            this
-          )
-        );
-        base = next;
-        enclosing = enclosing.enclosingType();
-      }
-      return base;
+
+    TypeDecl  enclosing;
+    Local     base;
+    if (inExplicitConstructorInvocation()) {
+      enclosing = hostType().enclosing();
+      base      = b.local(hostingCtorHack().getExplicitisedParameters().getChild(0));
+    } else {
+      enclosing = hostType();
+      base      = b.emitThis(hostType(), this);
     }
+
+    while (enclosing != targetDecl) {
+      Local next = b.newTemp(enclosing.enclosingType().sootType(), this);
+      b.add(b.newAssignStmt(
+        next,
+        b.newInstanceFieldRef(
+          base,
+          Scene.v().makeFieldRef(
+            enclosing.sootClass(),
+            "this$0",
+            enclosing.enclosingType().sootType(),
+            false),
+          this
+        ),
+        this
+        ));
+      base      = next;
+      enclosing = enclosing.enclosingType();
+    }
+
+    return base;
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:703
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:630
    */
-  public void addArraySize(Body b, ArrayList list) {
-  }
+  void evalArraySize(Body b, ArrayList<Value> list) {}
   /**
    * @declaredat ASTNode:1
    */
@@ -235,8 +237,9 @@ public abstract class Access extends Expr implements Cloneable {
    */
   public abstract Access treeCopy();
   /**
-   * Find the outermost qualified expression this access, if this access is
-   * qualified. Otherwise, returns this access.
+   * Find the outermost qualified expression this access.
+   * 
+   * <p>If this is not a qualified access, then this access is returned.
    * 
    * <p>For example, if {@code unqualifiedScope()} is evaluated for the {@code
    * MethodAccess} inside the expression {@code Dot(FieldAccess,
@@ -244,10 +247,10 @@ public abstract class Access extends Expr implements Cloneable {
    * unqualified scope of the {@code MethodAccess}.
    * @attribute syn
    * @aspect LookupMethod
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:60
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:87
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:60")
+  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:87")
   public Expr unqualifiedScope() {
     Expr unqualifiedScope_value = isQualified() ? nestedScope() : this;
     return unqualifiedScope_value;
@@ -328,7 +331,7 @@ public abstract class Access extends Expr implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -336,13 +339,13 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = unknownType();
@@ -350,7 +353,7 @@ public abstract class Access extends Expr implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -401,10 +404,10 @@ public abstract class Access extends Expr implements Cloneable {
    * Creates a copy of this access where parameterized types have been erased.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1597
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1596
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1597")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1596")
   public Access erasedCopy() {
     Access erasedCopy_value = treeCopyNoTransform();
     return erasedCopy_value;
@@ -426,10 +429,10 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect Diamond
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:87
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/Diamond.jrag:99
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Diamond", declaredAt="/home/olivier/projects/extendj/java7/frontend/Diamond.jrag:87")
+  @ASTNodeAnnotation.Source(aspect="Diamond", declaredAt="/home/olivier/projects/extendj/java7/frontend/Diamond.jrag:99")
   public boolean isDiamond() {
     boolean isDiamond_value = false;
     return isDiamond_value;
@@ -437,10 +440,10 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect LambdaParametersInference
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:620
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:656
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:620")
+  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:656")
   public boolean mentionsTypeVariable(TypeVariable var) {
     boolean mentionsTypeVariable_TypeVariable_value = false;
     return mentionsTypeVariable_TypeVariable_value;
@@ -467,10 +470,10 @@ public abstract class Access extends Expr implements Cloneable {
    * access.
    * @attribute inh
    * @aspect LookupMethod
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:71
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:98
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:71")
+  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:98")
   public Expr nestedScope() {
     Expr nestedScope_value = getParent().Define_nestedScope(this, null);
     return nestedScope_value;
@@ -478,10 +481,10 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute inh
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:325
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:329
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:325")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:329")
   public TypeDecl unknownType() {
     TypeDecl unknownType_value = getParent().Define_unknownType(this, null);
     return unknownType_value;
@@ -489,10 +492,10 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute inh
    * @aspect VariableScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:372
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:340
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:372")
+  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:340")
   public Variable unknownField() {
     Variable unknownField_value = getParent().Define_unknownField(this, null);
     return unknownField_value;
@@ -500,10 +503,10 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute inh
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:403
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:400
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:403")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:400")
   public boolean withinSuppressWarnings(String annot) {
     boolean withinSuppressWarnings_String_value = getParent().Define_withinSuppressWarnings(this, null, annot);
     return withinSuppressWarnings_String_value;
@@ -511,10 +514,10 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute inh
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:534
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:531
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:534")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:531")
   public boolean withinDeprecatedAnnotation() {
     boolean withinDeprecatedAnnotation_value = getParent().Define_withinDeprecatedAnnotation(this, null);
     return withinDeprecatedAnnotation_value;
@@ -522,10 +525,10 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute inh
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:342
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:282
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:342")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:282")
   public boolean inExplicitConstructorInvocation() {
     boolean inExplicitConstructorInvocation_value = getParent().Define_inExplicitConstructorInvocation(this, null);
     return inExplicitConstructorInvocation_value;
@@ -533,10 +536,10 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute inh
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:538
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:475
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:538")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:475")
   public ConstructorDecl hostingCtorHack() {
     ConstructorDecl hostingCtorHack_value = getParent().Define_hostingCtorHack(this, null);
     return hostingCtorHack_value;
@@ -549,6 +552,11 @@ public abstract class Access extends Expr implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:86
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isLeftChildOfDot
+   */
   protected boolean canDefine_isLeftChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -560,6 +568,11 @@ public abstract class Access extends Expr implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:101
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isRightChildOfDot
+   */
   protected boolean canDefine_isRightChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -571,6 +584,11 @@ public abstract class Access extends Expr implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return prevExprError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:118
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute prevExpr
+   */
   protected boolean canDefine_prevExpr(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -582,6 +600,11 @@ public abstract class Access extends Expr implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return nextAccessError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:142
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nextAccess
+   */
   protected boolean canDefine_nextAccess(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

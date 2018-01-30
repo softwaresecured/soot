@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,6 +42,7 @@ import soot.coffi.CoffiMethodSource;
  * <p>Member declaration signatures are copied on demand by the BodyDecl NTA.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:92
+ * @astdecl ClassDeclSubstituted : ClassDecl ::= <Original:TypeDecl> BodyDecl*;
  * @production ClassDeclSubstituted : {@link ClassDecl} ::= <span class="component">&lt;Original:TypeDecl&gt;</span> <span class="component">{@link BodyDecl}*</span>;
 
  */
@@ -67,6 +70,11 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "SuperClass", "Implements", "Original"},
+    type = {"Modifiers", "String", "Opt<Access>", "List<Access>", "TypeDecl"},
+    kind = {"Child", "Token", "Opt", "List", "Token"}
+  )
   public ClassDeclSubstituted(Modifiers p0, String p1, Opt<Access> p2, List<Access> p3, TypeDecl p4) {
     setChild(p0, 0);
     setID(p1);
@@ -75,7 +83,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
     setOriginal(p4);
   }
   /**
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public ClassDeclSubstituted(Modifiers p0, beaver.Symbol p1, Opt<Access> p2, List<Access> p3, TypeDecl p4) {
     setChild(p0, 0);
@@ -85,49 +93,47 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
     setOriginal(p4);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     getBodyDeclList_reset();
     sourceTypeDecl_reset();
     instanceOf_TypeDecl_reset();
-    subtype_TypeDecl_reset();
-    strictSubtype_TypeDecl_reset();
     typeDescriptor_reset();
     uniqueIndex_reset();
-    localMethodsSignatureMap_reset();
+    localMethods_reset();
     localFields_String_reset();
     localTypeDecls_String_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:56
+   * @declaredat ASTNode:59
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:60
+   * @declaredat ASTNode:63
    */
   public ClassDeclSubstituted clone() throws CloneNotSupportedException {
     ClassDeclSubstituted node = (ClassDeclSubstituted) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:65
+   * @declaredat ASTNode:68
    */
   public ClassDeclSubstituted copy() {
     try {
@@ -147,7 +153,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:84
+   * @declaredat ASTNode:87
    */
   @Deprecated
   public ClassDeclSubstituted fullCopy() {
@@ -158,7 +164,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:94
+   * @declaredat ASTNode:97
    */
   public ClassDeclSubstituted treeCopyNoTransform() {
     ClassDeclSubstituted tree = (ClassDeclSubstituted) copy();
@@ -187,7 +193,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:122
+   * @declaredat ASTNode:125
    */
   public ClassDeclSubstituted treeCopy() {
     ClassDeclSubstituted tree = (ClassDeclSubstituted) copy();
@@ -211,7 +217,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:144
+   * @declaredat ASTNode:147
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((ClassDeclSubstituted) node).tokenString_ID) && (tokenTypeDecl_Original == ((ClassDeclSubstituted) node).tokenTypeDecl_Original);    
@@ -605,10 +611,10 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
   /**
    * @attribute syn
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:643
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:639
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:643")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:639")
   public TypeDecl hostType() {
     TypeDecl hostType_value = getOriginal();
     return hostType_value;
@@ -616,10 +622,10 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1665
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1664
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1665")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1664")
   public TypeDecl original() {
     TypeDecl original_value = getOriginal().original();
     return original_value;
@@ -639,12 +645,12 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
   /**
    * @attribute syn nta
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1695
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1694
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1695")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1694")
   public List<BodyDecl> getBodyDeclList() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getBodyDeclList_computed) {
       return (List<BodyDecl>) getChild(getBodyDeclListChildPosition());
     }
@@ -662,7 +668,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
     sourceTypeDecl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle sourceTypeDecl_computed = null;
+  protected ASTState.Cycle sourceTypeDecl_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl sourceTypeDecl_value;
@@ -670,13 +676,13 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1880
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1879
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1880")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1879")
   public TypeDecl sourceTypeDecl() {
-    ASTNode$State state = state();
-    if (sourceTypeDecl_computed == ASTNode$State.NON_CYCLE || sourceTypeDecl_computed == state().cycle()) {
+    ASTState state = state();
+    if (sourceTypeDecl_computed == ASTState.NON_CYCLE || sourceTypeDecl_computed == state().cycle()) {
       return sourceTypeDecl_value;
     }
     sourceTypeDecl_value = original().sourceTypeDecl();
@@ -684,14 +690,14 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
       sourceTypeDecl_computed = state().cycle();
     
     } else {
-      sourceTypeDecl_computed = ASTNode$State.NON_CYCLE;
+      sourceTypeDecl_computed = ASTState.NON_CYCLE;
     
     }
     return sourceTypeDecl_value;
   }
   /** @apilevel internal */
   private void instanceOf_TypeDecl_reset() {
-    instanceOf_TypeDecl_computed = new java.util.HashMap(4);
+    instanceOf_TypeDecl_computed = null;
     instanceOf_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -701,18 +707,18 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
   /**
    * @attribute syn
    * @aspect TypeWideningAndIdentity
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:443
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:442
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeWideningAndIdentity", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:443")
+  @ASTNodeAnnotation.Source(aspect="TypeWideningAndIdentity", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:442")
   public boolean instanceOf(TypeDecl type) {
     Object _parameters = type;
     if (instanceOf_TypeDecl_computed == null) instanceOf_TypeDecl_computed = new java.util.HashMap(4);
     if (instanceOf_TypeDecl_values == null) instanceOf_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (instanceOf_TypeDecl_values.containsKey(_parameters) && instanceOf_TypeDecl_computed != null
+    ASTState state = state();
+    if (instanceOf_TypeDecl_values.containsKey(_parameters)
         && instanceOf_TypeDecl_computed.containsKey(_parameters)
-        && (instanceOf_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || instanceOf_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (instanceOf_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || instanceOf_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) instanceOf_TypeDecl_values.get(_parameters);
     }
     boolean instanceOf_TypeDecl_value = subtype(type);
@@ -722,69 +728,29 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
     
     } else {
       instanceOf_TypeDecl_values.put(_parameters, instanceOf_TypeDecl_value);
-      instanceOf_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      instanceOf_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return instanceOf_TypeDecl_value;
   }
-  /** @apilevel internal */
-  private void subtype_TypeDecl_reset() {
-    subtype_TypeDecl_values = null;
-  }
-  protected java.util.Map subtype_TypeDecl_values;
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
+  /**
+   * @attribute syn
+   * @aspect GenericsSubtype
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:492
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:492")
   public boolean subtype(TypeDecl type) {
-    Object _parameters = type;
-    if (subtype_TypeDecl_values == null) subtype_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
-    if (subtype_TypeDecl_values.containsKey(_parameters)) {
-      Object _cache = subtype_TypeDecl_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
-        return (Boolean) _cache;
-      } else {
-        _value = (ASTNode$State.CircularValue) _cache;
-      }
-    } else {
-      _value = new ASTNode$State.CircularValue();
-      subtype_TypeDecl_values.put(_parameters, _value);
-      _value.value = true;
-    }
-    ASTNode$State state = state();
-    if (!state.inCircle() || state.calledByLazyAttribute()) {
-      state.enterCircle();
-      boolean new_subtype_TypeDecl_value;
-      do {
-        _value.cycle = state.nextCycle();
-        new_subtype_TypeDecl_value = type.supertypeClassDeclSubstituted(this);
-        if (new_subtype_TypeDecl_value != ((Boolean)_value.value)) {
-          state.setChangeInCycle();
-          _value.value = new_subtype_TypeDecl_value;
-        }
-      } while (state.testAndClearChangeInCycle());
-      subtype_TypeDecl_values.put(_parameters, new_subtype_TypeDecl_value);
-
-      state.leaveCircle();
-      return new_subtype_TypeDecl_value;
-    } else if (_value.cycle != state.cycle()) {
-      _value.cycle = state.cycle();
-      boolean new_subtype_TypeDecl_value = type.supertypeClassDeclSubstituted(this);
-      if (new_subtype_TypeDecl_value != ((Boolean)_value.value)) {
-        state.setChangeInCycle();
-        _value.value = new_subtype_TypeDecl_value;
-      }
-      return new_subtype_TypeDecl_value;
-    } else {
-      return (Boolean) _value.value;
-    }
+    boolean subtype_TypeDecl_value = type.supertypeClassDeclSubstituted(this);
+    return subtype_TypeDecl_value;
   }
   /**
    * @attribute syn
    * @aspect GenericsSubtype
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:594
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:591
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:594")
+  @ASTNodeAnnotation.Source(aspect="GenericsSubtype", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericsSubtype.jrag:591")
   public boolean supertypeClassDeclSubstituted(ClassDeclSubstituted type) {
     boolean supertypeClassDeclSubstituted_ClassDeclSubstituted_value = original() == type.original() && type.enclosingType().subtype(enclosingType())
           || super.supertypeClassDeclSubstituted(type);
@@ -801,64 +767,24 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
     boolean supertypeClassDecl_ClassDecl_value = super.supertypeClassDecl(type) || original().supertypeClassDecl(type);
     return supertypeClassDecl_ClassDecl_value;
   }
-  /** @apilevel internal */
-  private void strictSubtype_TypeDecl_reset() {
-    strictSubtype_TypeDecl_values = null;
-  }
-  protected java.util.Map strictSubtype_TypeDecl_values;
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
+  /**
+   * @attribute syn
+   * @aspect StrictSubtype
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:363
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:363")
   public boolean strictSubtype(TypeDecl type) {
-    Object _parameters = type;
-    if (strictSubtype_TypeDecl_values == null) strictSubtype_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
-    if (strictSubtype_TypeDecl_values.containsKey(_parameters)) {
-      Object _cache = strictSubtype_TypeDecl_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
-        return (Boolean) _cache;
-      } else {
-        _value = (ASTNode$State.CircularValue) _cache;
-      }
-    } else {
-      _value = new ASTNode$State.CircularValue();
-      strictSubtype_TypeDecl_values.put(_parameters, _value);
-      _value.value = true;
-    }
-    ASTNode$State state = state();
-    if (!state.inCircle() || state.calledByLazyAttribute()) {
-      state.enterCircle();
-      boolean new_strictSubtype_TypeDecl_value;
-      do {
-        _value.cycle = state.nextCycle();
-        new_strictSubtype_TypeDecl_value = type.strictSupertypeClassDeclSubstituted(this);
-        if (new_strictSubtype_TypeDecl_value != ((Boolean)_value.value)) {
-          state.setChangeInCycle();
-          _value.value = new_strictSubtype_TypeDecl_value;
-        }
-      } while (state.testAndClearChangeInCycle());
-      strictSubtype_TypeDecl_values.put(_parameters, new_strictSubtype_TypeDecl_value);
-
-      state.leaveCircle();
-      return new_strictSubtype_TypeDecl_value;
-    } else if (_value.cycle != state.cycle()) {
-      _value.cycle = state.cycle();
-      boolean new_strictSubtype_TypeDecl_value = type.strictSupertypeClassDeclSubstituted(this);
-      if (new_strictSubtype_TypeDecl_value != ((Boolean)_value.value)) {
-        state.setChangeInCycle();
-        _value.value = new_strictSubtype_TypeDecl_value;
-      }
-      return new_strictSubtype_TypeDecl_value;
-    } else {
-      return (Boolean) _value.value;
-    }
+    boolean strictSubtype_TypeDecl_value = type.strictSupertypeClassDeclSubstituted(this);
+    return strictSubtype_TypeDecl_value;
   }
   /**
    * @attribute syn
    * @aspect StrictSubtype
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:463
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:460
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:463")
+  @ASTNodeAnnotation.Source(aspect="StrictSubtype", declaredAt="/home/olivier/projects/extendj/java8/frontend/GenericsSubtype.jrag:460")
   public boolean strictSupertypeClassDeclSubstituted(ClassDeclSubstituted type) {
     boolean strictSupertypeClassDeclSubstituted_ClassDeclSubstituted_value = original() == type.original() && type.enclosingType().strictSubtype(enclosingType())
           || super.strictSupertypeClassDeclSubstituted(type);
@@ -881,7 +807,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
     typeDescriptor_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle typeDescriptor_computed = null;
+  protected ASTState.Cycle typeDescriptor_computed = null;
 
   /** @apilevel internal */
   protected String typeDescriptor_value;
@@ -894,8 +820,8 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ConstantPoolNames", declaredAt="/home/olivier/projects/extendj/java4/backend/ConstantPoolNames.jrag:78")
   public String typeDescriptor() {
-    ASTNode$State state = state();
-    if (typeDescriptor_computed == ASTNode$State.NON_CYCLE || typeDescriptor_computed == state().cycle()) {
+    ASTState state = state();
+    if (typeDescriptor_computed == ASTState.NON_CYCLE || typeDescriptor_computed == state().cycle()) {
       return typeDescriptor_value;
     }
     typeDescriptor_value = original().typeDescriptor();
@@ -903,7 +829,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
       typeDescriptor_computed = state().cycle();
     
     } else {
-      typeDescriptor_computed = ASTNode$State.NON_CYCLE;
+      typeDescriptor_computed = ASTState.NON_CYCLE;
     
     }
     return typeDescriptor_value;
@@ -913,7 +839,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
     uniqueIndex_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle uniqueIndex_computed = null;
+  protected ASTState.Cycle uniqueIndex_computed = null;
 
   /** @apilevel internal */
   protected int uniqueIndex_value;
@@ -926,8 +852,8 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Java2Rewrites", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Java2Rewrites.jrag:35")
   public int uniqueIndex() {
-    ASTNode$State state = state();
-    if (uniqueIndex_computed == ASTNode$State.NON_CYCLE || uniqueIndex_computed == state().cycle()) {
+    ASTState state = state();
+    if (uniqueIndex_computed == ASTState.NON_CYCLE || uniqueIndex_computed == state().cycle()) {
       return uniqueIndex_value;
     }
     uniqueIndex_value = original().uniqueIndex();
@@ -935,64 +861,65 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
       uniqueIndex_computed = state().cycle();
     
     } else {
-      uniqueIndex_computed = ASTNode$State.NON_CYCLE;
+      uniqueIndex_computed = ASTState.NON_CYCLE;
     
     }
     return uniqueIndex_value;
   }
   /** @apilevel internal */
-  private void localMethodsSignatureMap_reset() {
-    localMethodsSignatureMap_computed = null;
-    localMethodsSignatureMap_value = null;
+  private void localMethods_reset() {
+    localMethods_computed = null;
+    localMethods_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle localMethodsSignatureMap_computed = null;
+  protected ASTState.Cycle localMethods_computed = null;
 
   /** @apilevel internal */
-  protected Map<String, SimpleSet<MethodDecl>> localMethodsSignatureMap_value;
+  protected java.util.List<MethodDecl> localMethods_value;
 
   /**
+   * Substituted local methods.
+   * 
+   * <p>Includes all non-substitutable original methods plus all substituted methods.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1347
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1348
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1347")
-  public Map<String, SimpleSet<MethodDecl>> localMethodsSignatureMap() {
-    ASTNode$State state = state();
-    if (localMethodsSignatureMap_computed == ASTNode$State.NON_CYCLE || localMethodsSignatureMap_computed == state().cycle()) {
-      return localMethodsSignatureMap_value;
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1348")
+  public java.util.List<MethodDecl> localMethods() {
+    ASTState state = state();
+    if (localMethods_computed == ASTState.NON_CYCLE || localMethods_computed == state().cycle()) {
+      return localMethods_value;
     }
-    localMethodsSignatureMap_value = localMethodsSignatureMap_compute();
+    localMethods_value = localMethods_compute();
     if (state().inCircle()) {
-      localMethodsSignatureMap_computed = state().cycle();
+      localMethods_computed = state().cycle();
     
     } else {
-      localMethodsSignatureMap_computed = ASTNode$State.NON_CYCLE;
+      localMethods_computed = ASTState.NON_CYCLE;
     
     }
-    return localMethodsSignatureMap_value;
+    return localMethods_value;
   }
   /** @apilevel internal */
-  private Map<String, SimpleSet<MethodDecl>> localMethodsSignatureMap_compute() {
-      Map<String, SimpleSet<MethodDecl>> map = new HashMap<String, SimpleSet<MethodDecl>>();
-      for (Iterator<MethodDecl> iter = original().localMethodsIterator(); iter.hasNext(); ) {
-        MethodDecl decl = iter.next();
-        if (!decl.isSubstitutable()) {
-          putSimpleSetElement(map, decl.signature(), decl);
+  private java.util.List<MethodDecl> localMethods_compute() {
+      ArrayList<MethodDecl> methods = new ArrayList<MethodDecl>();
+      for (MethodDecl m : original().localMethods()) {
+        if (!m.isSubstitutable()) {
+          methods.add(m);
         }
       }
       for (BodyDecl decl : getBodyDeclList()) {
         if (decl instanceof MethodDecl) {
-          MethodDecl method = (MethodDecl) decl;
-          putSimpleSetElement(map, method.signature(), method);
+          methods.add((MethodDecl) decl);
         }
       }
-      return map;
+      return methods;
     }
   /** @apilevel internal */
   private void localFields_String_reset() {
-    localFields_String_computed = new java.util.HashMap(4);
+    localFields_String_computed = null;
     localFields_String_values = null;
   }
   /** @apilevel internal */
@@ -1002,18 +929,18 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1364
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1363
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1364")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1363")
   public SimpleSet<Variable> localFields(String name) {
     Object _parameters = name;
     if (localFields_String_computed == null) localFields_String_computed = new java.util.HashMap(4);
     if (localFields_String_values == null) localFields_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (localFields_String_values.containsKey(_parameters) && localFields_String_computed != null
+    ASTState state = state();
+    if (localFields_String_values.containsKey(_parameters)
         && localFields_String_computed.containsKey(_parameters)
-        && (localFields_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || localFields_String_computed.get(_parameters) == state().cycle())) {
+        && (localFields_String_computed.get(_parameters) == ASTState.NON_CYCLE || localFields_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<Variable>) localFields_String_values.get(_parameters);
     }
     SimpleSet<Variable> localFields_String_value = localFields_compute(name);
@@ -1023,7 +950,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
     
     } else {
       localFields_String_values.put(_parameters, localFields_String_value);
-      localFields_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      localFields_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return localFields_String_value;
@@ -1055,31 +982,31 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
   }
   protected java.util.Map localTypeDecls_String_values;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1395")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1394")
   public SimpleSet<TypeDecl> localTypeDecls(String name) {
     Object _parameters = name;
     if (localTypeDecls_String_values == null) localTypeDecls_String_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (localTypeDecls_String_values.containsKey(_parameters)) {
       Object _cache = localTypeDecls_String_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (SimpleSet<TypeDecl>) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       localTypeDecls_String_values.put(_parameters, _value);
       _value.value = emptySet();
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       SimpleSet<TypeDecl> new_localTypeDecls_String_value;
       do {
         _value.cycle = state.nextCycle();
         new_localTypeDecls_String_value = localTypeDecls_compute(name);
-        if ((new_localTypeDecls_String_value == null && ((SimpleSet<TypeDecl>)_value.value) != null) || (new_localTypeDecls_String_value != null && !new_localTypeDecls_String_value.equals(((SimpleSet<TypeDecl>)_value.value)))) {
+        if (!AttributeValue.equals(((SimpleSet<TypeDecl>)_value.value), new_localTypeDecls_String_value)) {
           state.setChangeInCycle();
           _value.value = new_localTypeDecls_String_value;
         }
@@ -1091,7 +1018,7 @@ public class ClassDeclSubstituted extends ClassDecl implements Cloneable, Member
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       SimpleSet<TypeDecl> new_localTypeDecls_String_value = localTypeDecls_compute(name);
-      if ((new_localTypeDecls_String_value == null && ((SimpleSet<TypeDecl>)_value.value) != null) || (new_localTypeDecls_String_value != null && !new_localTypeDecls_String_value.equals(((SimpleSet<TypeDecl>)_value.value)))) {
+      if (!AttributeValue.equals(((SimpleSet<TypeDecl>)_value.value), new_localTypeDecls_String_value)) {
         state.setChangeInCycle();
         _value.value = new_localTypeDecls_String_value;
       }

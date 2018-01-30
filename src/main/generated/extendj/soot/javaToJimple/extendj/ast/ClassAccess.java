@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:112
+ * @astdecl ClassAccess : Access;
  * @production ClassAccess : {@link Access};
 
  */
@@ -47,11 +50,6 @@ public class ClassAccess extends Access implements Cloneable {
   public void prettyPrint(PrettyPrinter out) {
     out.print("class");
   }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:964
-   */
-  public soot.Value eval(Body b) { return transformed().eval(b); }
   /**
    * @declaredat ASTNode:1
    */
@@ -177,7 +175,7 @@ public class ClassAccess extends Access implements Cloneable {
   }
   /**
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:438
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:437
    */
   private TypeDecl refined_TypeAnalysis_ClassAccess_type()
 { return lookupType("java.lang", "Class"); }
@@ -211,7 +209,7 @@ public class ClassAccess extends Access implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -219,13 +217,13 @@ public class ClassAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = type_compute();
@@ -233,7 +231,7 @@ public class ClassAccess extends Access implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -254,6 +252,16 @@ public class ClassAccess extends Access implements Cloneable {
       // Using non-generic java.lang.Class.
       return decl;
     }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    { return transformed().eval(b); }
+  }
   /** @apilevel internal */
   private void transformed_reset() {
     transformed_computed = false;
@@ -274,7 +282,7 @@ public class ClassAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="Synthesis", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Synthesis.jrag:76")
   public Expr transformed() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (transformed_computed) {
       return transformed_value;
     }
@@ -301,7 +309,7 @@ public class ClassAccess extends Access implements Cloneable {
         new ParTypeAccess(
           new TypeAccess("java.lang", "Class"),
           new List<Access>(type.createQualifiedAccess())),
-        hostType().createQualifiedAccess().qualifiesAccess(
+        hostType().topLevelType().createQualifiedAccess().qualifiesAccess(
           new MethodAccess("class$", new List<Expr>().add(className)))));
     }
   /** @apilevel internal */
@@ -312,6 +320,7 @@ public class ClassAccess extends Access implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java4/frontend/NameCheck.jrag:273
     if (isQualified() && !qualifier().isTypeAccess()) {
@@ -326,6 +335,7 @@ public class ClassAccess extends Access implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (isQualified() && !qualifier().isTypeAccess()) {

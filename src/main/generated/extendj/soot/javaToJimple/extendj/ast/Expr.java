@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,13 +38,14 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:194
+ * @astdecl Expr : ASTNode;
  * @production Expr : {@link ASTNode};
 
  */
 public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:635
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:639
    */
   public SimpleSet<TypeDecl> keepAccessibleTypes(SimpleSet<TypeDecl> types) {
     SimpleSet<TypeDecl> result = emptySet();
@@ -74,9 +77,23 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    * @see "JLS $6.6.2.1"
    * @return true if the expression may access the given field
    * @aspect VariableScope
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:314
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:313
    */
-  public boolean mayAccess(Variable f) { return hostType().mayAccess(f); }
+  public boolean mayAccess(Variable f) {
+    if (f.isPublic  ()) return true;
+    if (f.isPrivate ()) return f.hostType().topLevelType() == hostType().topLevelType();
+
+    // protected & package-private can be accessed by anyone in the same pkg
+    if (f.hostPackage().equals(hostPackage())) return true;
+
+    if (f.isProtected()) {
+      for (TypeDecl t = hostType(); t != null; t = t.isNestedType() ? t.enclosingType() : null) {
+        if (t.instanceOf(f.hostType())) return true;
+      }
+    }
+
+    return false;
+  }
   /**
    * Creates a qualified expression. This will not be subject to rewriting.
    * @aspect QualifiedNames
@@ -87,83 +104,6 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     dot.setStart(this.getStart());
     dot.setEnd(access.getEnd());
     return dot;
-  }
-  /**
-   * Infer type arguments based on the actual arguments and result assignment type.
-   * @aspect GenericMethodsInference
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:91
-   */
-  public Collection<TypeDecl> computeConstraints(
-      TypeDecl resultType,
-      List<ParameterDeclaration> params,
-      List<Expr> args,
-      List<TypeVariable> typeParams) {
-    Constraints constraints = new Constraints();
-
-    // Store type parameters.
-    for (TypeVariable p : typeParams) {
-      constraints.addTypeVariable(p);
-    }
-
-    // Add initial constraints.
-    for (int i = 0; i < args.getNumChild(); i++) {
-      TypeDecl A = args.getChild(i).type();
-      int index = i >= params.getNumChild() ? params.getNumChild() - 1 : i;
-      TypeDecl F = params.getChild(index).type();
-      if (params.getChild(index) instanceof VariableArityParameterDeclaration
-         && (args.getNumChild() != params.getNumChild() || !A.isArrayDecl())) {
-        F = F.componentType();
-      }
-      constraints.convertibleTo(A, F);
-    }
-
-    if (constraints.rawAccess) {
-      return new ArrayList<TypeDecl>();
-    }
-
-    constraints.resolveEqualityConstraints();
-
-    constraints.resolveSupertypeConstraints();
-
-    if (constraints.unresolvedTypeArguments()) {
-      TypeDecl S = assignConvertedType();
-      if (S.isUnboxedPrimitive()) {
-        S = S.boxed();
-      }
-      TypeDecl R = resultType;
-      if (R.isVoid()) {
-        R = typeObject();
-      }
-      constraints.convertibleFrom(S, R);
-      // Build the last constraints by substituting type bounds using the
-      // already-inferred type variables.
-      Collection<TypeDecl> substArgs = new ArrayList<TypeDecl>();
-      for (TypeVariable p : typeParams) {
-        TypeDecl arg = constraints.constraintsMap.get(p).typeArgument;
-        if (arg != null) {
-          substArgs.add(arg);
-        } else {
-          substArgs.add(p);
-        }
-      }
-      Parameterization partialSubst = new Parameterization(typeParams, substArgs);
-      for (TypeVariable p : typeParams) {
-        if (p.hasTypeBound() && !p.getTypeBound(0).isTypeAccess("java.lang", "Object")) {
-          TypeDecl Bp = constraints.constraintsMap.get(p).typeArgument;
-          if (Bp == null) {
-            Bp = p;
-          }
-          TypeDecl Bi_sub = p.substituted(partialSubst).lowerBound();
-          constraints.convertibleFrom(Bi_sub, p);
-          constraints.convertibleTo(Bp, Bi_sub);
-        }
-      }
-      constraints.resolveEqualityConstraints();
-      constraints.resolveSupertypeConstraints();
-      constraints.resolveSubtypeConstraints();
-    }
-
-    return constraints.typeArguments();
   }
   /**
    * @aspect MethodSignature15
@@ -185,7 +125,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   }
   /**
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1111
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1184
    */
   protected static boolean moreSpecificThan(ConstructorDecl m1, ConstructorDecl m2,
       List<Expr> argList) {
@@ -240,7 +180,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   }
   /**
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1163
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1236
    */
   protected static SimpleSet<ConstructorDecl> mostSpecific(
       SimpleSet<ConstructorDecl> maxSpecific, ConstructorDecl decl, List<Expr> argList) {
@@ -268,69 +208,81 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   }
   /**
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:105
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:132
    */
-  protected soot.Value emitBooleanCondition(Body b) {
+  protected Local emitBooleanCondition(Body b) {
+    assert type().isBoolean();
     //b.setLine(this);
+    Body.Label end_label = newLabel(b);
+
     emitEvalBranch(b);
-    soot.jimple.Stmt end_label = newLabel();
-    b.addLabel(false_label());
+
+    b.addLabel(false_label(b));
     Local result = b.newTemp(soot.BooleanType.v(), this);
     b.add(b.newAssignStmt(result, BooleanType.emitConstant(false, b, this), this));
-    b.add(b.newGotoStmt(end_label, this));
-    b.addLabel(true_label());
+    b.addGoTo(end_label, this);
+
+    b.addLabel(true_label(b));
     b.add(b.newAssignStmt(result, BooleanType.emitConstant(true, b, this), this));
+
     b.addLabel(end_label);
     return result;
   }
   /**
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:158
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:154
    */
-  public void refined_BooleanExpressions_Expr_emitEvalBranch(Body b) {
+  protected void refined_BooleanExpressions_Expr_emitEvalBranch(Body b) {
     //b.setLine(this);
     // const-expr
-    if (isTrue() || isFalse()) {
-      soot.jimple.Stmt lbl = isTrue() ? true_label() : false_label();
-      b.add(b.newGotoStmt(lbl, this));
-      return;
-    }
+    // if (isTrue() || isFalse()) {
+    //   soot.jimple.Stmt lbl = isTrue() ? true_label(b) : false_label(b);
+    //   b.addGoTo(lbl);
+    //   return;
+    // }
 
-    b.add(
-      b.newIfStmt(
-        b.newEqExpr(
-          asImmediate(b, eval(b)),
-          BooleanType.emitConstant(false, b, this),
-          this
-        ),
-        false_label(),
+    b.add(b.newIfStmt(
+      b.newEqExpr(
+        eval(b),
+        BooleanType.emitConstant(false, b, this),
         this
-      )
-    );
-    b.add(b.newGotoStmt(true_label(), this));
+      ),
+      false_label(b).stmt,
+      this
+      ));
+    b.addGoTo(true_label(b), this);
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:53
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:33
    */
-  public soot.Value eval(Body b) {
-    throw new Error("Operation eval not supported for " + getClass().getName());
-  }
+  protected final Value evalAndCast(Body b, TypeDecl castTo)
+  { return type().emitCastTo(b, this, castTo); }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:313
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:36
    */
-  public soot.Value emitStore(Body b, soot.Value lvalue, soot.Value rvalue, ASTNode location) {
+  protected Value eval_fail(String msg)
+  { throw new Error("extendj code-gen error (" + getClass().getName() + "): " + msg); }
+  /**
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:40
+   */
+  protected Value eval_fail_general() { return eval_fail("node type does not generate code"); }
+  /**
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:251
+   */
+  protected void emitStore(Body b, Value lvalue, Value rvalue, ASTNode location) {
     //b.setLine(this);
-    b.add(
-      b.newAssignStmt(
-        lvalue,
-        asLocal(b, rvalue, lvalue.getType()),
-        location
-      )
-    );
-    return rvalue;
+    b.add(b.newAssignStmt(b.chkAssignable(lvalue), rvalue, location));
   }
+  /**
+   * @aspect GenericsCodegen
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:33
+   */
+  protected Value eval_fail_unerased_generics()
+  { return eval_fail("attempted to code-gen non-erased generics"); }
   /**
    * @declaredat ASTNode:1
    */
@@ -369,6 +321,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     unassignedAfter_Variable_reset();
     inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__reset();
     stmtCompatible_reset();
+    boundConstructor_ConstructorDecl_reset();
     compatibleStrictContext_TypeDecl_reset();
     compatibleLooseContext_TypeDecl_reset();
     pertinentToApplicability_Expr_BodyDecl_int_reset();
@@ -378,8 +331,8 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     isNumericExpression_reset();
     isPolyExpression_reset();
     assignConversionTo_TypeDecl_reset();
-    false_label_reset();
-    true_label_reset();
+    false_label_Body_reset();
+    true_label_Body_reset();
     targetType_reset();
     assignmentContext_reset();
     invocationContext_reset();
@@ -388,13 +341,13 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     numericContext_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:50
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:54
    */
   public Expr clone() throws CloneNotSupportedException {
     Expr node = (Expr) super.clone();
@@ -406,7 +359,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:64
+   * @declaredat ASTNode:65
    */
   @Deprecated
   public abstract Expr fullCopy();
@@ -415,7 +368,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:72
+   * @declaredat ASTNode:73
    */
   public abstract Expr treeCopyNoTransform();
   /**
@@ -424,12 +377,101 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:80
+   * @declaredat ASTNode:81
    */
   public abstract Expr treeCopy();
   /**
+   * @aspect LambdaParametersInference
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:715
+   */
+   
+  public Collection<TypeDecl> computeConstraints(
+      TypeDecl resultType,
+      List<ParameterDeclaration> params,
+      List<Expr> args,
+      List<TypeVariable> typeParams) {
+    Constraints constraints = new Constraints();
+
+    // Store type parameters.
+    for (TypeVariable p : typeParams) {
+      constraints.addTypeVariable(p);
+    }
+
+    // Add initial constraints.
+    for (int i = 0; i < args.getNumChild(); i++) {
+      TypeDecl A = args.getChild(i).type();
+      int index = i >= params.getNumChild() ? params.getNumChild() - 1 : i;
+      TypeDecl F = params.getChild(index).type();
+      if (params.getChild(index) instanceof VariableArityParameterDeclaration
+         && (args.getNumChild() != params.getNumChild() || !A.isArrayDecl())) {
+        F = F.componentType();
+      }
+      constraints.convertibleTo(A, F);
+    }
+
+    if (constraints.rawAccess) {
+      return new ArrayList<TypeDecl>();
+    }
+
+    TypeDecl ret = targetType();
+    if (!ret.isNull() && !ret.isUnknown()) {
+      if (ret.isPrimitiveType()) {
+        ret = ret.boxed();
+      }
+      //System.out.println("=========");
+      //System.out.println("method: " + toString());
+      //System.out.println("targetType: " + ret.typeName());
+      //System.out.println("BEFORE: " + constraints);
+      constraints.convertibleFrom(ret, resultType);
+      //System.out.println("AFTER: " + constraints);
+    }
+
+    constraints.resolveEqualityConstraints();
+    constraints.resolveSupertypeConstraints();
+
+    if (constraints.unresolvedTypeArguments()) {
+      TypeDecl S = assignConvertedType();
+      if (S.isUnboxedPrimitive()) {
+        S = S.boxed();
+      }
+      TypeDecl R = resultType;
+      if (R.isVoid()) {
+        R = typeObject();
+      }
+      constraints.convertibleFrom(S, R);
+      // Build the last constraints by substituting type bounds using the
+      // already-inferred type variables.
+      Collection<TypeDecl> substArgs = new ArrayList<TypeDecl>();
+      for (TypeVariable p : typeParams) {
+        TypeDecl arg = constraints.constraintsMap.get(p).typeArgument;
+        if (arg != null) {
+          substArgs.add(arg);
+        } else {
+          substArgs.add(p);
+        }
+      }
+      Parameterization partialSubst = new Parameterization(typeParams, substArgs);
+      for (TypeVariable p : typeParams) {
+        if (p.hasTypeBound() && !p.getTypeBound(0).isTypeAccess("java.lang", "Object")) {
+          TypeDecl Bp = constraints.constraintsMap.get(p).typeArgument;
+          if (Bp == null) {
+            Bp = p;
+          }
+          TypeDecl Bi_sub = p.substituted(partialSubst).lowerBound();
+          constraints.convertibleFrom(Bi_sub, p);
+          constraints.convertibleTo(Bp, Bi_sub);
+        }
+      }
+      constraints.resolveEqualityConstraints();
+      constraints.resolveSupertypeConstraints();
+      constraints.resolveSubtypeConstraints();
+    }
+
+    return constraints.typeArguments();
+  }
+  /**
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:964
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:1033
    */
    
   protected SimpleSet<ConstructorDecl> chooseConstructor(
@@ -455,7 +497,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     // First phase.
     SimpleSet<ConstructorDecl> maxSpecific = emptySet();
     for (ConstructorDecl decl : potentiallyApplicable) {
-      if (decl.applicableByStrictInvocation(this, argList)) {
+      if (boundConstructor(decl).applicableByStrictInvocation(this)) {
         maxSpecific = mostSpecific(maxSpecific, decl, argList);
       }
     }
@@ -463,7 +505,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     // Second phase.
     if (maxSpecific.isEmpty()) {
       for (ConstructorDecl decl : potentiallyApplicable) {
-        if (decl.applicableByLooseInvocation(this, argList)) {
+        if (boundConstructor(decl).applicableByLooseInvocation(this)) {
           maxSpecific = mostSpecific(maxSpecific, decl, argList);
         }
       }
@@ -472,7 +514,8 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     // Third phase.
     if (maxSpecific.isEmpty()) {
       for (ConstructorDecl decl : potentiallyApplicable) {
-        if (decl.isVariableArity() && decl.applicableByVariableArityInvocation(this, argList)) {
+        if (decl.isVariableArity()
+            && boundConstructor(decl).applicableByVariableArityInvocation(this)) {
           maxSpecific = mostSpecific(maxSpecific, decl, argList);
         }
       }
@@ -481,10 +524,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   }
   /**
    * @aspect AutoBoxingCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/AutoBoxingCodegen.jrag:120
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/AutoBoxingCodegen.jrag:122
    */
    
-  public void emitEvalBranch(Body b) {
+  protected void emitEvalBranch(Body b) {
     if (!type().isReferenceType()) {
       refined_BooleanExpressions_Expr_emitEvalBranch(b);
       return;
@@ -494,24 +537,32 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     b.add(
       b.newIfStmt(
         b.newEqExpr(
-          asImmediate(b, ((ReferenceType)type()).emitUnboxingOperation(b, eval(b), this)),
+          ((ReferenceType)type()).emitUnboxingOperation(b, eval(b), this),
           BooleanType.emitConstant(false, b, this),
           this
         ),
-        false_label(),
+        false_label(b).stmt,
         this
       )
     );
-    b.add(b.newGotoStmt(true_label(), this));
+    b.addGoTo(true_label(b), this);
   }
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public abstract TypeDecl type();
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public abstract Value eval(Body b);
   /**
    * @attribute syn
    * @aspect ConstantExpression
@@ -645,27 +696,27 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   public boolean unassignedAfterFalse(Variable v) {
     Object _parameters = v;
     if (unassignedAfterFalse_Variable_values == null) unassignedAfterFalse_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterFalse_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterFalse_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterFalse_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterFalse_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterFalse_Variable_value = isTrue() || unassignedAfter(v);
-        if (new_unassignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterFalse_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterFalse_Variable_value;
         }
@@ -677,7 +728,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterFalse_Variable_value = isTrue() || unassignedAfter(v);
-      if (new_unassignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterFalse_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterFalse_Variable_value;
       }
@@ -696,27 +747,27 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   public boolean unassignedAfterTrue(Variable v) {
     Object _parameters = v;
     if (unassignedAfterTrue_Variable_values == null) unassignedAfterTrue_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterTrue_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterTrue_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterTrue_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterTrue_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterTrue_Variable_value = isFalse() || unassignedAfter(v);
-        if (new_unassignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterTrue_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterTrue_Variable_value;
         }
@@ -728,7 +779,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterTrue_Variable_value = isFalse() || unassignedAfter(v);
-      if (new_unassignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterTrue_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterTrue_Variable_value;
       }
@@ -747,27 +798,27 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = unassignedBefore(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -779,7 +830,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = unassignedBefore(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -832,10 +883,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupFullyQualifiedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:106
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:110
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupFullyQualifiedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:106")
+  @ASTNodeAnnotation.Source(aspect="LookupFullyQualifiedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:110")
   public boolean hasQualifiedPackage(String packageName) {
     boolean hasQualifiedPackage_String_value = false;
     return hasQualifiedPackage_String_value;
@@ -843,10 +894,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:608
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:612
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:608")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:612")
   public SimpleSet<TypeDecl> qualifiedLookupType(String name) {
     SimpleSet<TypeDecl> qualifiedLookupType_String_value = keepAccessibleTypes(type().memberTypes(name));
     return qualifiedLookupType_String_value;
@@ -1048,21 +1099,33 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:493
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:313
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:493")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:313")
   public boolean isParseName() {
     boolean isParseName_value = false;
     return isParseName_value;
   }
   /**
+   * Test if an expression contains an unresolved parse name.
    * @attribute syn
-   * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:563
+   * @aspect NameResolution
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:563")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421")
+  public boolean containsParseName() {
+    boolean containsParseName_value = false;
+    return containsParseName_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect NestedTypes
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:559
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:559")
   public Stmt enclosingStmt() {
     {
         ASTNode node = this;
@@ -1097,10 +1160,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeHierarchyCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:224
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:240
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:224")
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:240")
   public boolean staticContextQualifier() {
     boolean staticContextQualifier_value = false;
     return staticContextQualifier_value;
@@ -1108,10 +1171,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Enums
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:663
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:645
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:663")
+  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:645")
   public boolean isEnumConstant() {
     boolean isEnumConstant_value = false;
     return isEnumConstant_value;
@@ -1119,17 +1182,17 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1605
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1604
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1605")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1604")
   public Expr erasedCopy() {
     Expr erasedCopy_value = treeCopyNoTransform();
     return erasedCopy_value;
   }
   /** @apilevel internal */
   private void inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__reset() {
-    inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed = new java.util.HashMap(4);
+    inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed = null;
     inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values = null;
   }
   /** @apilevel internal */
@@ -1140,10 +1203,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    * Infers type arguments for a generic method invocation.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:452
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:545
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:452")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:545")
   public ArrayList<TypeDecl> inferTypeArguments(TypeDecl resultType, List<ParameterDeclaration> params, List<Expr> args, List<TypeVariable> typeParams) {
     java.util.List _parameters = new java.util.ArrayList(4);
     _parameters.add(resultType);
@@ -1152,10 +1215,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     _parameters.add(typeParams);
     if (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed == null) inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed = new java.util.HashMap(4);
     if (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values == null) inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values.containsKey(_parameters) && inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed != null
+    ASTState state = state();
+    if (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values.containsKey(_parameters)
         && inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.containsKey(_parameters)
-        && (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.get(_parameters) == ASTNode$State.NON_CYCLE || inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.get(_parameters) == state().cycle())) {
+        && (inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.get(_parameters) == ASTState.NON_CYCLE || inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.get(_parameters) == state().cycle())) {
       return (ArrayList<TypeDecl>) inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values.get(_parameters);
     }
     ArrayList<TypeDecl> inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__value = inferTypeArguments_compute(resultType, params, args, typeParams);
@@ -1165,7 +1228,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     
     } else {
       inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__values.put(_parameters, inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__value);
-      inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return inferTypeArguments_TypeDecl_List_ParameterDeclaration__List_Expr__List_TypeVariable__value;
@@ -1178,15 +1241,19 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
           params,
           args,
           typeParams);
+      Set<TypeVariable> typeVars = new HashSet<TypeVariable>();
+      for (TypeVariable var : typeParams) {
+        typeVars.add(var);
+      }
       if (arguments.isEmpty()) {
         return typeArguments;
       }
       int i = 0;
       for (TypeDecl type : arguments) {
-        if (type == null) {
+        if (type == null || type.isUnknown()) {
           TypeVariable v = typeParams.getChild(i);
           type = v.firstBound();
-        } else if (type.isTypeVariable()) {
+        } else if (typeVars.contains(type)) {
           TypeVariable v = (TypeVariable) type;
           // Replace the type variable if it is not defined in an outer scope.
           // This is needed for handling constructor reference type inference (in Java 8).
@@ -1247,7 +1314,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     stmtCompatible_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle stmtCompatible_computed = null;
+  protected ASTState.Cycle stmtCompatible_computed = null;
 
   /** @apilevel internal */
   protected boolean stmtCompatible_value;
@@ -1255,13 +1322,13 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect StmtCompatible
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:141
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:145
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:141")
+  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:145")
   public boolean stmtCompatible() {
-    ASTNode$State state = state();
-    if (stmtCompatible_computed == ASTNode$State.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
+    ASTState state = state();
+    if (stmtCompatible_computed == ASTState.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
       return stmtCompatible_value;
     }
     stmtCompatible_value = false;
@@ -1269,14 +1336,59 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
       stmtCompatible_computed = state().cycle();
     
     } else {
-      stmtCompatible_computed = ASTNode$State.NON_CYCLE;
+      stmtCompatible_computed = ASTState.NON_CYCLE;
     
     }
     return stmtCompatible_value;
   }
   /** @apilevel internal */
+  private void boundConstructor_ConstructorDecl_reset() {
+    boundConstructor_ConstructorDecl_values = null;
+    boundConstructor_ConstructorDecl_proxy = null;
+  }
+  /** @apilevel internal */
+  protected ASTNode boundConstructor_ConstructorDecl_proxy;
+  /** @apilevel internal */
+  protected java.util.Map boundConstructor_ConstructorDecl_values;
+
+  /**
+   * @attribute syn
+   * @aspect MethodSignature18
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:56
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:56")
+  public ConstructorAccess boundConstructor(ConstructorDecl decl) {
+    Object _parameters = decl;
+    if (boundConstructor_ConstructorDecl_values == null) boundConstructor_ConstructorDecl_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (boundConstructor_ConstructorDecl_values.containsKey(_parameters)) {
+      return (ConstructorAccess) boundConstructor_ConstructorDecl_values.get(_parameters);
+    }
+    state().enterLazyAttribute();
+    ConstructorAccess boundConstructor_ConstructorDecl_value = boundConstructor_compute(decl);
+    if (boundConstructor_ConstructorDecl_proxy == null) {
+      boundConstructor_ConstructorDecl_proxy = new ASTNode();
+      boundConstructor_ConstructorDecl_proxy.setParent(this);
+    }
+    if (boundConstructor_ConstructorDecl_value != null) {
+      boundConstructor_ConstructorDecl_value.setParent(boundConstructor_ConstructorDecl_proxy);
+      if (boundConstructor_ConstructorDecl_value.mayHaveRewrite()) {
+        boundConstructor_ConstructorDecl_value = (ConstructorAccess) boundConstructor_ConstructorDecl_value.rewrittenNode();
+        boundConstructor_ConstructorDecl_value.setParent(boundConstructor_ConstructorDecl_proxy);
+      }
+    }
+    boundConstructor_ConstructorDecl_values.put(_parameters, boundConstructor_ConstructorDecl_value);
+    state().leaveLazyAttribute();
+    return boundConstructor_ConstructorDecl_value;
+  }
+  /** @apilevel internal */
+  private ConstructorAccess boundConstructor_compute(ConstructorDecl decl) {
+      throw new Error("can not create a synthetic constructor for this expression: " + this);
+    }
+  /** @apilevel internal */
   private void compatibleStrictContext_TypeDecl_reset() {
-    compatibleStrictContext_TypeDecl_computed = new java.util.HashMap(4);
+    compatibleStrictContext_TypeDecl_computed = null;
     compatibleStrictContext_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1286,18 +1398,18 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /** Used to compute compatibility during phase 1 of overload resolution. 
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:50
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:91
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:50")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:91")
   public boolean compatibleStrictContext(TypeDecl type) {
     Object _parameters = type;
     if (compatibleStrictContext_TypeDecl_computed == null) compatibleStrictContext_TypeDecl_computed = new java.util.HashMap(4);
     if (compatibleStrictContext_TypeDecl_values == null) compatibleStrictContext_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (compatibleStrictContext_TypeDecl_values.containsKey(_parameters) && compatibleStrictContext_TypeDecl_computed != null
+    ASTState state = state();
+    if (compatibleStrictContext_TypeDecl_values.containsKey(_parameters)
         && compatibleStrictContext_TypeDecl_computed.containsKey(_parameters)
-        && (compatibleStrictContext_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || compatibleStrictContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (compatibleStrictContext_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || compatibleStrictContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) compatibleStrictContext_TypeDecl_values.get(_parameters);
     }
     boolean compatibleStrictContext_TypeDecl_value = type().subtype(type);
@@ -1307,14 +1419,14 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     
     } else {
       compatibleStrictContext_TypeDecl_values.put(_parameters, compatibleStrictContext_TypeDecl_value);
-      compatibleStrictContext_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      compatibleStrictContext_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return compatibleStrictContext_TypeDecl_value;
   }
   /** @apilevel internal */
   private void compatibleLooseContext_TypeDecl_reset() {
-    compatibleLooseContext_TypeDecl_computed = new java.util.HashMap(4);
+    compatibleLooseContext_TypeDecl_computed = null;
     compatibleLooseContext_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1324,18 +1436,18 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:94
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:135
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:94")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:135")
   public boolean compatibleLooseContext(TypeDecl type) {
     Object _parameters = type;
     if (compatibleLooseContext_TypeDecl_computed == null) compatibleLooseContext_TypeDecl_computed = new java.util.HashMap(4);
     if (compatibleLooseContext_TypeDecl_values == null) compatibleLooseContext_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (compatibleLooseContext_TypeDecl_values.containsKey(_parameters) && compatibleLooseContext_TypeDecl_computed != null
+    ASTState state = state();
+    if (compatibleLooseContext_TypeDecl_values.containsKey(_parameters)
         && compatibleLooseContext_TypeDecl_computed.containsKey(_parameters)
-        && (compatibleLooseContext_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || compatibleLooseContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (compatibleLooseContext_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || compatibleLooseContext_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) compatibleLooseContext_TypeDecl_values.get(_parameters);
     }
     boolean compatibleLooseContext_TypeDecl_value = type().methodInvocationConversionTo(type)
@@ -1346,14 +1458,14 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     
     } else {
       compatibleLooseContext_TypeDecl_values.put(_parameters, compatibleLooseContext_TypeDecl_value);
-      compatibleLooseContext_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      compatibleLooseContext_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return compatibleLooseContext_TypeDecl_value;
   }
   /** @apilevel internal */
   private void pertinentToApplicability_Expr_BodyDecl_int_reset() {
-    pertinentToApplicability_Expr_BodyDecl_int_computed = new java.util.HashMap(4);
+    pertinentToApplicability_Expr_BodyDecl_int_computed = null;
     pertinentToApplicability_Expr_BodyDecl_int_values = null;
   }
   /** @apilevel internal */
@@ -1363,10 +1475,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:122
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:163
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:122")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:163")
   public boolean pertinentToApplicability(Expr access, BodyDecl decl, int argIndex) {
     java.util.List _parameters = new java.util.ArrayList(3);
     _parameters.add(access);
@@ -1374,10 +1486,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     _parameters.add(argIndex);
     if (pertinentToApplicability_Expr_BodyDecl_int_computed == null) pertinentToApplicability_Expr_BodyDecl_int_computed = new java.util.HashMap(4);
     if (pertinentToApplicability_Expr_BodyDecl_int_values == null) pertinentToApplicability_Expr_BodyDecl_int_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (pertinentToApplicability_Expr_BodyDecl_int_values.containsKey(_parameters) && pertinentToApplicability_Expr_BodyDecl_int_computed != null
+    ASTState state = state();
+    if (pertinentToApplicability_Expr_BodyDecl_int_values.containsKey(_parameters)
         && pertinentToApplicability_Expr_BodyDecl_int_computed.containsKey(_parameters)
-        && (pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == ASTNode$State.NON_CYCLE || pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == state().cycle())) {
+        && (pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == ASTState.NON_CYCLE || pertinentToApplicability_Expr_BodyDecl_int_computed.get(_parameters) == state().cycle())) {
       return (Boolean) pertinentToApplicability_Expr_BodyDecl_int_values.get(_parameters);
     }
     boolean pertinentToApplicability_Expr_BodyDecl_int_value = true;
@@ -1387,14 +1499,14 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     
     } else {
       pertinentToApplicability_Expr_BodyDecl_int_values.put(_parameters, pertinentToApplicability_Expr_BodyDecl_int_value);
-      pertinentToApplicability_Expr_BodyDecl_int_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      pertinentToApplicability_Expr_BodyDecl_int_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return pertinentToApplicability_Expr_BodyDecl_int_value;
   }
   /** @apilevel internal */
   private void moreSpecificThan_TypeDecl_TypeDecl_reset() {
-    moreSpecificThan_TypeDecl_TypeDecl_computed = new java.util.HashMap(4);
+    moreSpecificThan_TypeDecl_TypeDecl_computed = null;
     moreSpecificThan_TypeDecl_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1408,20 +1520,20 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    * @return {@code true} if type1 is more specific than type2, {@code false} otherwise
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:248
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:289
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:248")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:289")
   public boolean moreSpecificThan(TypeDecl type1, TypeDecl type2) {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(type1);
     _parameters.add(type2);
     if (moreSpecificThan_TypeDecl_TypeDecl_computed == null) moreSpecificThan_TypeDecl_TypeDecl_computed = new java.util.HashMap(4);
     if (moreSpecificThan_TypeDecl_TypeDecl_values == null) moreSpecificThan_TypeDecl_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (moreSpecificThan_TypeDecl_TypeDecl_values.containsKey(_parameters) && moreSpecificThan_TypeDecl_TypeDecl_computed != null
+    ASTState state = state();
+    if (moreSpecificThan_TypeDecl_TypeDecl_values.containsKey(_parameters)
         && moreSpecificThan_TypeDecl_TypeDecl_computed.containsKey(_parameters)
-        && (moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || moreSpecificThan_TypeDecl_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) moreSpecificThan_TypeDecl_TypeDecl_values.get(_parameters);
     }
     boolean moreSpecificThan_TypeDecl_TypeDecl_value = type1.instanceOf(type2) || type1.withinBounds(type2);
@@ -1431,14 +1543,14 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     
     } else {
       moreSpecificThan_TypeDecl_TypeDecl_values.put(_parameters, moreSpecificThan_TypeDecl_TypeDecl_value);
-      moreSpecificThan_TypeDecl_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      moreSpecificThan_TypeDecl_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return moreSpecificThan_TypeDecl_TypeDecl_value;
   }
   /** @apilevel internal */
   private void potentiallyCompatible_TypeDecl_BodyDecl_reset() {
-    potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
+    potentiallyCompatible_TypeDecl_BodyDecl_computed = null;
     potentiallyCompatible_TypeDecl_BodyDecl_values = null;
   }
   /** @apilevel internal */
@@ -1448,20 +1560,20 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:503")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:544")
   public boolean potentiallyCompatible(TypeDecl type, BodyDecl candidateDecl) {
     java.util.List _parameters = new java.util.ArrayList(2);
     _parameters.add(type);
     _parameters.add(candidateDecl);
     if (potentiallyCompatible_TypeDecl_BodyDecl_computed == null) potentiallyCompatible_TypeDecl_BodyDecl_computed = new java.util.HashMap(4);
     if (potentiallyCompatible_TypeDecl_BodyDecl_values == null) potentiallyCompatible_TypeDecl_BodyDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters) && potentiallyCompatible_TypeDecl_BodyDecl_computed != null
+    ASTState state = state();
+    if (potentiallyCompatible_TypeDecl_BodyDecl_values.containsKey(_parameters)
         && potentiallyCompatible_TypeDecl_BodyDecl_computed.containsKey(_parameters)
-        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
+        && (potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == ASTState.NON_CYCLE || potentiallyCompatible_TypeDecl_BodyDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) potentiallyCompatible_TypeDecl_BodyDecl_values.get(_parameters);
     }
     boolean potentiallyCompatible_TypeDecl_BodyDecl_value = true;
@@ -1471,7 +1583,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     
     } else {
       potentiallyCompatible_TypeDecl_BodyDecl_values.put(_parameters, potentiallyCompatible_TypeDecl_BodyDecl_value);
-      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      potentiallyCompatible_TypeDecl_BodyDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return potentiallyCompatible_TypeDecl_BodyDecl_value;
@@ -1481,7 +1593,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     isBooleanExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isBooleanExpression_computed = null;
+  protected ASTState.Cycle isBooleanExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isBooleanExpression_value;
@@ -1494,8 +1606,8 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:29")
   public boolean isBooleanExpression() {
-    ASTNode$State state = state();
-    if (isBooleanExpression_computed == ASTNode$State.NON_CYCLE || isBooleanExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isBooleanExpression_computed == ASTState.NON_CYCLE || isBooleanExpression_computed == state().cycle()) {
       return isBooleanExpression_value;
     }
     isBooleanExpression_value = !isPolyExpression() && type().isBoolean();
@@ -1503,7 +1615,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
       isBooleanExpression_computed = state().cycle();
     
     } else {
-      isBooleanExpression_computed = ASTNode$State.NON_CYCLE;
+      isBooleanExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isBooleanExpression_value;
@@ -1513,7 +1625,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     isNumericExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isNumericExpression_computed = null;
+  protected ASTState.Cycle isNumericExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isNumericExpression_value;
@@ -1526,8 +1638,8 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:60")
   public boolean isNumericExpression() {
-    ASTNode$State state = state();
-    if (isNumericExpression_computed == ASTNode$State.NON_CYCLE || isNumericExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isNumericExpression_computed == ASTState.NON_CYCLE || isNumericExpression_computed == state().cycle()) {
       return isNumericExpression_value;
     }
     isNumericExpression_value = !isPolyExpression() && type().isNumericType();
@@ -1535,7 +1647,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
       isNumericExpression_computed = state().cycle();
     
     } else {
-      isNumericExpression_computed = ASTNode$State.NON_CYCLE;
+      isNumericExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isNumericExpression_value;
@@ -1556,7 +1668,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     isPolyExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isPolyExpression_computed = null;
+  protected ASTState.Cycle isPolyExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isPolyExpression_value;
@@ -1569,8 +1681,8 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:86")
   public boolean isPolyExpression() {
-    ASTNode$State state = state();
-    if (isPolyExpression_computed == ASTNode$State.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isPolyExpression_computed == ASTState.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
       return isPolyExpression_value;
     }
     isPolyExpression_value = false;
@@ -1578,14 +1690,14 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
       isPolyExpression_computed = state().cycle();
     
     } else {
-      isPolyExpression_computed = ASTNode$State.NON_CYCLE;
+      isPolyExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isPolyExpression_value;
   }
   /** @apilevel internal */
   private void assignConversionTo_TypeDecl_reset() {
-    assignConversionTo_TypeDecl_computed = new java.util.HashMap(4);
+    assignConversionTo_TypeDecl_computed = null;
     assignConversionTo_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1603,10 +1715,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     Object _parameters = type;
     if (assignConversionTo_TypeDecl_computed == null) assignConversionTo_TypeDecl_computed = new java.util.HashMap(4);
     if (assignConversionTo_TypeDecl_values == null) assignConversionTo_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (assignConversionTo_TypeDecl_values.containsKey(_parameters) && assignConversionTo_TypeDecl_computed != null
+    ASTState state = state();
+    if (assignConversionTo_TypeDecl_values.containsKey(_parameters)
         && assignConversionTo_TypeDecl_computed.containsKey(_parameters)
-        && (assignConversionTo_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || assignConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (assignConversionTo_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || assignConversionTo_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) assignConversionTo_TypeDecl_values.get(_parameters);
     }
     boolean assignConversionTo_TypeDecl_value = type().assignConversionTo(type, this);
@@ -1616,84 +1728,105 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     
     } else {
       assignConversionTo_TypeDecl_values.put(_parameters, assignConversionTo_TypeDecl_value);
-      assignConversionTo_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      assignConversionTo_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return assignConversionTo_TypeDecl_value;
   }
   /** @apilevel internal */
-  private void false_label_reset() {
-    false_label_computed = null;
-    false_label_value = null;
+  private void false_label_Body_reset() {
+    false_label_Body_computed = null;
+    false_label_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle false_label_computed = null;
-
+  protected java.util.Map false_label_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt false_label_value;
-
+  protected java.util.Map false_label_Body_computed;
   /**
    * @attribute syn
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:16
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:17
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:16")
-  public soot.jimple.Stmt false_label() {
-    ASTNode$State state = state();
-    if (false_label_computed == ASTNode$State.NON_CYCLE || false_label_computed == state().cycle()) {
-      return false_label_value;
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:17")
+  public Body.Label false_label(Body b) {
+    Object _parameters = b;
+    if (false_label_Body_computed == null) false_label_Body_computed = new java.util.HashMap(4);
+    if (false_label_Body_values == null) false_label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (false_label_Body_values.containsKey(_parameters)
+        && false_label_Body_computed.containsKey(_parameters)
+        && (false_label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || false_label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) false_label_Body_values.get(_parameters);
     }
-    false_label_value = getParent().definesLabel() ? condition_false_label() : newLabel();
+    Body.Label false_label_Body_value = getParent().definesLabel() ? condition_false_label(b) : newLabel(b);
     if (state().inCircle()) {
-      false_label_computed = state().cycle();
+      false_label_Body_values.put(_parameters, false_label_Body_value);
+      false_label_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      false_label_computed = ASTNode$State.NON_CYCLE;
+      false_label_Body_values.put(_parameters, false_label_Body_value);
+      false_label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return false_label_value;
+    return false_label_Body_value;
   }
   /** @apilevel internal */
-  private void true_label_reset() {
-    true_label_computed = null;
-    true_label_value = null;
+  private void true_label_Body_reset() {
+    true_label_Body_computed = null;
+    true_label_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle true_label_computed = null;
-
+  protected java.util.Map true_label_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt true_label_value;
-
+  protected java.util.Map true_label_Body_computed;
   /**
    * @attribute syn
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:18
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:20
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:18")
-  public soot.jimple.Stmt true_label() {
-    ASTNode$State state = state();
-    if (true_label_computed == ASTNode$State.NON_CYCLE || true_label_computed == state().cycle()) {
-      return true_label_value;
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:20")
+  public Body.Label true_label(Body b) {
+    Object _parameters = b;
+    if (true_label_Body_computed == null) true_label_Body_computed = new java.util.HashMap(4);
+    if (true_label_Body_values == null) true_label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (true_label_Body_values.containsKey(_parameters)
+        && true_label_Body_computed.containsKey(_parameters)
+        && (true_label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || true_label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) true_label_Body_values.get(_parameters);
     }
-    true_label_value = getParent().definesLabel() ? condition_true_label() : newLabel();
+    Body.Label true_label_Body_value = getParent().definesLabel() ? condition_true_label(b)  : newLabel(b);
     if (state().inCircle()) {
-      true_label_computed = state().cycle();
+      true_label_Body_values.put(_parameters, true_label_Body_value);
+      true_label_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      true_label_computed = ASTNode$State.NON_CYCLE;
+      true_label_Body_values.put(_parameters, true_label_Body_value);
+      true_label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return true_label_value;
+    return true_label_Body_value;
   }
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:778
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:73
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:778")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:73")
+  public soot.Type sootType() {
+    soot.Type sootType_value = type().sootType();
+    return sootType_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:421
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:421")
   public int srcSpanStart() {
     int srcSpanStart_value = recursiveSpanStart();
     return srcSpanStart_value;
@@ -1701,10 +1834,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect EmitJimple
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:779
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:422
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:779")
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:422")
   public int srcSpanEnd() {
     int srcSpanEnd_value = recursiveSpanEnd();
     return srcSpanEnd_value;
@@ -1712,10 +1845,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:37
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:17
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:37")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:17")
   public MethodDecl stringBufferAppendMethodForType(TypeDecl arg) {
     {
         TypeDecl  sb          = lookupType("java.lang", "StringBuffer");
@@ -1803,57 +1936,13 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    * scope or a qualified scope.
    * @attribute inh
    * @aspect LookupMethod
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:84
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:111
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:84")
+  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:111")
   public Collection<MethodDecl> lookupMethod(String name) {
     Collection<MethodDecl> lookupMethod_String_value = getParent().Define_lookupMethod(this, null, name);
     return lookupMethod_String_value;
-  }
-  /**
-   * @attribute inh
-   * @aspect SpecialClasses
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:74
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:74")
-  public TypeDecl typeBoolean() {
-    TypeDecl typeBoolean_value = getParent().Define_typeBoolean(this, null);
-    return typeBoolean_value;
-  }
-  /**
-   * @attribute inh
-   * @aspect SpecialClasses
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:75
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:75")
-  public TypeDecl typeByte() {
-    TypeDecl typeByte_value = getParent().Define_typeByte(this, null);
-    return typeByte_value;
-  }
-  /**
-   * @attribute inh
-   * @aspect SpecialClasses
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:76
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:76")
-  public TypeDecl typeShort() {
-    TypeDecl typeShort_value = getParent().Define_typeShort(this, null);
-    return typeShort_value;
-  }
-  /**
-   * @attribute inh
-   * @aspect SpecialClasses
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:77
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:77")
-  public TypeDecl typeChar() {
-    TypeDecl typeChar_value = getParent().Define_typeChar(this, null);
-    return typeChar_value;
   }
   /**
    * @attribute inh
@@ -1862,9 +1951,9 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:78")
-  public TypeDecl typeInt() {
-    TypeDecl typeInt_value = getParent().Define_typeInt(this, null);
-    return typeInt_value;
+  public TypeDecl typeBoolean() {
+    TypeDecl typeBoolean_value = getParent().Define_typeBoolean(this, null);
+    return typeBoolean_value;
   }
   /**
    * @attribute inh
@@ -1873,9 +1962,9 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:79")
-  public TypeDecl typeLong() {
-    TypeDecl typeLong_value = getParent().Define_typeLong(this, null);
-    return typeLong_value;
+  public TypeDecl typeByte() {
+    TypeDecl typeByte_value = getParent().Define_typeByte(this, null);
+    return typeByte_value;
   }
   /**
    * @attribute inh
@@ -1884,9 +1973,9 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:80")
-  public TypeDecl typeFloat() {
-    TypeDecl typeFloat_value = getParent().Define_typeFloat(this, null);
-    return typeFloat_value;
+  public TypeDecl typeShort() {
+    TypeDecl typeShort_value = getParent().Define_typeShort(this, null);
+    return typeShort_value;
   }
   /**
    * @attribute inh
@@ -1895,9 +1984,9 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:81")
-  public TypeDecl typeDouble() {
-    TypeDecl typeDouble_value = getParent().Define_typeDouble(this, null);
-    return typeDouble_value;
+  public TypeDecl typeChar() {
+    TypeDecl typeChar_value = getParent().Define_typeChar(this, null);
+    return typeChar_value;
   }
   /**
    * @attribute inh
@@ -1906,9 +1995,9 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:82")
-  public TypeDecl typeString() {
-    TypeDecl typeString_value = getParent().Define_typeString(this, null);
-    return typeString_value;
+  public TypeDecl typeInt() {
+    TypeDecl typeInt_value = getParent().Define_typeInt(this, null);
+    return typeInt_value;
   }
   /**
    * @attribute inh
@@ -1917,9 +2006,9 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:83")
-  public TypeDecl typeVoid() {
-    TypeDecl typeVoid_value = getParent().Define_typeVoid(this, null);
-    return typeVoid_value;
+  public TypeDecl typeLong() {
+    TypeDecl typeLong_value = getParent().Define_typeLong(this, null);
+    return typeLong_value;
   }
   /**
    * @attribute inh
@@ -1928,6 +2017,50 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:84")
+  public TypeDecl typeFloat() {
+    TypeDecl typeFloat_value = getParent().Define_typeFloat(this, null);
+    return typeFloat_value;
+  }
+  /**
+   * @attribute inh
+   * @aspect SpecialClasses
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:85
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
+  @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:85")
+  public TypeDecl typeDouble() {
+    TypeDecl typeDouble_value = getParent().Define_typeDouble(this, null);
+    return typeDouble_value;
+  }
+  /**
+   * @attribute inh
+   * @aspect SpecialClasses
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:86
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
+  @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:86")
+  public TypeDecl typeString() {
+    TypeDecl typeString_value = getParent().Define_typeString(this, null);
+    return typeString_value;
+  }
+  /**
+   * @attribute inh
+   * @aspect SpecialClasses
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:87
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
+  @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:87")
+  public TypeDecl typeVoid() {
+    TypeDecl typeVoid_value = getParent().Define_typeVoid(this, null);
+    return typeVoid_value;
+  }
+  /**
+   * @attribute inh
+   * @aspect SpecialClasses
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:88
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
+  @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:88")
   public TypeDecl typeNull() {
     TypeDecl typeNull_value = getParent().Define_typeNull(this, null);
     return typeNull_value;
@@ -1935,10 +2068,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect SpecialClasses
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:97
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:101
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:97")
+  @ASTNodeAnnotation.Source(aspect="SpecialClasses", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:101")
   public TypeDecl unknownType() {
     TypeDecl unknownType_value = getParent().Define_unknownType(this, null);
     return unknownType_value;
@@ -1946,10 +2079,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect LookupFullyQualifiedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:109
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupFullyQualifiedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:109")
+  @ASTNodeAnnotation.Source(aspect="LookupFullyQualifiedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113")
   public boolean hasPackage(String packageName) {
     boolean hasPackage_String_value = getParent().Define_hasPackage(this, null, packageName);
     return hasPackage_String_value;
@@ -1957,10 +2090,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect LookupFullyQualifiedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:123
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:127
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupFullyQualifiedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:123")
+  @ASTNodeAnnotation.Source(aspect="LookupFullyQualifiedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:127")
   public TypeDecl lookupType(String packageName, String typeName) {
     TypeDecl lookupType_String_String_value = getParent().Define_lookupType(this, null, packageName, typeName);
     return lookupType_String_String_value;
@@ -1968,10 +2101,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect TypeScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:397
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:401
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:397")
+  @ASTNodeAnnotation.Source(aspect="TypeScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupType.jrag:401")
   public SimpleSet<TypeDecl> lookupType(String name) {
     SimpleSet<TypeDecl> lookupType_String_value = getParent().Define_lookupType(this, null, name);
     return lookupType_String_value;
@@ -2057,10 +2190,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:571
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:567
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:571")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:567")
   public BodyDecl enclosingBodyDecl() {
     BodyDecl enclosingBodyDecl_value = getParent().Define_enclosingBodyDecl(this, null);
     return enclosingBodyDecl_value;
@@ -2068,10 +2201,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:640
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:636
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:640")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:636")
   public String hostPackage() {
     String hostPackage_value = getParent().Define_hostPackage(this, null);
     return hostPackage_value;
@@ -2079,10 +2212,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:657
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:653
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:657")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:653")
   public TypeDecl hostType() {
     TypeDecl hostType_value = getParent().Define_hostType(this, null);
     return hostType_value;
@@ -2101,10 +2234,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect TypeHierarchyCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:207
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:207")
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223")
   public boolean inStaticContext() {
     boolean inStaticContext_value = getParent().Define_inStaticContext(this, null);
     return inStaticContext_value;
@@ -2125,10 +2258,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect GenericMethodsInference
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:86
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:97
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="GenericMethodsInference", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:86")
+  @ASTNodeAnnotation.Source(aspect="GenericMethodsInference", declaredAt="/home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:97")
   public TypeDecl typeObject() {
     TypeDecl typeObject_value = getParent().Define_typeObject(this, null);
     return typeObject_value;
@@ -2148,57 +2281,75 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    * @return the directly enclosing block of this statement.
    * @attribute inh
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:426
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:519
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:426")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:519")
   public Block enclosingBlock() {
     Block enclosingBlock_value = getParent().Define_enclosingBlock(this, null);
     return enclosingBlock_value;
   }
-  /**
-   * @attribute inh
-   * @aspect TargetType
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH, isCircular=true)
   @ASTNodeAnnotation.Source(aspect="TargetType", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31")
   public TypeDecl targetType() {
-    ASTNode$State state = state();
-    if (targetType_computed == ASTNode$State.NON_CYCLE || targetType_computed == state().cycle()) {
+    if (targetType_computed) {
       return targetType_value;
     }
-    targetType_value = getParent().Define_targetType(this, null);
-    if (state().inCircle()) {
-      targetType_computed = state().cycle();
-    
+    ASTState state = state();
+    if (!targetType_initialized) {
+      targetType_initialized = true;
+      targetType_value = typeNull();
+    }
+    if (!state.inCircle() || state.calledByLazyAttribute()) {
+      state.enterCircle();
+      do {
+        targetType_cycle = state.nextCycle();
+        TypeDecl new_targetType_value = getParent().Define_targetType(this, null);
+        if (!AttributeValue.equals(targetType_value, new_targetType_value)) {
+          state.setChangeInCycle();
+        }
+        targetType_value = new_targetType_value;
+      } while (state.testAndClearChangeInCycle());
+      targetType_computed = true;
+
+      state.leaveCircle();
+    } else if (targetType_cycle != state.cycle()) {
+      targetType_cycle = state.cycle();
+      TypeDecl new_targetType_value = getParent().Define_targetType(this, null);
+      if (!AttributeValue.equals(targetType_value, new_targetType_value)) {
+        state.setChangeInCycle();
+      }
+      targetType_value = new_targetType_value;
     } else {
-      targetType_computed = ASTNode$State.NON_CYCLE;
-    
     }
     return targetType_value;
   }
+/** @apilevel internal */
+protected ASTState.Cycle targetType_cycle = null;
   /** @apilevel internal */
   private void targetType_reset() {
-    targetType_computed = null;
+    targetType_computed = false;
+    targetType_initialized = false;
     targetType_value = null;
+    targetType_cycle = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle targetType_computed = null;
+  protected boolean targetType_computed = false;
 
   /** @apilevel internal */
   protected TypeDecl targetType_value;
-
+  /** @apilevel internal */
+  protected boolean targetType_initialized = false;
   /**
    * @attribute inh
    * @aspect Contexts
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Contexts", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234")
+  @ASTNodeAnnotation.Source(aspect="Contexts", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418")
   public boolean assignmentContext() {
-    ASTNode$State state = state();
-    if (assignmentContext_computed == ASTNode$State.NON_CYCLE || assignmentContext_computed == state().cycle()) {
+    ASTState state = state();
+    if (assignmentContext_computed == ASTState.NON_CYCLE || assignmentContext_computed == state().cycle()) {
       return assignmentContext_value;
     }
     assignmentContext_value = getParent().Define_assignmentContext(this, null);
@@ -2206,7 +2357,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
       assignmentContext_computed = state().cycle();
     
     } else {
-      assignmentContext_computed = ASTNode$State.NON_CYCLE;
+      assignmentContext_computed = ASTState.NON_CYCLE;
     
     }
     return assignmentContext_value;
@@ -2216,7 +2367,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     assignmentContext_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle assignmentContext_computed = null;
+  protected ASTState.Cycle assignmentContext_computed = null;
 
   /** @apilevel internal */
   protected boolean assignmentContext_value;
@@ -2224,13 +2375,13 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect Contexts
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Contexts", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235")
+  @ASTNodeAnnotation.Source(aspect="Contexts", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419")
   public boolean invocationContext() {
-    ASTNode$State state = state();
-    if (invocationContext_computed == ASTNode$State.NON_CYCLE || invocationContext_computed == state().cycle()) {
+    ASTState state = state();
+    if (invocationContext_computed == ASTState.NON_CYCLE || invocationContext_computed == state().cycle()) {
       return invocationContext_value;
     }
     invocationContext_value = getParent().Define_invocationContext(this, null);
@@ -2238,7 +2389,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
       invocationContext_computed = state().cycle();
     
     } else {
-      invocationContext_computed = ASTNode$State.NON_CYCLE;
+      invocationContext_computed = ASTState.NON_CYCLE;
     
     }
     return invocationContext_value;
@@ -2248,7 +2399,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     invocationContext_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle invocationContext_computed = null;
+  protected ASTState.Cycle invocationContext_computed = null;
 
   /** @apilevel internal */
   protected boolean invocationContext_value;
@@ -2256,13 +2407,13 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect Contexts
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Contexts", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236")
+  @ASTNodeAnnotation.Source(aspect="Contexts", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420")
   public boolean castContext() {
-    ASTNode$State state = state();
-    if (castContext_computed == ASTNode$State.NON_CYCLE || castContext_computed == state().cycle()) {
+    ASTState state = state();
+    if (castContext_computed == ASTState.NON_CYCLE || castContext_computed == state().cycle()) {
       return castContext_value;
     }
     castContext_value = getParent().Define_castContext(this, null);
@@ -2270,7 +2421,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
       castContext_computed = state().cycle();
     
     } else {
-      castContext_computed = ASTNode$State.NON_CYCLE;
+      castContext_computed = ASTState.NON_CYCLE;
     
     }
     return castContext_value;
@@ -2280,7 +2431,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     castContext_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle castContext_computed = null;
+  protected ASTState.Cycle castContext_computed = null;
 
   /** @apilevel internal */
   protected boolean castContext_value;
@@ -2288,13 +2439,13 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect Contexts
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Contexts", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237")
+  @ASTNodeAnnotation.Source(aspect="Contexts", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421")
   public boolean stringContext() {
-    ASTNode$State state = state();
-    if (stringContext_computed == ASTNode$State.NON_CYCLE || stringContext_computed == state().cycle()) {
+    ASTState state = state();
+    if (stringContext_computed == ASTState.NON_CYCLE || stringContext_computed == state().cycle()) {
       return stringContext_value;
     }
     stringContext_value = getParent().Define_stringContext(this, null);
@@ -2302,7 +2453,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
       stringContext_computed = state().cycle();
     
     } else {
-      stringContext_computed = ASTNode$State.NON_CYCLE;
+      stringContext_computed = ASTState.NON_CYCLE;
     
     }
     return stringContext_value;
@@ -2312,7 +2463,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     stringContext_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle stringContext_computed = null;
+  protected ASTState.Cycle stringContext_computed = null;
 
   /** @apilevel internal */
   protected boolean stringContext_value;
@@ -2320,13 +2471,13 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect Contexts
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Contexts", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238")
+  @ASTNodeAnnotation.Source(aspect="Contexts", declaredAt="/home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422")
   public boolean numericContext() {
-    ASTNode$State state = state();
-    if (numericContext_computed == ASTNode$State.NON_CYCLE || numericContext_computed == state().cycle()) {
+    ASTState state = state();
+    if (numericContext_computed == ASTState.NON_CYCLE || numericContext_computed == state().cycle()) {
       return numericContext_value;
     }
     numericContext_value = getParent().Define_numericContext(this, null);
@@ -2334,7 +2485,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
       numericContext_computed = state().cycle();
     
     } else {
-      numericContext_computed = ASTNode$State.NON_CYCLE;
+      numericContext_computed = ASTState.NON_CYCLE;
     
     }
     return numericContext_value;
@@ -2344,7 +2495,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     numericContext_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle numericContext_computed = null;
+  protected ASTState.Cycle numericContext_computed = null;
 
   /** @apilevel internal */
   protected boolean numericContext_value;
@@ -2352,24 +2503,24 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:48
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:48")
-  public soot.jimple.Stmt condition_false_label() {
-    soot.jimple.Stmt condition_false_label_value = getParent().Define_condition_false_label(this, null);
-    return condition_false_label_value;
-  }
-  /**
-   * @attribute inh
-   * @aspect BooleanExpressions
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:49
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:49")
-  public soot.jimple.Stmt condition_true_label() {
-    soot.jimple.Stmt condition_true_label_value = getParent().Define_condition_true_label(this, null);
-    return condition_true_label_value;
+  public Body.Label condition_false_label(Body b) {
+    Body.Label condition_false_label_Body_value = getParent().Define_condition_false_label(this, null, b);
+    return condition_false_label_Body_value;
+  }
+  /**
+   * @attribute inh
+   * @aspect BooleanExpressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:50
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:50")
+  public Body.Label condition_true_label(Body b) {
+    Body.Label condition_true_label_Body_value = getParent().Define_condition_true_label(this, null, b);
+    return condition_true_label_Body_value;
   }
   /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:86
@@ -2379,6 +2530,11 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:86
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isLeftChildOfDot
+   */
   protected boolean canDefine_isLeftChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2390,6 +2546,11 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return false;
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:101
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isRightChildOfDot
+   */
   protected boolean canDefine_isRightChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2401,6 +2562,11 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return prevExprError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:118
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute prevExpr
+   */
   protected boolean canDefine_prevExpr(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2412,6 +2578,11 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return nextAccessError();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:142
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nextAccess
+   */
   protected boolean canDefine_nextAccess(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2423,6 +2594,7 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_hierarchyDependencies(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/soot8/backend/ResolverDependencies.jrag:15
     if (sootHierarchyDepType().sootDependencyNeeded()) {
@@ -2437,10 +2609,11 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_hierarchyDependencies(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_hierarchyDependencies(HashSet<Type> collection) {
     super.contributeTo_CompilationUnit_hierarchyDependencies(collection);
     if (sootHierarchyDepType().sootDependencyNeeded()) {
-      collection.add(sootHierarchyDepType().getSootType());
+      collection.add(sootHierarchyDepType().sootType());
     }
   }
 }

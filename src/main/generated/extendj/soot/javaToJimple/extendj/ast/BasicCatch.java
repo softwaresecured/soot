@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +39,7 @@ import soot.coffi.CoffiMethodSource;
  * A catch clause that can catch a single exception type.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java7/grammar/MultiCatch.ast:9
+ * @astdecl BasicCatch : CatchClause ::= Parameter:ParameterDeclaration Block;
  * @production BasicCatch : {@link CatchClause} ::= <span class="component">Parameter:{@link ParameterDeclaration}</span> <span class="component">{@link Block}</span>;
 
  */
@@ -50,18 +53,6 @@ public class BasicCatch extends CatchClause implements Cloneable {
     out.print(getParameter());
     out.print(") ");
     out.print(getBlock());
-  }
-  /**
-   * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:489
-   */
-  public void jimplify2(Body b) {
-    b.addLabel(label());
-    Local local = b.newLocal(getParameter().name(), getParameter().type().getSootType(), getParameter());
-    //b.setLine(this);
-    b.add(b.newIdentityStmt(local, b.newCaughtExceptionRef(getParameter()), getParameter()));
-    getParameter().local = local;
-    getBlock().jimplify2(b);
   }
   /**
    * @declaredat ASTNode:1
@@ -82,45 +73,50 @@ public class BasicCatch extends CatchClause implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Parameter", "Block"},
+    type = {"ParameterDeclaration", "Block"},
+    kind = {"Child", "Child"}
+  )
   public BasicCatch(ParameterDeclaration p0, Block p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     parameterDeclaration_String_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public BasicCatch clone() throws CloneNotSupportedException {
     BasicCatch node = (BasicCatch) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public BasicCatch copy() {
     try {
@@ -140,7 +136,7 @@ public class BasicCatch extends CatchClause implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:66
    */
   @Deprecated
   public BasicCatch fullCopy() {
@@ -151,7 +147,7 @@ public class BasicCatch extends CatchClause implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:71
+   * @declaredat ASTNode:76
    */
   public BasicCatch treeCopyNoTransform() {
     BasicCatch tree = (BasicCatch) copy();
@@ -172,7 +168,7 @@ public class BasicCatch extends CatchClause implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:91
+   * @declaredat ASTNode:96
    */
   public BasicCatch treeCopy() {
     BasicCatch tree = (BasicCatch) copy();
@@ -188,7 +184,7 @@ public class BasicCatch extends CatchClause implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:105
+   * @declaredat ASTNode:110
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -259,7 +255,7 @@ public class BasicCatch extends CatchClause implements Cloneable {
   }
   /** @apilevel internal */
   private void parameterDeclaration_String_reset() {
-    parameterDeclaration_String_computed = new java.util.HashMap(4);
+    parameterDeclaration_String_computed = null;
     parameterDeclaration_String_values = null;
   }
   /** @apilevel internal */
@@ -277,10 +273,10 @@ public class BasicCatch extends CatchClause implements Cloneable {
     Object _parameters = name;
     if (parameterDeclaration_String_computed == null) parameterDeclaration_String_computed = new java.util.HashMap(4);
     if (parameterDeclaration_String_values == null) parameterDeclaration_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (parameterDeclaration_String_values.containsKey(_parameters) && parameterDeclaration_String_computed != null
+    ASTState state = state();
+    if (parameterDeclaration_String_values.containsKey(_parameters)
         && parameterDeclaration_String_computed.containsKey(_parameters)
-        && (parameterDeclaration_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || parameterDeclaration_String_computed.get(_parameters) == state().cycle())) {
+        && (parameterDeclaration_String_computed.get(_parameters) == ASTState.NON_CYCLE || parameterDeclaration_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<Variable>) parameterDeclaration_String_values.get(_parameters);
     }
     SimpleSet<Variable> parameterDeclaration_String_value = getParameter().name().equals(name)
@@ -292,7 +288,7 @@ public class BasicCatch extends CatchClause implements Cloneable {
     
     } else {
       parameterDeclaration_String_values.put(_parameters, parameterDeclaration_String_value);
-      parameterDeclaration_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      parameterDeclaration_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return parameterDeclaration_String_value;
@@ -310,6 +306,11 @@ public class BasicCatch extends CatchClause implements Cloneable {
       return super.Define_lookupVariable(_callerNode, _childNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -326,6 +327,11 @@ public class BasicCatch extends CatchClause implements Cloneable {
       return getParent().Define_outerScope(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/NameCheck.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute outerScope
+   */
   protected boolean canDefine_outerScope(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -342,6 +348,11 @@ public class BasicCatch extends CatchClause implements Cloneable {
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -358,6 +369,11 @@ public class BasicCatch extends CatchClause implements Cloneable {
       return getParent().Define_reachable(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:49
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reachable
+   */
   protected boolean canDefine_reachable(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -374,6 +390,11 @@ public class BasicCatch extends CatchClause implements Cloneable {
       return getParent().Define_isMethodParameter(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:44
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isMethodParameter
+   */
   protected boolean canDefine_isMethodParameter(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -390,6 +411,11 @@ public class BasicCatch extends CatchClause implements Cloneable {
       return getParent().Define_isConstructorParameter(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:45
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isConstructorParameter
+   */
   protected boolean canDefine_isConstructorParameter(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -406,6 +432,11 @@ public class BasicCatch extends CatchClause implements Cloneable {
       return getParent().Define_isExceptionHandlerParameter(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/MultiCatch.jrag:46
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isExceptionHandlerParameter
+   */
   protected boolean canDefine_isExceptionHandlerParameter(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -422,6 +453,11 @@ public class BasicCatch extends CatchClause implements Cloneable {
       return getParent().Define_variableArityValid(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/VariableArityParameters.jrag:46
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute variableArityValid
+   */
   protected boolean canDefine_variableArityValid(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -438,6 +474,11 @@ public class BasicCatch extends CatchClause implements Cloneable {
       return getParent().Define_inhModifiedInScope(this, _callerNode, var);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inhModifiedInScope
+   */
   protected boolean canDefine_inhModifiedInScope(ASTNode _callerNode, ASTNode _childNode, Variable var) {
     return true;
   }
@@ -454,6 +495,11 @@ public class BasicCatch extends CatchClause implements Cloneable {
       return getParent().Define_isCatchParam(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/PreciseRethrow.jrag:202
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isCatchParam
+   */
   protected boolean canDefine_isCatchParam(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -465,8 +511,9 @@ public class BasicCatch extends CatchClause implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:491
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:493
     if (!getParameter().type().instanceOf(typeThrowable())) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -490,6 +537,7 @@ public class BasicCatch extends CatchClause implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!getParameter().type().instanceOf(typeThrowable())) {

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +39,7 @@ import soot.coffi.CoffiMethodSource;
  * The JSR 334 try with resources statement.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java7/grammar/TryWithResources.ast:4
+ * @astdecl TryWithResources : TryStmt ::= Resource:ResourceDeclaration* Block CatchClause* [Finally:Block];
  * @production TryWithResources : {@link TryStmt} ::= <span class="component">Resource:{@link ResourceDeclaration}*</span> <span class="component">{@link Block}</span> <span class="component">{@link CatchClause}*</span> <span class="component">[Finally:{@link Block}]</span>;
 
  */
@@ -73,7 +76,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    * Returns {@code true} if the try-with-resources statement can throw
    * an exception of type (or a subtype of) catchType.
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:216
    */
   protected boolean reachedException(TypeDecl catchType) {
     boolean found = false;
@@ -100,6 +103,12 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     return hasNonEmptyFinally() && getFinally().reachedException(catchType);
   }
   /**
+   * @aspect TryWithResources
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:77
+   */
+  public void jimpleEmit(Body b)
+  { getTransformed().jimpleEmit(b); }
+  /**
    * @declaredat ASTNode:1
    */
   public TryWithResources() {
@@ -121,6 +130,11 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   /**
    * @declaredat ASTNode:16
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Resource", "Block", "CatchClause", "Finally"},
+    type = {"List<ResourceDeclaration>", "Block", "List<CatchClause>", "Opt<Block>"},
+    kind = {"List", "Child", "List", "Opt"}
+  )
   public TryWithResources(List<ResourceDeclaration> p0, Block p1, List<CatchClause> p2, Opt<Block> p3) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -128,20 +142,20 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     setChild(p3, 3);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   protected int numChildren() {
     return 4;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -156,20 +170,20 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     lookupVariable_String_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   public TryWithResources clone() throws CloneNotSupportedException {
     TryWithResources node = (TryWithResources) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:55
+   * @declaredat ASTNode:60
    */
   public TryWithResources copy() {
     try {
@@ -189,7 +203,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   @Deprecated
   public TryWithResources fullCopy() {
@@ -200,7 +214,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:84
+   * @declaredat ASTNode:89
    */
   public TryWithResources treeCopyNoTransform() {
     TryWithResources tree = (TryWithResources) copy();
@@ -226,7 +240,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:109
+   * @declaredat ASTNode:114
    */
   public TryWithResources treeCopy() {
     TryWithResources tree = (TryWithResources) copy();
@@ -247,7 +261,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:128
+   * @declaredat ASTNode:133
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -579,10 +593,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
         Collection<Problem> problems = new LinkedList<Problem>();
         // Check exception handling of exceptions on auto closing of resource.
         for (ResourceDeclaration resource : getResourceList()) {
-          MethodDecl close = lookupClose(resource);
-          if (close == null) {
-            continue;
-          }
+          MethodDecl close = resource.closeAccess().decl();
           for (Access exception : close.getExceptionList()) {
             TypeDecl exceptionType = exception.type();
             if (!twrHandlesException(exceptionType)) {
@@ -601,10 +612,10 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    * has a catch clause which handles the exception.
    * @attribute syn
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:88
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:85
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:88")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:85")
   public boolean catchHandlesException(TypeDecl exceptionType) {
     {
         for (int i = 0; i < getNumCatchClause(); i++) {
@@ -621,10 +632,10 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    * within the directly enclosing method or initializer block.
    * @attribute syn
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:102
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:99
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:102")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:99")
   public boolean twrHandlesException(TypeDecl exceptionType) {
     {
         if (catchHandlesException(exceptionType)) {
@@ -636,31 +647,9 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
         return handlesException(exceptionType);
       }
   }
-  /**
-   * Lookup the close method declaration for the resource which is being used.
-   * @attribute syn
-   * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:127
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:127")
-  public MethodDecl lookupClose(ResourceDeclaration resource) {
-    {
-        TypeDecl resourceType = resource.getTypeAccess().type();
-        for (MethodDecl method : (Collection<MethodDecl>) resourceType.memberMethods("close")) {
-          if (method.getNumParameter() == 0) {
-            return method;
-          }
-        }
-        // We should not throw a runtime exception here. If there is no close
-        // method it likely means that the resource type is not a subtype of
-        // java.lang.AutoCloseable and type checking will report this error.
-        return null;
-      }
-  }
   /** @apilevel internal */
   private void localLookup_String_reset() {
-    localLookup_String_computed = new java.util.HashMap(4);
+    localLookup_String_computed = null;
     localLookup_String_values = null;
   }
   /** @apilevel internal */
@@ -670,18 +659,18 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   /**
    * @attribute syn
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:173
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:153
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:173")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:153")
   public SimpleSet<Variable> localLookup(String name) {
     Object _parameters = name;
     if (localLookup_String_computed == null) localLookup_String_computed = new java.util.HashMap(4);
     if (localLookup_String_values == null) localLookup_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (localLookup_String_values.containsKey(_parameters) && localLookup_String_computed != null
+    ASTState state = state();
+    if (localLookup_String_values.containsKey(_parameters)
         && localLookup_String_computed.containsKey(_parameters)
-        && (localLookup_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || localLookup_String_computed.get(_parameters) == state().cycle())) {
+        && (localLookup_String_computed.get(_parameters) == ASTState.NON_CYCLE || localLookup_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<Variable>) localLookup_String_values.get(_parameters);
     }
     SimpleSet<Variable> localLookup_String_value = localLookup_compute(name);
@@ -691,7 +680,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     
     } else {
       localLookup_String_values.put(_parameters, localLookup_String_value);
-      localLookup_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      localLookup_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return localLookup_String_value;
@@ -706,7 +695,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     }
   /** @apilevel internal */
   private void localVariableDeclaration_String_reset() {
-    localVariableDeclaration_String_computed = new java.util.HashMap(4);
+    localVariableDeclaration_String_computed = null;
     localVariableDeclaration_String_values = null;
   }
   /** @apilevel internal */
@@ -716,18 +705,18 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   /**
    * @attribute syn
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:181
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:161
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:181")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:161")
   public VariableDeclarator localVariableDeclaration(String name) {
     Object _parameters = name;
     if (localVariableDeclaration_String_computed == null) localVariableDeclaration_String_computed = new java.util.HashMap(4);
     if (localVariableDeclaration_String_values == null) localVariableDeclaration_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (localVariableDeclaration_String_values.containsKey(_parameters) && localVariableDeclaration_String_computed != null
+    ASTState state = state();
+    if (localVariableDeclaration_String_values.containsKey(_parameters)
         && localVariableDeclaration_String_computed.containsKey(_parameters)
-        && (localVariableDeclaration_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || localVariableDeclaration_String_computed.get(_parameters) == state().cycle())) {
+        && (localVariableDeclaration_String_computed.get(_parameters) == ASTState.NON_CYCLE || localVariableDeclaration_String_computed.get(_parameters) == state().cycle())) {
       return (VariableDeclarator) localVariableDeclaration_String_values.get(_parameters);
     }
     VariableDeclarator localVariableDeclaration_String_value = localVariableDeclaration_compute(name);
@@ -737,7 +726,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     
     } else {
       localVariableDeclaration_String_values.put(_parameters, localVariableDeclaration_String_value);
-      localVariableDeclaration_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      localVariableDeclaration_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return localVariableDeclaration_String_value;
@@ -761,27 +750,27 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   public boolean assignedAfter(Variable v) {
     Object _parameters = v;
     if (assignedAfter_Variable_values == null) assignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfter_Variable_value = getBlock().assignedAfter(v);
-        if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfter_Variable_value;
         }
@@ -793,7 +782,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfter_Variable_value = getBlock().assignedAfter(v);
-      if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfter_Variable_value;
       }
@@ -807,17 +796,14 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    * may throw an exception of type catchType.
    * @attribute syn
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:265
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:262
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:265")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:262")
   public boolean resourceClosingException(TypeDecl catchType) {
     {
         for (ResourceDeclaration resource : getResourceList()) {
-          MethodDecl close = lookupClose(resource);
-          if (close == null) {
-            continue;
-          }
+          MethodDecl close = resource.closeAccess().decl();
           for (Access exception : close.getExceptionList()) {
             TypeDecl exceptionType = exception.type();
             if (catchType.mayCatch(exception.type())) {
@@ -833,10 +819,10 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    * may throw an exception of type catchType.
    * @attribute syn
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:285
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:279
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:285")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:279")
   public boolean resourceInitializationException(TypeDecl catchType) {
     {
         for (ResourceDeclaration resource : getResourceList()) {
@@ -849,7 +835,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   }
   /** @apilevel internal */
   private void catchableException_TypeDecl_reset() {
-    catchableException_TypeDecl_computed = new java.util.HashMap(4);
+    catchableException_TypeDecl_computed = null;
     catchableException_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -869,10 +855,10 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     Object _parameters = type;
     if (catchableException_TypeDecl_computed == null) catchableException_TypeDecl_computed = new java.util.HashMap(4);
     if (catchableException_TypeDecl_values == null) catchableException_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (catchableException_TypeDecl_values.containsKey(_parameters) && catchableException_TypeDecl_computed != null
+    ASTState state = state();
+    if (catchableException_TypeDecl_values.containsKey(_parameters)
         && catchableException_TypeDecl_computed.containsKey(_parameters)
-        && (catchableException_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || catchableException_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (catchableException_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || catchableException_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) catchableException_TypeDecl_values.get(_parameters);
     }
     boolean catchableException_TypeDecl_value = getBlock().reachedException(type)
@@ -884,7 +870,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     
     } else {
       catchableException_TypeDecl_values.put(_parameters, catchableException_TypeDecl_value);
-      catchableException_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      catchableException_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return catchableException_TypeDecl_value;
@@ -913,7 +899,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:39")
   public Stmt getTransformed() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getTransformed_computed) {
       return getTransformed_value;
     }
@@ -966,18 +952,18 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    * Inherit the handlesException attribute from methoddecl.
    * @attribute inh
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:115
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:115")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112")
   public boolean handlesException(TypeDecl exceptionType) {
     Object _parameters = exceptionType;
     if (handlesException_TypeDecl_computed == null) handlesException_TypeDecl_computed = new java.util.HashMap(4);
     if (handlesException_TypeDecl_values == null) handlesException_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (handlesException_TypeDecl_values.containsKey(_parameters) && handlesException_TypeDecl_computed != null
+    ASTState state = state();
+    if (handlesException_TypeDecl_values.containsKey(_parameters)
         && handlesException_TypeDecl_computed.containsKey(_parameters)
-        && (handlesException_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || handlesException_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (handlesException_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || handlesException_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) handlesException_TypeDecl_values.get(_parameters);
     }
     boolean handlesException_TypeDecl_value = getParent().Define_handlesException(this, null, exceptionType);
@@ -987,14 +973,14 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     
     } else {
       handlesException_TypeDecl_values.put(_parameters, handlesException_TypeDecl_value);
-      handlesException_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      handlesException_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return handlesException_TypeDecl_value;
   }
   /** @apilevel internal */
   private void handlesException_TypeDecl_reset() {
-    handlesException_TypeDecl_computed = new java.util.HashMap(4);
+    handlesException_TypeDecl_computed = null;
     handlesException_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1004,13 +990,13 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   /**
    * @attribute inh
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:140
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:120
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:140")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:120")
   public TypeDecl typeError() {
-    ASTNode$State state = state();
-    if (typeError_computed == ASTNode$State.NON_CYCLE || typeError_computed == state().cycle()) {
+    ASTState state = state();
+    if (typeError_computed == ASTState.NON_CYCLE || typeError_computed == state().cycle()) {
       return typeError_value;
     }
     typeError_value = getParent().Define_typeError(this, null);
@@ -1018,7 +1004,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
       typeError_computed = state().cycle();
     
     } else {
-      typeError_computed = ASTNode$State.NON_CYCLE;
+      typeError_computed = ASTState.NON_CYCLE;
     
     }
     return typeError_value;
@@ -1029,7 +1015,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     typeError_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle typeError_computed = null;
+  protected ASTState.Cycle typeError_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl typeError_value;
@@ -1037,13 +1023,13 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   /**
    * @attribute inh
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:142
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:122
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:142")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:122")
   public TypeDecl typeRuntimeException() {
-    ASTNode$State state = state();
-    if (typeRuntimeException_computed == ASTNode$State.NON_CYCLE || typeRuntimeException_computed == state().cycle()) {
+    ASTState state = state();
+    if (typeRuntimeException_computed == ASTState.NON_CYCLE || typeRuntimeException_computed == state().cycle()) {
       return typeRuntimeException_value;
     }
     typeRuntimeException_value = getParent().Define_typeRuntimeException(this, null);
@@ -1051,7 +1037,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
       typeRuntimeException_computed = state().cycle();
     
     } else {
-      typeRuntimeException_computed = ASTNode$State.NON_CYCLE;
+      typeRuntimeException_computed = ASTState.NON_CYCLE;
     
     }
     return typeRuntimeException_value;
@@ -1062,7 +1048,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     typeRuntimeException_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle typeRuntimeException_computed = null;
+  protected ASTState.Cycle typeRuntimeException_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl typeRuntimeException_value;
@@ -1070,18 +1056,18 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   /**
    * @attribute inh
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:192
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:172
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:192")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:172")
   public SimpleSet<Variable> lookupVariable(String name) {
     Object _parameters = name;
     if (lookupVariable_String_computed == null) lookupVariable_String_computed = new java.util.HashMap(4);
     if (lookupVariable_String_values == null) lookupVariable_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (lookupVariable_String_values.containsKey(_parameters) && lookupVariable_String_computed != null
+    ASTState state = state();
+    if (lookupVariable_String_values.containsKey(_parameters)
         && lookupVariable_String_computed.containsKey(_parameters)
-        && (lookupVariable_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || lookupVariable_String_computed.get(_parameters) == state().cycle())) {
+        && (lookupVariable_String_computed.get(_parameters) == ASTState.NON_CYCLE || lookupVariable_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<Variable>) lookupVariable_String_values.get(_parameters);
     }
     SimpleSet<Variable> lookupVariable_String_value = getParent().Define_lookupVariable(this, null, name);
@@ -1091,14 +1077,14 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     
     } else {
       lookupVariable_String_values.put(_parameters, lookupVariable_String_value);
-      lookupVariable_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      lookupVariable_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return lookupVariable_String_value;
   }
   /** @apilevel internal */
   private void lookupVariable_String_reset() {
-    lookupVariable_String_computed = new java.util.HashMap(4);
+    lookupVariable_String_computed = null;
     lookupVariable_String_values = null;
   }
   /** @apilevel internal */
@@ -1108,25 +1094,25 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   /**
    * @attribute inh
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:198
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:178
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:198")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:178")
   public boolean resourcePreviouslyDeclared(String name) {
     boolean resourcePreviouslyDeclared_String_value = getParent().Define_resourcePreviouslyDeclared(this, null, name);
     return resourcePreviouslyDeclared_String_value;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:115
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
    * @apilevel internal
    */
   public boolean Define_handlesException(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
     if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:120
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:117
       return twrHandlesException(exceptionType);
     }
     else if (_callerNode == getResourceListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:117
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:114
       int i = _callerNode.getIndexOfChild(_childNode);
       return twrHandlesException(exceptionType);
     }
@@ -1134,6 +1120,11 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
       return super.Define_handlesException(_callerNode, _childNode, exceptionType);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute handlesException
+   */
   protected boolean canDefine_handlesException(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
     return true;
   }
@@ -1143,7 +1134,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    */
   public boolean Define_reachableCatchClause(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
     if (_callerNode == getCatchClauseListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:144
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:124
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       {
           for (int i = 0; i < childIndex; i++) {
@@ -1164,6 +1155,11 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
       return super.Define_reachableCatchClause(_callerNode, _childNode, exceptionType);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:182
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reachableCatchClause
+   */
   protected boolean canDefine_reachableCatchClause(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
     return true;
   }
@@ -1173,7 +1169,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    */
   public SimpleSet<Variable> Define_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     if (_callerNode == getResourceListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:164
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:144
       int index = _callerNode.getIndexOfChild(_childNode);
       {
           for (int i = index - 1; i >= 0; --i) {
@@ -1185,13 +1181,18 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
         }
     }
     else if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:162
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:142
       return localLookup(name);
     }
     else {
       return getParent().Define_lookupVariable(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -1201,7 +1202,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    */
   public VariableScope Define_outerScope(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getResourceListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:194
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:174
       int i = _callerNode.getIndexOfChild(_childNode);
       return this;
     }
@@ -1209,16 +1210,21 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
       return getParent().Define_outerScope(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/NameCheck.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute outerScope
+   */
   protected boolean canDefine_outerScope(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:198
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:178
    * @apilevel internal
    */
   public boolean Define_resourcePreviouslyDeclared(ASTNode _callerNode, ASTNode _childNode, String name) {
     if (_callerNode == getResourceListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:200
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:180
       int index = _callerNode.getIndexOfChild(_childNode);
       {
           for (int i = 0; i < index; ++i) {
@@ -1233,6 +1239,11 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
       return getParent().Define_resourcePreviouslyDeclared(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:178
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute resourcePreviouslyDeclared
+   */
   protected boolean canDefine_resourcePreviouslyDeclared(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -1242,13 +1253,13 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    */
   public boolean Define_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:227
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:207
       return getNumResource() == 0
             ? assignedBefore(v)
             : getResource(getNumResource() - 1).assignedAfter(v);
     }
     else if (_callerNode == getResourceListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:224
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:204
       int index = _callerNode.getIndexOfChild(_childNode);
       return index == 0 ? assignedBefore(v) : getResource(index - 1).assignedAfter(v);
     }
@@ -1256,6 +1267,11 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
       return super.Define_assignedBefore(_callerNode, _childNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -1265,7 +1281,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    */
   public Modifiers Define_declarationModifiers(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getResourceListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:308
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:302
       int index = _callerNode.getIndexOfChild(_childNode);
       return getResource(index).getResourceModifiers();
     }
@@ -1273,6 +1289,11 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
       return getParent().Define_declarationModifiers(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:133
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declarationModifiers
+   */
   protected boolean canDefine_declarationModifiers(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1282,7 +1303,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
    */
   public Access Define_declarationType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getResourceListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:311
+      // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:305
       int index = _callerNode.getIndexOfChild(_childNode);
       return getResource(index).getResourceType();
     }
@@ -1290,6 +1311,11 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
       return getParent().Define_declarationType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:144
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declarationType
+   */
   protected boolean canDefine_declarationType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1301,6 +1327,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:58
     {
@@ -1313,6 +1340,7 @@ public class TryWithResources extends TryStmt implements Cloneable, VariableScop
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : exceptionHandlingProblems()) {

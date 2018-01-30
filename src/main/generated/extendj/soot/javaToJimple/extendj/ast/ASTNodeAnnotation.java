@@ -1,6 +1,7 @@
 package soot.javaToJimple.extendj.ast;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,7 +37,7 @@ import beaver.*;
 import soot.coffi.CoffiMethodSource;
 /**
  * @ast class
- * @declaredat ASTNode:219
+ * @declaredat ASTNode:221
  */
 public class ASTNodeAnnotation extends java.lang.Object {
   
@@ -95,6 +97,17 @@ public class ASTNodeAnnotation extends java.lang.Object {
   public @interface Source {
     String aspect() default "";
     String declaredAt() default "";
+  }
+
+  
+
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+  @java.lang.annotation.Target(java.lang.annotation.ElementType.CONSTRUCTOR)
+  @java.lang.annotation.Documented
+  public @interface Constructor{
+    String[] name(); 
+    String[] type(); 
+    String[] kind(); 
   }
 
 

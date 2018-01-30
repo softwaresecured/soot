@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,16 +38,17 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:297
+ * @astdecl Case : Stmt;
  * @production Case : {@link Stmt};
 
  */
 public abstract class Case extends Stmt implements Cloneable {
   /**
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:112
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:149
    */
-  public void jimplify2(Body b) {
-    b.addLabel(label());
+  public void jimpleEmit(Body b) {
+    b.addLabel(label(b));
   }
   /**
    * @declaredat ASTNode:1
@@ -83,7 +86,7 @@ public abstract class Case extends Stmt implements Cloneable {
     assignedBefore_Variable_reset();
     assignedAfter_Variable_reset();
     unassignedAfter_Variable_reset();
-    label_reset();
+    label_Body_reset();
     previousCase_Case_reset();
   }
   /** @apilevel internal 
@@ -146,20 +149,20 @@ public abstract class Case extends Stmt implements Cloneable {
   public boolean assignedBefore(Variable v) {
     Object _parameters = v;
     if (assignedBefore_Variable_values == null) assignedBefore_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedBefore_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedBefore_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedBefore_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedBefore_Variable_value;
@@ -168,7 +171,7 @@ public abstract class Case extends Stmt implements Cloneable {
         new_assignedBefore_Variable_value = getParent().getParent() instanceof Block
               && ((Block) getParent().getParent()).assignedBefore(v)
               && super.assignedBefore(v);
-        if (new_assignedBefore_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedBefore_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedBefore_Variable_value;
         }
@@ -182,7 +185,7 @@ public abstract class Case extends Stmt implements Cloneable {
       boolean new_assignedBefore_Variable_value = getParent().getParent() instanceof Block
             && ((Block) getParent().getParent()).assignedBefore(v)
             && super.assignedBefore(v);
-      if (new_assignedBefore_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedBefore_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedBefore_Variable_value;
       }
@@ -201,27 +204,27 @@ public abstract class Case extends Stmt implements Cloneable {
   public boolean assignedAfter(Variable v) {
     Object _parameters = v;
     if (assignedAfter_Variable_values == null) assignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfter_Variable_value = assignedBefore(v);
-        if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfter_Variable_value;
         }
@@ -233,7 +236,7 @@ public abstract class Case extends Stmt implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfter_Variable_value = assignedBefore(v);
-      if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfter_Variable_value;
       }
@@ -265,27 +268,27 @@ public abstract class Case extends Stmt implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = unassignedBefore(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -297,7 +300,7 @@ public abstract class Case extends Stmt implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = unassignedBefore(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -340,37 +343,42 @@ public abstract class Case extends Stmt implements Cloneable {
     return isDefaultCase_value;
   }
   /** @apilevel internal */
-  private void label_reset() {
-    label_computed = null;
-    label_value = null;
+  private void label_Body_reset() {
+    label_Body_computed = null;
+    label_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle label_computed = null;
-
+  protected java.util.Map label_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt label_value;
-
+  protected java.util.Map label_Body_computed;
   /**
    * @attribute syn
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:110
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:148
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:110")
-  public soot.jimple.Stmt label() {
-    ASTNode$State state = state();
-    if (label_computed == ASTNode$State.NON_CYCLE || label_computed == state().cycle()) {
-      return label_value;
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:148")
+  public Body.Label label(Body b) {
+    Object _parameters = b;
+    if (label_Body_computed == null) label_Body_computed = new java.util.HashMap(4);
+    if (label_Body_values == null) label_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (label_Body_values.containsKey(_parameters)
+        && label_Body_computed.containsKey(_parameters)
+        && (label_Body_computed.get(_parameters) == ASTState.NON_CYCLE || label_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) label_Body_values.get(_parameters);
     }
-    label_value = newLabel();
+    Body.Label label_Body_value = newLabel(b);
     if (state().inCircle()) {
-      label_computed = state().cycle();
+      label_Body_values.put(_parameters, label_Body_value);
+      label_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      label_computed = ASTNode$State.NON_CYCLE;
+      label_Body_values.put(_parameters, label_Body_value);
+      label_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return label_value;
+    return label_Body_value;
   }
   /**
    * Finds the first case label that has the same constant expression as
@@ -385,10 +393,10 @@ public abstract class Case extends Stmt implements Cloneable {
     Object _parameters = c;
     if (previousCase_Case_computed == null) previousCase_Case_computed = new java.util.HashMap(4);
     if (previousCase_Case_values == null) previousCase_Case_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (previousCase_Case_values.containsKey(_parameters) && previousCase_Case_computed != null
+    ASTState state = state();
+    if (previousCase_Case_values.containsKey(_parameters)
         && previousCase_Case_computed.containsKey(_parameters)
-        && (previousCase_Case_computed.get(_parameters) == ASTNode$State.NON_CYCLE || previousCase_Case_computed.get(_parameters) == state().cycle())) {
+        && (previousCase_Case_computed.get(_parameters) == ASTState.NON_CYCLE || previousCase_Case_computed.get(_parameters) == state().cycle())) {
       return (Case) previousCase_Case_values.get(_parameters);
     }
     Case previousCase_Case_value = getParent().Define_previousCase(this, null, c);
@@ -398,14 +406,14 @@ public abstract class Case extends Stmt implements Cloneable {
     
     } else {
       previousCase_Case_values.put(_parameters, previousCase_Case_value);
-      previousCase_Case_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      previousCase_Case_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return previousCase_Case_value;
   }
   /** @apilevel internal */
   private void previousCase_Case_reset() {
-    previousCase_Case_computed = new java.util.HashMap(4);
+    previousCase_Case_computed = null;
     previousCase_Case_values = null;
   }
   /** @apilevel internal */
@@ -415,10 +423,10 @@ public abstract class Case extends Stmt implements Cloneable {
   /**
    * @attribute inh
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:482
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:484
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:482")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:484")
   public TypeDecl switchType() {
     TypeDecl switchType_value = getParent().Define_switchType(this, null);
     return switchType_value;

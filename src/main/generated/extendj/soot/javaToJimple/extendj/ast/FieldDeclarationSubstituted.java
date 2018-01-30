@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:84
+ * @astdecl FieldDeclarationSubstituted : FieldDeclarator ::= <Original:FieldDeclarator>;
  * @production FieldDeclarationSubstituted : {@link FieldDeclarator} ::= <span class="component">&lt;Original:FieldDeclarator&gt;</span>;
 
  */
@@ -61,6 +64,11 @@ public class FieldDeclarationSubstituted extends FieldDeclarator implements Clon
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Dims", "Init", "Original"},
+    type = {"String", "List<Dims>", "Opt<Expr>", "FieldDeclarator"},
+    kind = {"Token", "List", "Opt", "Token"}
+  )
   public FieldDeclarationSubstituted(String p0, List<Dims> p1, Opt<Expr> p2, FieldDeclarator p3) {
     setID(p0);
     setChild(p1, 0);
@@ -68,7 +76,7 @@ public class FieldDeclarationSubstituted extends FieldDeclarator implements Clon
     setOriginal(p3);
   }
   /**
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   public FieldDeclarationSubstituted(beaver.Symbol p0, List<Dims> p1, Opt<Expr> p2, FieldDeclarator p3) {
     setID(p0);
@@ -77,39 +85,39 @@ public class FieldDeclarationSubstituted extends FieldDeclarator implements Clon
     setOriginal(p3);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public FieldDeclarationSubstituted clone() throws CloneNotSupportedException {
     FieldDeclarationSubstituted node = (FieldDeclarationSubstituted) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:56
    */
   public FieldDeclarationSubstituted copy() {
     try {
@@ -129,7 +137,7 @@ public class FieldDeclarationSubstituted extends FieldDeclarator implements Clon
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:70
+   * @declaredat ASTNode:75
    */
   @Deprecated
   public FieldDeclarationSubstituted fullCopy() {
@@ -140,7 +148,7 @@ public class FieldDeclarationSubstituted extends FieldDeclarator implements Clon
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:80
+   * @declaredat ASTNode:85
    */
   public FieldDeclarationSubstituted treeCopyNoTransform() {
     FieldDeclarationSubstituted tree = (FieldDeclarationSubstituted) copy();
@@ -166,7 +174,7 @@ public class FieldDeclarationSubstituted extends FieldDeclarator implements Clon
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:105
+   * @declaredat ASTNode:110
    */
   public FieldDeclarationSubstituted treeCopy() {
     FieldDeclarationSubstituted tree = (FieldDeclarationSubstituted) copy();
@@ -187,7 +195,7 @@ public class FieldDeclarationSubstituted extends FieldDeclarator implements Clon
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:124
+   * @declaredat ASTNode:129
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((FieldDeclarationSubstituted) node).tokenString_ID) && (tokenFieldDeclarator_Original == ((FieldDeclarationSubstituted) node).tokenFieldDeclarator_Original);    

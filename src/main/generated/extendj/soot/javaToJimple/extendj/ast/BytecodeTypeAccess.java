@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/BoundNames.ast:10
+ * @astdecl BytecodeTypeAccess : TypeAccess;
  * @production BytecodeTypeAccess : {@link TypeAccess};
 
  */
@@ -58,52 +61,57 @@ public class BytecodeTypeAccess extends TypeAccess implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Package", "ID"},
+    type = {"String", "String"},
+    kind = {"Token", "Token"}
+  )
   public BytecodeTypeAccess(String p0, String p1) {
     setPackage(p0);
     setID(p1);
   }
   /**
-   * @declaredat ASTNode:16
+   * @declaredat ASTNode:21
    */
   public BytecodeTypeAccess(beaver.Symbol p0, beaver.Symbol p1) {
     setPackage(p0);
     setID(p1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public boolean mayHaveRewrite() {
     return true;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     rewrittenNode_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:40
+   * @declaredat ASTNode:45
    */
   public BytecodeTypeAccess clone() throws CloneNotSupportedException {
     BytecodeTypeAccess node = (BytecodeTypeAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public BytecodeTypeAccess copy() {
     try {
@@ -123,7 +131,7 @@ public class BytecodeTypeAccess extends TypeAccess implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:64
+   * @declaredat ASTNode:69
    */
   @Deprecated
   public BytecodeTypeAccess fullCopy() {
@@ -134,7 +142,7 @@ public class BytecodeTypeAccess extends TypeAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   public BytecodeTypeAccess treeCopyNoTransform() {
     BytecodeTypeAccess tree = (BytecodeTypeAccess) copy();
@@ -155,7 +163,7 @@ public class BytecodeTypeAccess extends TypeAccess implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:94
+   * @declaredat ASTNode:99
    */
   public BytecodeTypeAccess treeCopy() {
     BytecodeTypeAccess tree = (BytecodeTypeAccess) copy();
@@ -171,7 +179,7 @@ public class BytecodeTypeAccess extends TypeAccess implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:108
+   * @declaredat ASTNode:113
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_Package == ((BytecodeTypeAccess) node).tokenString_Package) && (tokenString_ID == ((BytecodeTypeAccess) node).tokenString_ID);    
@@ -285,7 +293,7 @@ public class BytecodeTypeAccess extends TypeAccess implements Cloneable {
     rewrittenNode_cycle = null;
   }
 /** @apilevel internal */
-protected ASTNode$State.Cycle rewrittenNode_cycle = null;
+protected ASTState.Cycle rewrittenNode_cycle = null;
   /** @apilevel internal */
   protected boolean rewrittenNode_computed = false;
 
@@ -299,7 +307,7 @@ protected ASTNode$State.Cycle rewrittenNode_cycle = null;
     if (rewrittenNode_computed) {
       return rewrittenNode_value;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!rewrittenNode_initialized) {
       rewrittenNode_initialized = true;
       rewrittenNode_value = this;

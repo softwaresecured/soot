@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +39,7 @@ import soot.coffi.CoffiMethodSource;
  * A statement that can be reached by {@code break} or {@code continue}.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:289
+ * @astdecl BranchTargetStmt : Stmt;
  * @production BranchTargetStmt : {@link Stmt};
 
  */
@@ -135,7 +138,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
     targetBranches_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle targetBranches_computed = null;
+  protected ASTState.Cycle targetBranches_computed = null;
 
   /** @apilevel internal */
   protected Collection<Stmt> targetBranches_value;
@@ -148,8 +151,8 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="BranchTarget", declaredAt="/home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:88")
   public Collection<Stmt> targetBranches() {
-    ASTNode$State state = state();
-    if (targetBranches_computed == ASTNode$State.NON_CYCLE || targetBranches_computed == state().cycle()) {
+    ASTState state = state();
+    if (targetBranches_computed == ASTState.NON_CYCLE || targetBranches_computed == state().cycle()) {
       return targetBranches_value;
     }
     targetBranches_value = targetBranches_compute();
@@ -157,7 +160,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
       targetBranches_computed = state().cycle();
     
     } else {
-      targetBranches_computed = ASTNode$State.NON_CYCLE;
+      targetBranches_computed = ASTState.NON_CYCLE;
     
     }
     return targetBranches_value;
@@ -178,7 +181,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
     escapedBranches_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle escapedBranches_computed = null;
+  protected ASTState.Cycle escapedBranches_computed = null;
 
   /** @apilevel internal */
   protected Collection<Stmt> escapedBranches_value;
@@ -191,8 +194,8 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="BranchTarget", declaredAt="/home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:90")
   public Collection<Stmt> escapedBranches() {
-    ASTNode$State state = state();
-    if (escapedBranches_computed == ASTNode$State.NON_CYCLE || escapedBranches_computed == state().cycle()) {
+    ASTState state = state();
+    if (escapedBranches_computed == ASTState.NON_CYCLE || escapedBranches_computed == state().cycle()) {
       return escapedBranches_value;
     }
     escapedBranches_value = escapedBranches_compute();
@@ -200,7 +203,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
       escapedBranches_computed = state().cycle();
     
     } else {
-      escapedBranches_computed = ASTNode$State.NON_CYCLE;
+      escapedBranches_computed = ASTState.NON_CYCLE;
     
     }
     return escapedBranches_value;
@@ -223,7 +226,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
     branches_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle branches_computed = null;
+  protected ASTState.Cycle branches_computed = null;
 
   /** @apilevel internal */
   protected Collection<Stmt> branches_value;
@@ -236,8 +239,8 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="BranchTarget", declaredAt="/home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:92")
   public Collection<Stmt> branches() {
-    ASTNode$State state = state();
-    if (branches_computed == ASTNode$State.NON_CYCLE || branches_computed == state().cycle()) {
+    ASTState state = state();
+    if (branches_computed == ASTState.NON_CYCLE || branches_computed == state().cycle()) {
       return branches_value;
     }
     branches_value = branches_compute();
@@ -245,7 +248,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
       branches_computed = state().cycle();
     
     } else {
-      branches_computed = ASTNode$State.NON_CYCLE;
+      branches_computed = ASTState.NON_CYCLE;
     
     }
     return branches_value;
@@ -275,7 +278,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
     targetContinues_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle targetContinues_computed = null;
+  protected ASTState.Cycle targetContinues_computed = null;
 
   /** @apilevel internal */
   protected Collection<ContinueStmt> targetContinues_value;
@@ -288,8 +291,8 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="BranchTarget", declaredAt="/home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:84")
   public Collection<ContinueStmt> targetContinues() {
-    ASTNode$State state = state();
-    if (targetContinues_computed == ASTNode$State.NON_CYCLE || targetContinues_computed == state().cycle()) {
+    ASTState state = state();
+    if (targetContinues_computed == ASTState.NON_CYCLE || targetContinues_computed == state().cycle()) {
       return targetContinues_value;
     }
     targetContinues_value = targetContinues_compute();
@@ -297,7 +300,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
       targetContinues_computed = state().cycle();
     
     } else {
-      targetContinues_computed = ASTNode$State.NON_CYCLE;
+      targetContinues_computed = ASTState.NON_CYCLE;
     
     }
     return targetContinues_value;
@@ -325,7 +328,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
     targetBreaks_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle targetBreaks_computed = null;
+  protected ASTState.Cycle targetBreaks_computed = null;
 
   /** @apilevel internal */
   protected Collection<BreakStmt> targetBreaks_value;
@@ -338,8 +341,8 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="BranchTarget", declaredAt="/home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:86")
   public Collection<BreakStmt> targetBreaks() {
-    ASTNode$State state = state();
-    if (targetBreaks_computed == ASTNode$State.NON_CYCLE || targetBreaks_computed == state().cycle()) {
+    ASTState state = state();
+    if (targetBreaks_computed == ASTState.NON_CYCLE || targetBreaks_computed == state().cycle()) {
       return targetBreaks_value;
     }
     targetBreaks_value = targetBreaks_compute();
@@ -347,7 +350,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
       targetBreaks_computed = state().cycle();
     
     } else {
-      targetBreaks_computed = ASTNode$State.NON_CYCLE;
+      targetBreaks_computed = ASTState.NON_CYCLE;
     
     }
     return targetBreaks_value;
@@ -367,7 +370,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
     reachableBreak_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle reachableBreak_computed = null;
+  protected ASTState.Cycle reachableBreak_computed = null;
 
   /** @apilevel internal */
   protected boolean reachableBreak_value;
@@ -380,8 +383,8 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="UnreachableStatements", declaredAt="/home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:85")
   public boolean reachableBreak() {
-    ASTNode$State state = state();
-    if (reachableBreak_computed == ASTNode$State.NON_CYCLE || reachableBreak_computed == state().cycle()) {
+    ASTState state = state();
+    if (reachableBreak_computed == ASTState.NON_CYCLE || reachableBreak_computed == state().cycle()) {
       return reachableBreak_value;
     }
     reachableBreak_value = reachableBreak_compute();
@@ -389,7 +392,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
       reachableBreak_computed = state().cycle();
     
     } else {
-      reachableBreak_computed = ASTNode$State.NON_CYCLE;
+      reachableBreak_computed = ASTState.NON_CYCLE;
     
     }
     return reachableBreak_value;
@@ -408,7 +411,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
     reachableContinue_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle reachableContinue_computed = null;
+  protected ASTState.Cycle reachableContinue_computed = null;
 
   /** @apilevel internal */
   protected boolean reachableContinue_value;
@@ -421,8 +424,8 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="UnreachableStatements", declaredAt="/home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:140")
   public boolean reachableContinue() {
-    ASTNode$State state = state();
-    if (reachableContinue_computed == ASTNode$State.NON_CYCLE || reachableContinue_computed == state().cycle()) {
+    ASTState state = state();
+    if (reachableContinue_computed == ASTState.NON_CYCLE || reachableContinue_computed == state().cycle()) {
       return reachableContinue_value;
     }
     reachableContinue_value = reachableContinue_compute();
@@ -430,7 +433,7 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
       reachableContinue_computed = state().cycle();
     
     } else {
-      reachableContinue_computed = ASTNode$State.NON_CYCLE;
+      reachableContinue_computed = ASTState.NON_CYCLE;
     
     }
     return reachableContinue_value;
@@ -452,6 +455,11 @@ public abstract class BranchTargetStmt extends Stmt implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return potentialTargetOf(branch) ? null : enclosingFinally(branch);
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:273
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosingFinally
+   */
   protected boolean canDefine_enclosingFinally(ASTNode _callerNode, ASTNode _childNode, Stmt branch) {
     return true;
   }

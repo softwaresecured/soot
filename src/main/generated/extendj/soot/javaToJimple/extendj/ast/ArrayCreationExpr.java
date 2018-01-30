@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:223
+ * @astdecl ArrayCreationExpr : PrimaryExpr ::= TypeAccess:Access [ArrayInit];
  * @production ArrayCreationExpr : {@link PrimaryExpr} ::= <span class="component">TypeAccess:{@link Access}</span> <span class="component">[{@link ArrayInit}]</span>;
 
  */
@@ -50,34 +53,6 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
     if (hasArrayInit()) {
       out.print(" ");
       out.print(getArrayInit());
-    }
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:678
-   */
-  public soot.Value eval(Body b) {
-    if(hasArrayInit()) {
-      return getArrayInit().eval(b);
-    }
-    else {
-      ArrayList list = new ArrayList();
-      getTypeAccess().addArraySize(b, list);
-      if(numArrays() == 1) {
-        soot.Value size = (soot.Value)list.get(0);
-        return b.newNewArrayExpr(
-          type().componentType().getSootType(),
-          asImmediate(b, size),
-          this
-        );
-      }
-      else {
-        return b.newNewMultiArrayExpr(
-          (soot.ArrayType)type().getSootType(),
-          list,
-          this
-        );
-      }
     }
   }
   /**
@@ -100,25 +75,30 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"TypeAccess", "ArrayInit"},
+    type = {"Access", "Opt<ArrayInit>"},
+    kind = {"Child", "Opt"}
+  )
   public ArrayCreationExpr(Access p0, Opt<ArrayInit> p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -128,20 +108,20 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
     numArrays_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public ArrayCreationExpr clone() throws CloneNotSupportedException {
     ArrayCreationExpr node = (ArrayCreationExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public ArrayCreationExpr copy() {
     try {
@@ -161,7 +141,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:65
+   * @declaredat ASTNode:70
    */
   @Deprecated
   public ArrayCreationExpr fullCopy() {
@@ -172,7 +152,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:75
+   * @declaredat ASTNode:80
    */
   public ArrayCreationExpr treeCopyNoTransform() {
     ArrayCreationExpr tree = (ArrayCreationExpr) copy();
@@ -193,7 +173,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:95
+   * @declaredat ASTNode:100
    */
   public ArrayCreationExpr treeCopy() {
     ArrayCreationExpr tree = (ArrayCreationExpr) copy();
@@ -209,7 +189,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:109
+   * @declaredat ASTNode:114
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -323,27 +303,27 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
   public boolean unassignedAfterCreation(Variable v) {
     Object _parameters = v;
     if (unassignedAfterCreation_Variable_values == null) unassignedAfterCreation_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterCreation_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterCreation_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterCreation_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterCreation_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterCreation_Variable_value = getTypeAccess().unassignedAfter(v);
-        if (new_unassignedAfterCreation_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterCreation_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterCreation_Variable_value;
         }
@@ -355,7 +335,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterCreation_Variable_value = getTypeAccess().unassignedAfter(v);
-      if (new_unassignedAfterCreation_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterCreation_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterCreation_Variable_value;
       }
@@ -374,27 +354,27 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = hasArrayInit() ? getArrayInit().unassignedAfter(v) : unassignedAfterCreation(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -406,7 +386,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = hasArrayInit() ? getArrayInit().unassignedAfter(v) : unassignedAfterCreation(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -421,7 +401,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -429,13 +409,13 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = getTypeAccess().type();
@@ -443,7 +423,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -453,7 +433,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
     numArrays_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle numArrays_computed = null;
+  protected ASTState.Cycle numArrays_computed = null;
 
   /** @apilevel internal */
   protected int numArrays_value;
@@ -466,8 +446,8 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="InnerClasses", declaredAt="/home/olivier/projects/extendj/java4/backend/InnerClasses.jrag:112")
   public int numArrays() {
-    ASTNode$State state = state();
-    if (numArrays_computed == ASTNode$State.NON_CYCLE || numArrays_computed == state().cycle()) {
+    ASTState state = state();
+    if (numArrays_computed == ASTState.NON_CYCLE || numArrays_computed == state().cycle()) {
       return numArrays_value;
     }
     numArrays_value = numArrays_compute();
@@ -475,7 +455,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
       numArrays_computed = state().cycle();
     
     } else {
-      numArrays_computed = ASTNode$State.NON_CYCLE;
+      numArrays_computed = ASTState.NON_CYCLE;
     
     }
     return numArrays_value;
@@ -502,6 +482,31 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
     return modifiedInScope_Variable_value;
   }
   /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    {
+        if (hasArrayInit()) return getArrayInit().eval(b);
+    
+        ArrayList<Value> list = new ArrayList<>();
+        getTypeAccess().evalArraySize(b, list);
+        if (numArrays() == 1)
+          return b.newNewArrayExpr(
+            type().componentType().sootType(),
+            list.get(0),
+            this);
+    
+        return b.newNewMultiArrayExpr(
+            (soot.ArrayType)type().sootType(),
+            list,
+            this);
+      }
+  }
+  /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
    * @apilevel internal
    */
@@ -514,6 +519,11 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -530,6 +540,11 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -546,22 +561,32 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:713
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
    * @apilevel internal
    */
   public TypeDecl Define_declType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArrayInitOptNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:283
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:282
       return type();
     }
     else {
       return getParent().Define_declType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:723
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declType
+   */
   protected boolean canDefine_declType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -578,6 +603,11 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
       return getParent().Define_expectedType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/backend/InnerClasses.jrag:104
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute expectedType
+   */
   protected boolean canDefine_expectedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -589,6 +619,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:480
     if (!type().isReifiable()) {
@@ -603,6 +634,7 @@ public class ArrayCreationExpr extends PrimaryExpr implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!type().isReifiable()) {

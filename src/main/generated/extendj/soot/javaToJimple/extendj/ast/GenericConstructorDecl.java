@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/GenericMethods.ast:2
+ * @astdecl GenericConstructorDecl : ConstructorDecl ::= TypeParameter:TypeVariable*;
  * @production GenericConstructorDecl : {@link ConstructorDecl} ::= <span class="component">TypeParameter:{@link TypeVariable}*</span>;
 
  */
@@ -78,7 +81,7 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1460
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1459
    */
   public BodyDecl signatureCopy() {
     return new GenericConstructorDeclSubstituted(
@@ -93,7 +96,7 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1557
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1556
    */
   public BodyDecl erasedCopy() {
     return new GenericConstructorDeclErased(
@@ -189,6 +192,11 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "Parameter", "Exception", "ParsedConstructorInvocation", "Block", "TypeParameter"},
+    type = {"Modifiers", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Stmt>", "Block", "List<TypeVariable>"},
+    kind = {"Child", "Token", "List", "List", "Opt", "Child", "List"}
+  )
   public GenericConstructorDecl(Modifiers p0, String p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, List<TypeVariable> p6) {
     setChild(p0, 0);
     setID(p1);
@@ -199,7 +207,7 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
     setChild(p6, 5);
   }
   /**
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   public GenericConstructorDecl(Modifiers p0, beaver.Symbol p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, List<TypeVariable> p6) {
     setChild(p0, 0);
@@ -211,40 +219,40 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
     setChild(p6, 5);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   protected int numChildren() {
     return 6;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     lookupParConstructorDecl_Collection_TypeDecl__reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:56
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:55
+   * @declaredat ASTNode:60
    */
   public GenericConstructorDecl clone() throws CloneNotSupportedException {
     GenericConstructorDecl node = (GenericConstructorDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:60
+   * @declaredat ASTNode:65
    */
   public GenericConstructorDecl copy() {
     try {
@@ -264,7 +272,7 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:79
+   * @declaredat ASTNode:84
    */
   @Deprecated
   public GenericConstructorDecl fullCopy() {
@@ -275,7 +283,7 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:89
+   * @declaredat ASTNode:94
    */
   public GenericConstructorDecl treeCopyNoTransform() {
     GenericConstructorDecl tree = (GenericConstructorDecl) copy();
@@ -301,7 +309,7 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:114
+   * @declaredat ASTNode:119
    */
   public GenericConstructorDecl treeCopy() {
     GenericConstructorDecl tree = (GenericConstructorDecl) copy();
@@ -322,7 +330,7 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:133
+   * @declaredat ASTNode:138
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((GenericConstructorDecl) node).tokenString_ID);    
@@ -809,10 +817,10 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
   /** @apilevel internal */
   private void lookupParConstructorDecl_Collection_TypeDecl__reset() {
     lookupParConstructorDecl_Collection_TypeDecl__values = null;
-    lookupParConstructorDecl_Collection_TypeDecl__list = null;
+    lookupParConstructorDecl_Collection_TypeDecl__proxy = null;
   }
   /** @apilevel internal */
-  protected List lookupParConstructorDecl_Collection_TypeDecl__list;
+  protected ASTNode lookupParConstructorDecl_Collection_TypeDecl__proxy;
   /** @apilevel internal */
   protected java.util.Map lookupParConstructorDecl_Collection_TypeDecl__values;
 
@@ -826,19 +834,22 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
   public ParConstructorDecl lookupParConstructorDecl(Collection<TypeDecl> typeArguments) {
     Object _parameters = typeArguments;
     if (lookupParConstructorDecl_Collection_TypeDecl__values == null) lookupParConstructorDecl_Collection_TypeDecl__values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (lookupParConstructorDecl_Collection_TypeDecl__values.containsKey(_parameters)) {
       return (ParConstructorDecl) lookupParConstructorDecl_Collection_TypeDecl__values.get(_parameters);
     }
     state().enterLazyAttribute();
     ParConstructorDecl lookupParConstructorDecl_Collection_TypeDecl__value = newParConstructorDecl(typeArguments);
-    if (lookupParConstructorDecl_Collection_TypeDecl__list == null) {
-      lookupParConstructorDecl_Collection_TypeDecl__list = new List();
-      lookupParConstructorDecl_Collection_TypeDecl__list.setParent(this);
+    if (lookupParConstructorDecl_Collection_TypeDecl__proxy == null) {
+      lookupParConstructorDecl_Collection_TypeDecl__proxy = new ASTNode();
+      lookupParConstructorDecl_Collection_TypeDecl__proxy.setParent(this);
     }
-    lookupParConstructorDecl_Collection_TypeDecl__list.add(lookupParConstructorDecl_Collection_TypeDecl__value);
     if (lookupParConstructorDecl_Collection_TypeDecl__value != null) {
-      lookupParConstructorDecl_Collection_TypeDecl__value = (ParConstructorDecl) lookupParConstructorDecl_Collection_TypeDecl__list.getChild(lookupParConstructorDecl_Collection_TypeDecl__list.numChildren - 1);
+      lookupParConstructorDecl_Collection_TypeDecl__value.setParent(lookupParConstructorDecl_Collection_TypeDecl__proxy);
+      if (lookupParConstructorDecl_Collection_TypeDecl__value.mayHaveRewrite()) {
+        lookupParConstructorDecl_Collection_TypeDecl__value = (ParConstructorDecl) lookupParConstructorDecl_Collection_TypeDecl__value.rewrittenNode();
+        lookupParConstructorDecl_Collection_TypeDecl__value.setParent(lookupParConstructorDecl_Collection_TypeDecl__proxy);
+      }
     }
     lookupParConstructorDecl_Collection_TypeDecl__values.put(_parameters, lookupParConstructorDecl_Collection_TypeDecl__value);
     state().leaveLazyAttribute();
@@ -864,10 +875,10 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1447
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1446
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1447")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1446")
   public GenericConstructorDecl original() {
     GenericConstructorDecl original_value = this;
     return original_value;
@@ -877,10 +888,10 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
    * substitued generic method or constructor.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:320
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:413
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:320")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:413")
   public boolean isGeneric() {
     boolean isGeneric_value = true;
     return isGeneric_value;
@@ -891,10 +902,10 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
    * @return original generic declaration of this constructor.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:342
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:435
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:342")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:435")
   public GenericConstructorDecl genericDecl() {
     GenericConstructorDecl genericDecl_value = this;
     return genericDecl_value;
@@ -905,10 +916,10 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
    * @return type parameters for this declaration.
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:355
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:448
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:355")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:448")
   public List<TypeVariable> typeParameters() {
     List<TypeVariable> typeParameters_value = getTypeParameterList();
     return typeParameters_value;
@@ -916,10 +927,10 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
   /**
    * @attribute syn
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:255
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:263
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:255")
+  @ASTNodeAnnotation.Source(aspect="GenericsCodegen", declaredAt="/home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:263")
   public boolean needsSignatureAttribute() {
     boolean needsSignatureAttribute_value = true;
     return needsSignatureAttribute_value;
@@ -949,6 +960,11 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
       return super.Define_nameType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -960,6 +976,11 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
     int childIndex = this.getIndexOfChild(_callerNode);
     return localLookupType(name).isEmpty() ? lookupType(name) : localLookupType(name);
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -977,6 +998,11 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
       return getParent().Define_typeVarPosition(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeVariablePositions.jrag:29
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute typeVarPosition
+   */
   protected boolean canDefine_typeVarPosition(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -994,6 +1020,11 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
       return getParent().Define_typeVarInMethod(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeVariablePositions.jrag:32
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute typeVarInMethod
+   */
   protected boolean canDefine_typeVarInMethod(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

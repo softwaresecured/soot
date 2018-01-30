@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /** A method invocation. 
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:84
+ * @astdecl MethodAccess : Access ::= <ID:String> Arg:Expr*;
  * @production MethodAccess : {@link Access} ::= <span class="component">&lt;ID:String&gt;</span> <span class="component">Arg:{@link Expr}*</span>;
 
  */
@@ -66,7 +69,7 @@ public class MethodAccess extends Access implements Cloneable {
    * Filter a set of methods, keeping only the static methods
    * from the input set.
    * @aspect LookupMethod
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:258
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:285
    */
   protected static SimpleSet<MethodDecl> keepStaticMethods(
       SimpleSet<MethodDecl> methods) {
@@ -82,7 +85,7 @@ public class MethodAccess extends Access implements Cloneable {
    * Determine if a candidate method declaration is applicable
    * for this invocation.
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:364
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:391
    */
   public boolean applicable(MethodDecl decl) {
     if (getNumArg() != decl.getNumParameter()) {
@@ -92,7 +95,7 @@ public class MethodAccess extends Access implements Cloneable {
       return false;
     }
     for (int i = 0; i < getNumArg(); i++) {
-      if (!getArg(i).type().instanceOf(decl.getParameter(i).type())) {
+      if (!getArg(i).type().instanceOf(decl.paramType(i))) {
         return false;
       }
     }
@@ -124,7 +127,7 @@ public class MethodAccess extends Access implements Cloneable {
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:68
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:105
    */
   @Override public String toString() {
     return name() + "()";
@@ -145,7 +148,7 @@ public class MethodAccess extends Access implements Cloneable {
   }
   /**
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:789
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:843
    */
   protected boolean moreSpecificThan(MethodDecl m1, MethodDecl m2) {
     if (m1 instanceof ParMethodDecl) {
@@ -197,18 +200,16 @@ public class MethodAccess extends Access implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:374
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:318
    */
-  private ArrayList<soot.Immediate> buildArgList(Body b) {
+  private ArrayList<Immediate> buildArgList(Body b) {
     MethodDecl                decl = decl().erasedMethod();
-    ArrayList<soot.Immediate> list = new ArrayList<>();
+    ArrayList<Immediate> list = new ArrayList<>();
     for(int i = 0; i < getNumArg(); i++)
       list.add(
-        asImmediate(b,
-          getArg(i).type().emitCastTo(b, // MethodInvocationConversion
-            getArg(i),
+        b.asImmediate(
+          getArg(i).evalAndCast(b, // MethodInvocationConversion
             decl.getParameter(i).type().erasure()
-            //decl().getParameter(i).type()
           )
         )
       );
@@ -216,63 +217,29 @@ public class MethodAccess extends Access implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:395
-   */
-  public soot.Value eval(Body b) {
-    // Ensure bytecode is generated for the transformed access.
-    if (transformed() != this) return transformed().eval(b);
-
-    MethodDecl decl = decl().erasedMethod();
-    soot.Value result;
-
-    if (decl.isStatic()) {
-      if (isQualified() && !qualifier().isTypeAccess())
-        b.newTemp(qualifier().eval(b));
-
-      ArrayList<soot.Immediate> list = buildArgList(b);
-      result = b.newStaticInvokeExpr(sootRef(), list, this);
-    } else {
-      Local                     left = asLocal(b, createLoadQualifier(b));
-      ArrayList<soot.Immediate> list = buildArgList(b);
-
-      if (isQualified() && prevExpr().isSuperAccess() || isSuperAccessor)
-        result = b.newSpecialInvokeExpr   (left, sootRef(), list, this);
-      else if (methodQualifierType().isInterfaceDecl())
-        result = b.newInterfaceInvokeExpr (left, sootRef(), list, this);
-      else
-        result = b.newVirtualInvokeExpr   (left, sootRef(), list, this);
-    }
-
-    if (decl.type() != decl().type())
-      result = decl.type().emitCastTo(b, result, decl().type(), this);
-
-    return type().isVoid() ? result : asLocal(b, result);
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:426
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:368
    */
   private SootMethodRef sootRef() {
-    MethodDecl        decl        = decl().erasedMethod();
+    MethodDecl        declErased  = decl().erasedMethod();
     ArrayList<Type>   parameters  = new ArrayList<>();
-    for (int i = 0; i < decl.getNumParameter(); i++)
-      parameters.add(decl.getParameter(i).type().getSootType());
+    for (int i = 0; i < declErased.getNumParameter(); i++)
+      parameters.add(declErased.getParameter(i).type().sootType());
 
     return Scene.v().makeMethodRef(
-      methodQualifierType().getSootClassDecl(),
-      decl.name(),
+      methodQualifierType().sootClass(),
+      declErased.name(),
       parameters,
-      decl.type().getSootType(),
-      decl.isStatic()
+      declErased.type().sootType(),
+      declErased.isStatic()
     );
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:441
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:383
    */
-  private soot.Value createLoadQualifier(Body b) {
+  private Local createLoadQualifier(Body b) {
     if (hasPrevExpr())
-      return asLocal(b, prevExpr().eval(b));
+      return b.asLocal(prevExpr().eval(b));
 
     // load implicit this qualifier
     MethodDecl m = decl().erasedMethod();
@@ -301,32 +268,37 @@ public class MethodAccess extends Access implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Arg"},
+    type = {"String", "List<Expr>"},
+    kind = {"Token", "List"}
+  )
   public MethodAccess(String p0, List<Expr> p1) {
     setID(p0);
     setChild(p1, 0);
   }
   /**
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   public MethodAccess(beaver.Symbol p0, List<Expr> p1) {
     setID(p0);
     setChild(p1, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -349,20 +321,20 @@ public class MethodAccess extends Access implements Cloneable {
     isPolyExpression_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:54
+   * @declaredat ASTNode:59
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:58
+   * @declaredat ASTNode:63
    */
   public MethodAccess clone() throws CloneNotSupportedException {
     MethodAccess node = (MethodAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   public MethodAccess copy() {
     try {
@@ -382,7 +354,7 @@ public class MethodAccess extends Access implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:82
+   * @declaredat ASTNode:87
    */
   @Deprecated
   public MethodAccess fullCopy() {
@@ -393,7 +365,7 @@ public class MethodAccess extends Access implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:92
+   * @declaredat ASTNode:97
    */
   public MethodAccess treeCopyNoTransform() {
     MethodAccess tree = (MethodAccess) copy();
@@ -414,7 +386,7 @@ public class MethodAccess extends Access implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:112
+   * @declaredat ASTNode:117
    */
   public MethodAccess treeCopy() {
     MethodAccess tree = (MethodAccess) copy();
@@ -430,7 +402,7 @@ public class MethodAccess extends Access implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:126
+   * @declaredat ASTNode:131
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((MethodAccess) node).tokenString_ID);    
@@ -585,38 +557,44 @@ public class MethodAccess extends Access implements Cloneable {
   }
   /**
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:862
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:916
    */
    
   protected SimpleSet<MethodDecl> potentiallyApplicable(
-      Collection<MethodDecl> candidates) {
+      Iterable<MethodDecl> candidates) {
     SimpleSet<MethodDecl> potentiallyApplicable = emptySet();
     // Select potentially applicable methods.
     for (MethodDecl method : candidates) {
       if (potentiallyApplicable(method) && accessible(method)) {
-        if (method.isGeneric()) {
+        if (!method.isGeneric()) {
+          potentiallyApplicable = potentiallyApplicable.add(method);
+        } else {
           GenericMethodDecl gm = method.genericDecl();
-          MethodAccess inferenceNode;
-          if (this instanceof ParMethodAccess) {
-            inferenceNode = this;
-          } else {
-            inferenceNode = boundAccess(gm);
+          ParMethodDecl parMethod = (ParMethodDecl) inferTypes(gm).decl();
+          java.util.List<TypeDecl> typeArgs = parMethod.getParameterization().args;
+          if (typeArgs.size() == gm.getNumTypeParameter()) {
+            boolean withinBounds = true;
+            for (int i = 0; i < gm.getNumTypeParameter(); i++) {
+              if (!typeArgs.get(i).withinBounds(parMethod.getTypeParameter(i))) {
+                withinBounds = false;
+                break;
+              }
+            }
+            if (withinBounds) {
+              potentiallyApplicable = potentiallyApplicable.add(parMethod);
+            }
+          } else if (typeArgs.isEmpty()) {
+            // Raw parameterization.
+            potentiallyApplicable = potentiallyApplicable.add(parMethod);
           }
-          Collection<TypeDecl> typeArguments = inferenceNode.inferTypeArguments(
-              method.type(),
-              method.getParameterList(),
-              inferenceNode.getArgList(),
-              gm.getTypeParameterList());
-          method = gm.lookupParMethodDecl(typeArguments);
         }
-        potentiallyApplicable = potentiallyApplicable.add(method);
       }
     }
     return potentiallyApplicable;
   }
   /**
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:838
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:892
    */
    
   private SimpleSet<MethodDecl> mostSpecific(SimpleSet<MethodDecl> maxSpecific,
@@ -646,7 +624,7 @@ public class MethodAccess extends Access implements Cloneable {
    * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:33
    */
    
-  protected SimpleSet<MethodDecl> refined_MethodSignature15_MethodAccess_maxSpecific(Collection<MethodDecl> candidates) {
+  protected SimpleSet<MethodDecl> refined_MethodSignature15_MethodAccess_maxSpecific(Iterable<MethodDecl> candidates) {
     SimpleSet<MethodDecl> potentiallyApplicable = potentiallyApplicable(candidates);
 
     // First phase.
@@ -678,10 +656,10 @@ public class MethodAccess extends Access implements Cloneable {
   }
   /**
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:706
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:760
    */
    
-  protected SimpleSet<MethodDecl> maxSpecific(Collection<MethodDecl> candidates) {
+  protected SimpleSet<MethodDecl> maxSpecific(Iterable<MethodDecl> candidates) {
     SimpleSet<MethodDecl> potentiallyApplicable = potentiallyApplicable(candidates);
 
     // First phase.
@@ -704,7 +682,7 @@ public class MethodAccess extends Access implements Cloneable {
     // Third phase.
     if (maxSpecific.isEmpty()) {
       for (MethodDecl method : potentiallyApplicable) {
-        if (method.isVariableArity() && applicableVariableArity(method)) {
+        if (method.isVariableArity() && boundAccess(method).applicableVariableArity(method)) {
           maxSpecific = mostSpecific(maxSpecific, method);
         }
       }
@@ -713,7 +691,7 @@ public class MethodAccess extends Access implements Cloneable {
   }
   /**
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:307
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:306
    */
   private TypeDecl refined_TypeAnalysis_MethodAccess_type()
 { return decl().type(); }
@@ -777,27 +755,27 @@ public class MethodAccess extends Access implements Cloneable {
     _parameters.add(i);
     _parameters.add(v);
     if (computeDAbefore_int_Variable_values == null) computeDAbefore_int_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (computeDAbefore_int_Variable_values.containsKey(_parameters)) {
       Object _cache = computeDAbefore_int_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       computeDAbefore_int_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_computeDAbefore_int_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_computeDAbefore_int_Variable_value = i == 0 ? assignedBefore(v) : getArg(i-1).assignedAfter(v);
-        if (new_computeDAbefore_int_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_computeDAbefore_int_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_computeDAbefore_int_Variable_value;
         }
@@ -809,7 +787,7 @@ public class MethodAccess extends Access implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_computeDAbefore_int_Variable_value = i == 0 ? assignedBefore(v) : getArg(i-1).assignedAfter(v);
-      if (new_computeDAbefore_int_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_computeDAbefore_int_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_computeDAbefore_int_Variable_value;
       }
@@ -865,27 +843,27 @@ public class MethodAccess extends Access implements Cloneable {
     _parameters.add(i);
     _parameters.add(v);
     if (computeDUbefore_int_Variable_values == null) computeDUbefore_int_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (computeDUbefore_int_Variable_values.containsKey(_parameters)) {
       Object _cache = computeDUbefore_int_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       computeDUbefore_int_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_computeDUbefore_int_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_computeDUbefore_int_Variable_value = i == 0 ? unassignedBefore(v) : getArg(i-1).unassignedAfter(v);
-        if (new_computeDUbefore_int_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_computeDUbefore_int_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_computeDUbefore_int_Variable_value;
         }
@@ -897,7 +875,7 @@ public class MethodAccess extends Access implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_computeDUbefore_int_Variable_value = i == 0 ? unassignedBefore(v) : getArg(i-1).unassignedAfter(v);
-      if (new_computeDUbefore_int_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_computeDUbefore_int_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_computeDUbefore_int_Variable_value;
       }
@@ -916,27 +894,27 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = getNumArg() == 0 ? unassignedBefore(v) : getArg(getNumArg()-1).unassignedAfter(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -948,7 +926,7 @@ public class MethodAccess extends Access implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = getNumArg() == 0 ? unassignedBefore(v) : getArg(getNumArg()-1).unassignedAfter(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -967,20 +945,20 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean unassignedAfterTrue(Variable v) {
     Object _parameters = v;
     if (unassignedAfterTrue_Variable_values == null) unassignedAfterTrue_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterTrue_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterTrue_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterTrue_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterTrue_Variable_value;
@@ -988,7 +966,7 @@ public class MethodAccess extends Access implements Cloneable {
         _value.cycle = state.nextCycle();
         new_unassignedAfterTrue_Variable_value = isFalse()
               || (getNumArg() == 0 ? unassignedBefore(v) : getArg(getNumArg()-1).unassignedAfter(v));
-        if (new_unassignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterTrue_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterTrue_Variable_value;
         }
@@ -1001,7 +979,7 @@ public class MethodAccess extends Access implements Cloneable {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterTrue_Variable_value = isFalse()
             || (getNumArg() == 0 ? unassignedBefore(v) : getArg(getNumArg()-1).unassignedAfter(v));
-      if (new_unassignedAfterTrue_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterTrue_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterTrue_Variable_value;
       }
@@ -1020,20 +998,20 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean unassignedAfterFalse(Variable v) {
     Object _parameters = v;
     if (unassignedAfterFalse_Variable_values == null) unassignedAfterFalse_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterFalse_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterFalse_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterFalse_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterFalse_Variable_value;
@@ -1041,7 +1019,7 @@ public class MethodAccess extends Access implements Cloneable {
         _value.cycle = state.nextCycle();
         new_unassignedAfterFalse_Variable_value = isTrue()
               || (getNumArg() == 0 ? unassignedBefore(v) : getArg(getNumArg()-1).unassignedAfter(v));
-        if (new_unassignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterFalse_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterFalse_Variable_value;
         }
@@ -1054,7 +1032,7 @@ public class MethodAccess extends Access implements Cloneable {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterFalse_Variable_value = isTrue()
             || (getNumArg() == 0 ? unassignedBefore(v) : getArg(getNumArg()-1).unassignedAfter(v));
-      if (new_unassignedAfterFalse_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterFalse_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterFalse_Variable_value;
       }
@@ -1089,7 +1067,7 @@ public class MethodAccess extends Access implements Cloneable {
     exceptionCollection_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle exceptionCollection_computed = null;
+  protected ASTState.Cycle exceptionCollection_computed = null;
 
   /** @apilevel internal */
   protected Collection<TypeDecl> exceptionCollection_value;
@@ -1102,8 +1080,8 @@ public class MethodAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ExceptionHandling", declaredAt="/home/olivier/projects/extendj/java4/frontend/ExceptionHandling.jrag:113")
   public Collection<TypeDecl> exceptionCollection() {
-    ASTNode$State state = state();
-    if (exceptionCollection_computed == ASTNode$State.NON_CYCLE || exceptionCollection_computed == state().cycle()) {
+    ASTState state = state();
+    if (exceptionCollection_computed == ASTState.NON_CYCLE || exceptionCollection_computed == state().cycle()) {
       return exceptionCollection_value;
     }
     exceptionCollection_value = exceptionCollection_compute();
@@ -1111,7 +1089,7 @@ public class MethodAccess extends Access implements Cloneable {
       exceptionCollection_computed = state().cycle();
     
     } else {
-      exceptionCollection_computed = ASTNode$State.NON_CYCLE;
+      exceptionCollection_computed = ASTState.NON_CYCLE;
     
     }
     return exceptionCollection_value;
@@ -1162,10 +1140,10 @@ public class MethodAccess extends Access implements Cloneable {
    * for some reason.
    * @attribute syn
    * @aspect LookupMethod
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:177
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:204
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:177")
+  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:204")
   public MethodDecl singleCandidateDecl() {
     {
         String signature = "";
@@ -1189,7 +1167,7 @@ public class MethodAccess extends Access implements Cloneable {
     decls_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decls_computed = null;
+  protected ASTState.Cycle decls_computed = null;
 
   /** @apilevel internal */
   protected SimpleSet<MethodDecl> decls_value;
@@ -1198,13 +1176,13 @@ public class MethodAccess extends Access implements Cloneable {
    * Find all most specific applicable method declarations for this invocation.
    * @attribute syn
    * @aspect LookupMethod
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:219
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:246
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:219")
+  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:246")
   public SimpleSet<MethodDecl> decls() {
-    ASTNode$State state = state();
-    if (decls_computed == ASTNode$State.NON_CYCLE || decls_computed == state().cycle()) {
+    ASTState state = state();
+    if (decls_computed == ASTState.NON_CYCLE || decls_computed == state().cycle()) {
       return decls_value;
     }
     decls_value = decls_compute();
@@ -1212,7 +1190,7 @@ public class MethodAccess extends Access implements Cloneable {
       decls_computed = state().cycle();
     
     } else {
-      decls_computed = ASTNode$State.NON_CYCLE;
+      decls_computed = ASTState.NON_CYCLE;
     
     }
     return decls_value;
@@ -1231,7 +1209,7 @@ public class MethodAccess extends Access implements Cloneable {
     decl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decl_computed = null;
+  protected ASTState.Cycle decl_computed = null;
 
   /** @apilevel internal */
   protected MethodDecl decl_value;
@@ -1243,13 +1221,13 @@ public class MethodAccess extends Access implements Cloneable {
    * instead.
    * @attribute syn
    * @aspect LookupMethod
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:233
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:260
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:233")
+  @ASTNodeAnnotation.Source(aspect="LookupMethod", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:260")
   public MethodDecl decl() {
-    ASTNode$State state = state();
-    if (decl_computed == ASTNode$State.NON_CYCLE || decl_computed == state().cycle()) {
+    ASTState state = state();
+    if (decl_computed == ASTState.NON_CYCLE || decl_computed == state().cycle()) {
       return decl_value;
     }
     decl_value = decl_compute();
@@ -1257,7 +1235,7 @@ public class MethodAccess extends Access implements Cloneable {
       decl_computed = state().cycle();
     
     } else {
-      decl_computed = ASTNode$State.NON_CYCLE;
+      decl_computed = ASTState.NON_CYCLE;
     
     }
     return decl_value;
@@ -1288,10 +1266,10 @@ public class MethodAccess extends Access implements Cloneable {
    * from this invocation.
    * @attribute syn
    * @aspect MethodDecl
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:383
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:410
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:383")
+  @ASTNodeAnnotation.Source(aspect="MethodDecl", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:410")
   public boolean accessible(MethodDecl m) {
     {
         if (!isQualified()) {
@@ -1370,7 +1348,7 @@ public class MethodAccess extends Access implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -1378,13 +1356,13 @@ public class MethodAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = type_compute();
@@ -1392,7 +1370,7 @@ public class MethodAccess extends Access implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -1414,10 +1392,10 @@ public class MethodAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:149
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:151
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:149")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:151")
   public Collection<Problem> typeProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -1445,12 +1423,34 @@ public class MethodAccess extends Access implements Cloneable {
       }
   }
   /**
+   * Test if this method call has an argument of Unknown type.
+   * 
+   * <p>If an argument has Unknown type, then some error messages should
+   * be skipped because the root error is that the type of the argument
+   * could not be decided.
    * @attribute syn
    * @aspect TypeHierarchyCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:53
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:58
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:53")
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:58")
+  public boolean hasUnknownArg() {
+    {
+        for (Expr arg : getArgList()) {
+          if (arg.type().isUnknown()) {
+            return true;
+          }
+        }
+        return false;
+      }
+  }
+  /**
+   * @attribute syn
+   * @aspect TypeHierarchyCheck
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:69
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:69")
   public Collection<Problem> typeHierarchyProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -1461,7 +1461,7 @@ public class MethodAccess extends Access implements Cloneable {
         if (isQualified() && decl().isAbstract() && qualifier().isSuperAccess()) {
           problems.add(error("may not access abstract methods in superclass"));
         }
-        if (decls().isEmpty() && (!isQualified() || !qualifier().isUnknown())) {
+        if (decls().isEmpty() && !hasUnknownArg() && (!isQualified() || !qualifier().isUnknown())) {
           StringBuilder sb = new StringBuilder();
           sb.append("no method named " + name());
           sb.append("(");
@@ -1548,7 +1548,7 @@ public class MethodAccess extends Access implements Cloneable {
     transformed_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle transformed_computed = null;
+  protected ASTState.Cycle transformed_computed = null;
 
   /** @apilevel internal */
   protected Access transformed_value;
@@ -1561,8 +1561,8 @@ public class MethodAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Transformations", declaredAt="/home/olivier/projects/extendj/java4/backend/Transformations.jrag:33")
   public Access transformed() {
-    ASTNode$State state = state();
-    if (transformed_computed == ASTNode$State.NON_CYCLE || transformed_computed == state().cycle()) {
+    ASTState state = state();
+    if (transformed_computed == ASTState.NON_CYCLE || transformed_computed == state().cycle()) {
       return transformed_value;
     }
     transformed_value = cloneLocationOnto(refined_TransformationsJ8_MethodAccess_transformed());
@@ -1570,7 +1570,7 @@ public class MethodAccess extends Access implements Cloneable {
       transformed_computed = state().cycle();
     
     } else {
-      transformed_computed = ASTNode$State.NON_CYCLE;
+      transformed_computed = ASTState.NON_CYCLE;
     
     }
     return transformed_value;
@@ -1595,7 +1595,7 @@ public class MethodAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="Transformations", declaredAt="/home/olivier/projects/extendj/java4/backend/Transformations.jrag:44")
   public Access transformedQualified() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (transformedQualified_computed) {
       return transformedQualified_value;
     }
@@ -1610,10 +1610,10 @@ public class MethodAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:232
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:325
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:232")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:325")
   public boolean applicableBySubtyping(MethodDecl m) {
     {
         if (m.getNumParameter() != getNumArg()) {
@@ -1632,10 +1632,10 @@ public class MethodAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:260
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:353
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:260")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:353")
   public boolean applicableByMethodInvocationConversion(MethodDecl m) {
     {
         if (m.getNumParameter() != getNumArg()) {
@@ -1654,10 +1654,10 @@ public class MethodAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:285
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:378
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:285")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:378")
   public boolean applicableVariableArity(MethodDecl m) {
     {
         for (int i = 0; i < m.getNumParameter() - 1; i++) {
@@ -1699,10 +1699,10 @@ public class MethodAccess extends Access implements Cloneable {
    * </ul>
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:385
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:478
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:385")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:478")
   public boolean potentiallyApplicable(MethodDecl m) {
     {
         if (!m.name().equals(name())) {
@@ -1744,44 +1744,16 @@ public class MethodAccess extends Access implements Cloneable {
             }
           }
         }
-    
-        if (m.isGeneric()) {
-          GenericMethodDecl gm = m.genericDecl();
-          MethodAccess inferenceNode;
-          if (this instanceof ParMethodAccess) {
-            // Type inference is not needed for a parameterized method access.
-            inferenceNode = this;
-          } else {
-            inferenceNode = boundAccess(gm);
-          }
-          ArrayList<TypeDecl> typeArguments = inferenceNode.inferTypeArguments(
-              gm.type(),
-              gm.getParameterList(),
-              inferenceNode.getArgList(),
-              gm.getTypeParameterList());
-          if (!typeArguments.isEmpty()) {
-            if (gm.getNumTypeParameter() != typeArguments.size()) {
-              return false;
-            }
-            ParMethodDecl parMethod = gm.lookupParMethodDecl(typeArguments);
-            for (int i = 0; i < gm.getNumTypeParameter(); i++) {
-              if (!((TypeDecl) typeArguments.get(i)).withinBounds(parMethod.getTypeParameter(i))) {
-                return false;
-              }
-            }
-          }
-        }
-    
         return true;
       }
   }
   /**
    * @attribute syn
    * @aspect MethodSignature15
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:421
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:514
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:421")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature15", declaredAt="/home/olivier/projects/extendj/java5/frontend/MethodSignature.jrag:514")
   public int arity() {
     int arity_value = getNumArg();
     return arity_value;
@@ -1824,7 +1796,7 @@ public class MethodAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="VariableArityParametersCodegen", declaredAt="/home/olivier/projects/extendj/java5/backend/VariableArityParametersCodegen.jrag:49")
   public MethodAccess transformedVariableArity() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (transformedVariableArity_computed) {
       return transformedVariableArity_value;
     }
@@ -1903,7 +1875,7 @@ public class MethodAccess extends Access implements Cloneable {
     stmtCompatible_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle stmtCompatible_computed = null;
+  protected ASTState.Cycle stmtCompatible_computed = null;
 
   /** @apilevel internal */
   protected boolean stmtCompatible_value;
@@ -1911,13 +1883,13 @@ public class MethodAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect StmtCompatible
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:149
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:153
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:149")
+  @ASTNodeAnnotation.Source(aspect="StmtCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:153")
   public boolean stmtCompatible() {
-    ASTNode$State state = state();
-    if (stmtCompatible_computed == ASTNode$State.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
+    ASTState state = state();
+    if (stmtCompatible_computed == ASTState.NON_CYCLE || stmtCompatible_computed == state().cycle()) {
       return stmtCompatible_value;
     }
     stmtCompatible_value = true;
@@ -1925,7 +1897,7 @@ public class MethodAccess extends Access implements Cloneable {
       stmtCompatible_computed = state().cycle();
     
     } else {
-      stmtCompatible_computed = ASTNode$State.NON_CYCLE;
+      stmtCompatible_computed = ASTState.NON_CYCLE;
     
     }
     return stmtCompatible_value;
@@ -1933,60 +1905,66 @@ public class MethodAccess extends Access implements Cloneable {
   /** @apilevel internal */
   private void boundAccess_MethodDecl_reset() {
     boundAccess_MethodDecl_values = null;
-    boundAccess_MethodDecl_list = null;
+    boundAccess_MethodDecl_proxy = null;
   }
   /** @apilevel internal */
-  protected List boundAccess_MethodDecl_list;
+  protected ASTNode boundAccess_MethodDecl_proxy;
   /** @apilevel internal */
   protected java.util.Map boundAccess_MethodDecl_values;
 
   /**
-   * Builds an NTA bound method access, with a specific target method
-   * declaration.
+   * Creates a method access with a fixed target method declaration.
    * 
    * <p>This is used to pin the type inference to inferring types based on a
    * candidate method declaration, instead of inferring types for an unbound
    * method access - which would cause circularity.
    * 
+   * <p>Binding a method access to a fixed method declaration solves a
+   * circularity issue by creating bottom values for the inference attributes.
+   * This fixes circularlity problems in nested type inference (inferred type
+   * inside generic method argument).
+   * When the innermost type inference is performed, it will try to
+   * access the target type given by the context - this is the point
+   * where the inference becomes circular.
+   * 
    * @return a BoundMethodAccess with the argument method as the target
    * declaration.
    * @attribute syn
    * @aspect MethodSignature18
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:42
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:49
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:42")
+  @ASTNodeAnnotation.Source(aspect="MethodSignature18", declaredAt="/home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:49")
   public MethodAccess boundAccess(MethodDecl decl) {
     Object _parameters = decl;
     if (boundAccess_MethodDecl_values == null) boundAccess_MethodDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
+    ASTState state = state();
     if (boundAccess_MethodDecl_values.containsKey(_parameters)) {
       return (MethodAccess) boundAccess_MethodDecl_values.get(_parameters);
     }
     state().enterLazyAttribute();
-    MethodAccess boundAccess_MethodDecl_value = boundAccess_compute(decl);
-    if (boundAccess_MethodDecl_list == null) {
-      boundAccess_MethodDecl_list = new List();
-      boundAccess_MethodDecl_list.setParent(this);
+    MethodAccess boundAccess_MethodDecl_value = new BoundMethodAccess(name(), getArgList().treeCopyNoTransform(), decl);
+    if (boundAccess_MethodDecl_proxy == null) {
+      boundAccess_MethodDecl_proxy = new ASTNode();
+      boundAccess_MethodDecl_proxy.setParent(this);
     }
-    boundAccess_MethodDecl_list.add(boundAccess_MethodDecl_value);
     if (boundAccess_MethodDecl_value != null) {
-      boundAccess_MethodDecl_value = (MethodAccess) boundAccess_MethodDecl_list.getChild(boundAccess_MethodDecl_list.numChildren - 1);
+      boundAccess_MethodDecl_value.setParent(boundAccess_MethodDecl_proxy);
+      if (boundAccess_MethodDecl_value.mayHaveRewrite()) {
+        boundAccess_MethodDecl_value = (MethodAccess) boundAccess_MethodDecl_value.rewrittenNode();
+        boundAccess_MethodDecl_value.setParent(boundAccess_MethodDecl_proxy);
+      }
     }
     boundAccess_MethodDecl_values.put(_parameters, boundAccess_MethodDecl_value);
     state().leaveLazyAttribute();
     return boundAccess_MethodDecl_value;
   }
   /** @apilevel internal */
-  private MethodAccess boundAccess_compute(MethodDecl decl) {
-      return new BoundMethodAccess(name(), getArgList().treeCopyNoTransform(), decl);
-    }
-  /** @apilevel internal */
   private void isBooleanExpression_reset() {
     isBooleanExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isBooleanExpression_computed = null;
+  protected ASTState.Cycle isBooleanExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isBooleanExpression_value;
@@ -1999,8 +1977,8 @@ public class MethodAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:29")
   public boolean isBooleanExpression() {
-    ASTNode$State state = state();
-    if (isBooleanExpression_computed == ASTNode$State.NON_CYCLE || isBooleanExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isBooleanExpression_computed == ASTState.NON_CYCLE || isBooleanExpression_computed == state().cycle()) {
       return isBooleanExpression_value;
     }
     isBooleanExpression_value = isBooleanExpression_compute();
@@ -2008,7 +1986,7 @@ public class MethodAccess extends Access implements Cloneable {
       isBooleanExpression_computed = state().cycle();
     
     } else {
-      isBooleanExpression_computed = ASTNode$State.NON_CYCLE;
+      isBooleanExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isBooleanExpression_value;
@@ -2027,7 +2005,7 @@ public class MethodAccess extends Access implements Cloneable {
     isNumericExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isNumericExpression_computed = null;
+  protected ASTState.Cycle isNumericExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isNumericExpression_value;
@@ -2040,8 +2018,8 @@ public class MethodAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:60")
   public boolean isNumericExpression() {
-    ASTNode$State state = state();
-    if (isNumericExpression_computed == ASTNode$State.NON_CYCLE || isNumericExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isNumericExpression_computed == ASTState.NON_CYCLE || isNumericExpression_computed == state().cycle()) {
       return isNumericExpression_value;
     }
     isNumericExpression_value = isNumericExpression_compute();
@@ -2049,7 +2027,7 @@ public class MethodAccess extends Access implements Cloneable {
       isNumericExpression_computed = state().cycle();
     
     } else {
-      isNumericExpression_computed = ASTNode$State.NON_CYCLE;
+      isNumericExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isNumericExpression_value;
@@ -2068,7 +2046,7 @@ public class MethodAccess extends Access implements Cloneable {
     isPolyExpression_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isPolyExpression_computed = null;
+  protected ASTState.Cycle isPolyExpression_computed = null;
 
   /** @apilevel internal */
   protected boolean isPolyExpression_value;
@@ -2081,8 +2059,8 @@ public class MethodAccess extends Access implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="PolyExpressions", declaredAt="/home/olivier/projects/extendj/java8/frontend/PolyExpressions.jrag:86")
   public boolean isPolyExpression() {
-    ASTNode$State state = state();
-    if (isPolyExpression_computed == ASTNode$State.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
+    ASTState state = state();
+    if (isPolyExpression_computed == ASTState.NON_CYCLE || isPolyExpression_computed == state().cycle()) {
       return isPolyExpression_value;
     }
     isPolyExpression_value = isPolyExpression_compute();
@@ -2090,7 +2068,7 @@ public class MethodAccess extends Access implements Cloneable {
       isPolyExpression_computed = state().cycle();
     
     } else {
-      isPolyExpression_computed = ASTNode$State.NON_CYCLE;
+      isPolyExpression_computed = ASTState.NON_CYCLE;
     
     }
     return isPolyExpression_value;
@@ -2106,6 +2084,71 @@ public class MethodAccess extends Access implements Cloneable {
       GenericMethodDecl genericDecl = decl().genericDecl();
       return genericDecl.typeVariableInReturn();
     }
+  /**
+   * @attribute syn
+   * @aspect LambdaParametersInference
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:697
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="LambdaParametersInference", declaredAt="/home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:697")
+  public MethodAccess inferTypes(GenericMethodDecl decl) {
+    {
+        MethodDecl prevTarget = decl;
+        while (true) {
+          MethodAccess inferenceNode = boundAccess(prevTarget);
+          Collection<TypeDecl> typeArguments = inferenceNode.inferTypeArguments(
+              decl.type(),
+              decl.getParameterList(),
+              inferenceNode.getArgList(),
+              decl.getTypeParameterList());
+          MethodDecl target = decl.lookupParMethodDecl(typeArguments);
+          if (target == prevTarget) {
+            return inferenceNode;
+          } else {
+            prevTarget = target;
+          }
+        }
+      }
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    {
+        // Ensure bytecode is generated for the transformed access.
+        if (transformed() != this) return transformed().eval(b);
+    
+        MethodDecl declErased = decl().erasedMethod();
+        Value result;
+    
+        if (declErased.isStatic()) {
+          if (isQualified() && !qualifier().isTypeAccess())
+            b.newTemp(qualifier().eval(b));
+    
+          ArrayList<Immediate> list = buildArgList(b);
+          result = b.newStaticInvokeExpr(sootRef(), list, this);
+        } else {
+          Local                 left = b.asLocal(createLoadQualifier(b));
+          ArrayList<Immediate>  list = buildArgList(b);
+    
+          if (isQualified() && prevExpr().isSuperAccess() || isSuperAccessor)
+            result = b.newSpecialInvokeExpr   (left, sootRef(), list, this);
+          else if (methodQualifierType().isInterfaceDecl())
+            result = b.newInterfaceInvokeExpr (left, sootRef(), list, this);
+          else
+            result = b.newVirtualInvokeExpr   (left, sootRef(), list, this);
+        }
+    
+        if (declErased.type() != decl().type())
+          result = declErased.type().emitCastTo(b, result, decl().type(), this);
+    
+        return type().isVoid() ? result : b.asImmediate(result);
+      }
+  }
   /**
    * @return {@code true} if this access is a method call of a non-static method.
    * @attribute syn
@@ -2156,10 +2199,10 @@ public class MethodAccess extends Access implements Cloneable {
   /**
    * @attribute inh
    * @aspect TypeHierarchyCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:184
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:200
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:184")
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:200")
   public boolean inExplicitConstructorInvocation() {
     boolean inExplicitConstructorInvocation_value = getParent().Define_inExplicitConstructorInvocation(this, null);
     return inExplicitConstructorInvocation_value;
@@ -2189,6 +2232,11 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -2206,16 +2254,21 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:89
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:116
    * @apilevel internal
    */
   public Collection<MethodDecl> Define_lookupMethod(ASTNode _callerNode, ASTNode _childNode, String name) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:101
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:128
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return unqualifiedScope().lookupMethod(name);
     }
@@ -2223,16 +2276,21 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_lookupMethod(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupMethod.jrag:116
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupMethod
+   */
   protected boolean canDefine_lookupMethod(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:109
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
    * @apilevel internal
    */
   public boolean Define_hasPackage(ASTNode _callerNode, ASTNode _childNode, String packageName) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:110
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:114
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return unqualifiedScope().hasPackage(packageName);
     }
@@ -2240,6 +2298,11 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_hasPackage(this, _callerNode, packageName);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:113
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute hasPackage
+   */
   protected boolean canDefine_hasPackage(ASTNode _callerNode, ASTNode _childNode, String packageName) {
     return true;
   }
@@ -2248,8 +2311,13 @@ public class MethodAccess extends Access implements Cloneable {
    * @apilevel internal
    */
   public SimpleSet<TypeDecl> Define_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
-    if (_callerNode == boundAccess_MethodDecl_list) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:46
+    if (_callerNode == boundConstructor_ConstructorDecl_proxy) {
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:67
+      int childIndex = _callerNode.getIndexOfChild(_childNode);
+      return unqualifiedScope().lookupType(name);
+    }
+    else if (_callerNode == boundAccess_MethodDecl_proxy) {
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/MethodSignature.jrag:53
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return unqualifiedScope().lookupType(name);
     }
@@ -2258,7 +2326,7 @@ public class MethodAccess extends Access implements Cloneable {
       return unqualifiedScope().lookupType(name);
     }
     else if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:381
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/LookupType.jrag:385
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return unqualifiedScope().lookupType(name);
     }
@@ -2266,6 +2334,11 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_lookupType(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethods.jrag:231
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupType
+   */
   protected boolean canDefine_lookupType(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -2277,6 +2350,11 @@ public class MethodAccess extends Access implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return unqualifiedScope().lookupVariable(name);
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -2295,6 +2373,11 @@ public class MethodAccess extends Access implements Cloneable {
       return isRightChildOfDot();
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:101
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute isRightChildOfDot
+   */
   protected boolean canDefine_isRightChildOfDot(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2313,6 +2396,11 @@ public class MethodAccess extends Access implements Cloneable {
       return prevExpr();
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:118
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute prevExpr
+   */
   protected boolean canDefine_prevExpr(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2330,6 +2418,11 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2341,6 +2434,11 @@ public class MethodAccess extends Access implements Cloneable {
     int childIndex = this.getIndexOfChild(_callerNode);
     return unqualifiedScope().methodHost();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:33
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute methodHost
+   */
   protected boolean canDefine_methodHost(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2349,20 +2447,25 @@ public class MethodAccess extends Access implements Cloneable {
    * @apilevel internal
    */
   public TypeDecl Define_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
-    if (_callerNode == boundAccess_MethodDecl_list) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:180
+    if (_callerNode == boundAccess_MethodDecl_proxy) {
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:364
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return assignConvertedType();
     }
     else if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:183
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:367
       int index = _callerNode.getIndexOfChild(_childNode);
-      return decl().getParameter(index).type();
+      return decl().paramType(index);
     }
     else {
       return getParent().Define_assignConvertedType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:69
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignConvertedType
+   */
   protected boolean canDefine_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2372,7 +2475,7 @@ public class MethodAccess extends Access implements Cloneable {
    */
   public TypeDecl Define_targetType(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:87
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:105
       int i = _callerNode.getIndexOfChild(_childNode);
       {
           MethodDecl decl = decl();
@@ -2391,16 +2494,21 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_targetType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
   protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:349
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:533
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -2408,16 +2516,21 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_assignmentContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:350
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:534
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return true;
     }
@@ -2425,16 +2538,21 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_invocationContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:351
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:535
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -2442,16 +2560,21 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_castContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:352
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:536
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -2459,16 +2582,21 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_stringContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getArgListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:353
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:537
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return false;
     }
@@ -2476,6 +2604,11 @@ public class MethodAccess extends Access implements Cloneable {
       return getParent().Define_numericContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -2487,6 +2620,7 @@ public class MethodAccess extends Access implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java4/frontend/ExceptionHandling.jrag:98
     {
@@ -2497,7 +2631,7 @@ public class MethodAccess extends Access implements Cloneable {
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:147
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:149
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -2506,7 +2640,7 @@ public class MethodAccess extends Access implements Cloneable {
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:51
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:67
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -2515,7 +2649,7 @@ public class MethodAccess extends Access implements Cloneable {
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:499
+    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:496
     if (decl().isDeprecated()
               && !withinDeprecatedAnnotation()
               && hostType().topLevelType() != decl().hostType().topLevelType()
@@ -2538,19 +2672,9 @@ public class MethodAccess extends Access implements Cloneable {
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java8/frontend/UnsupportedFeaturesCheck.jrag:37
-    if (decl().hostType().isInterfaceDecl() && decl().isStatic()) {
-      {
-        java.util.Set<ASTNode> contributors = _map.get(_root);
-        if (contributors == null) {
-          contributors = new java.util.LinkedHashSet<ASTNode>();
-          _map.put((ASTNode) _root, contributors);
-        }
-        contributors.add(this);
-      }
-    }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_accessors(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:99
     if (requiresAccessor()) {
@@ -2566,6 +2690,7 @@ public class MethodAccess extends Access implements Cloneable {
     }
     super.collect_contributors_TypeDecl_accessors(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_signatureDependencies(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/soot8/backend/ResolverDependencies.jrag:26
     if (sootSigDepType().sootDependencyNeeded()) {
@@ -2580,6 +2705,7 @@ public class MethodAccess extends Access implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_signatureDependencies(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_nestedTypes(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
 
 
@@ -2592,6 +2718,7 @@ public class MethodAccess extends Access implements Cloneable {
     }
   }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : exceptionHandlingProblems()) {
@@ -2612,21 +2739,19 @@ public class MethodAccess extends Access implements Cloneable {
     for (Problem value : uncheckedWarnings()) {
       collection.add(value);
     }
-    if (decl().hostType().isInterfaceDecl() && decl().isStatic()) {
-      collection.add(errorf("calling static interface methods is not yet supported in ExtendJ.%n" +
-                "    See https://bitbucket.org/extendj/extendj/issues/220/intstream-and-doublestream-does-not-work"));
-    }
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_accessors(HashSet<BodyDecl> collection) {
     super.contributeTo_TypeDecl_accessors(collection);
     if (requiresAccessor()) {
       collection.add(methodQualifierType().methodAccessor(decl()));
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_signatureDependencies(HashSet<Type> collection) {
     super.contributeTo_CompilationUnit_signatureDependencies(collection);
     if (sootSigDepType().sootDependencyNeeded()) {
-      collection.add(sootSigDepType().getSootType());
+      collection.add(sootSigDepType().sootType());
     }
   }
 }

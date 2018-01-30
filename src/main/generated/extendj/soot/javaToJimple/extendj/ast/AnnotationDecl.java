@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Annotations.ast:2
+ * @astdecl AnnotationDecl : InterfaceDecl ::= SuperInterface:Access*;
  * @production AnnotationDecl : {@link InterfaceDecl} ::= <span class="component">SuperInterface:{@link Access}*</span>;
 
  */
@@ -84,13 +87,18 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "BodyDecl"},
+    type = {"Modifiers", "String", "List<BodyDecl>"},
+    kind = {"Child", "Token", "List"}
+  )
   public AnnotationDecl(Modifiers p0, String p1, List<BodyDecl> p2) {
     setChild(p0, 0);
     setID(p1);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   public AnnotationDecl(Modifiers p0, beaver.Symbol p1, List<BodyDecl> p2) {
     setChild(p0, 0);
@@ -98,20 +106,20 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -119,20 +127,20 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
     containsElementOf_TypeDecl_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public AnnotationDecl clone() throws CloneNotSupportedException {
     AnnotationDecl node = (AnnotationDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:51
+   * @declaredat ASTNode:56
    */
   public AnnotationDecl copy() {
     try {
@@ -152,7 +160,7 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:70
+   * @declaredat ASTNode:75
    */
   @Deprecated
   public AnnotationDecl fullCopy() {
@@ -163,7 +171,7 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:80
+   * @declaredat ASTNode:85
    */
   public AnnotationDecl treeCopyNoTransform() {
     AnnotationDecl tree = (AnnotationDecl) copy();
@@ -189,7 +197,7 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:105
+   * @declaredat ASTNode:110
    */
   public AnnotationDecl treeCopy() {
     AnnotationDecl tree = (AnnotationDecl) copy();
@@ -210,7 +218,7 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:124
+   * @declaredat ASTNode:129
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((AnnotationDecl) node).tokenString_ID);    
@@ -509,7 +517,7 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:170")
   public List getSuperInterfaceList() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getSuperInterfaceList_computed) {
       return (List) getChild(getSuperInterfaceListChildPosition());
     }
@@ -573,27 +581,27 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
   public boolean containsElementOf(TypeDecl typeDecl) {
     Object _parameters = typeDecl;
     if (containsElementOf_TypeDecl_values == null) containsElementOf_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (containsElementOf_TypeDecl_values.containsKey(_parameters)) {
       Object _cache = containsElementOf_TypeDecl_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       containsElementOf_TypeDecl_values.put(_parameters, _value);
       _value.value = false;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_containsElementOf_TypeDecl_value;
       do {
         _value.cycle = state.nextCycle();
         new_containsElementOf_TypeDecl_value = containsElementOf_compute(typeDecl);
-        if (new_containsElementOf_TypeDecl_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_containsElementOf_TypeDecl_value) {
           state.setChangeInCycle();
           _value.value = new_containsElementOf_TypeDecl_value;
         }
@@ -605,7 +613,7 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_containsElementOf_TypeDecl_value = containsElementOf_compute(typeDecl);
-      if (new_containsElementOf_TypeDecl_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_containsElementOf_TypeDecl_value) {
         state.setChangeInCycle();
         _value.value = new_containsElementOf_TypeDecl_value;
       }
@@ -632,10 +640,10 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:761
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:771
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:761")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:771")
   public boolean isAnnotationDecl() {
     boolean isAnnotationDecl_value = true;
     return isAnnotationDecl_value;
@@ -653,6 +661,11 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
       return super.Define_mayUseAnnotationTarget(_callerNode, _childNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:131
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayUseAnnotationTarget
+   */
   protected boolean canDefine_mayUseAnnotationTarget(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -664,6 +677,7 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:174
     {
@@ -676,6 +690,7 @@ public class AnnotationDecl extends InterfaceDecl implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : typeProblems()) {

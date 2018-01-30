@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java8/grammar/Lambda.ast:12
+ * @astdecl BlockLambdaBody : LambdaBody ::= Block;
  * @production BlockLambdaBody : {@link LambdaBody} ::= <span class="component">{@link Block}</span>;
 
  */
@@ -49,7 +52,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
   }
   /**
    * @aspect ReturnCompatible
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:57
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:76
    */
   public boolean noReturnsHasResult() {
     ArrayList<ReturnStmt> returnList = lambdaReturns();
@@ -62,7 +65,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
   }
   /**
    * @aspect ReturnCompatible
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:67
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:86
    */
   public boolean allReturnsHasResult() {
     ArrayList<ReturnStmt> returnList = lambdaReturns();
@@ -79,6 +82,13 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
    */
   public void prettyPrint(PrettyPrinter out) {
     out.print(getBlock());
+  }
+  /**
+   * @aspect PrettyPrintUtil8
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/PrettyPrintUtil.jadd:79
+   */
+  @Override public String toString() {
+    return "{ ... }";
   }
   /**
    * @declaredat ASTNode:1
@@ -99,24 +109,29 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Block"},
+    type = {"Block"},
+    kind = {"Child"}
+  )
   public BlockLambdaBody(Block p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -127,22 +142,23 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
     congruentTo_FunctionDescriptor_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
     BlockLambdaBody_lambdaReturns_computed = null;
     BlockLambdaBody_lambdaReturns_value = null;
+    contributorMap_BlockLambdaBody_lambdaReturns = null;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:48
    */
   public BlockLambdaBody clone() throws CloneNotSupportedException {
     BlockLambdaBody node = (BlockLambdaBody) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:47
+   * @declaredat ASTNode:53
    */
   public BlockLambdaBody copy() {
     try {
@@ -162,7 +178,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:72
    */
   @Deprecated
   public BlockLambdaBody fullCopy() {
@@ -173,7 +189,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:76
+   * @declaredat ASTNode:82
    */
   public BlockLambdaBody treeCopyNoTransform() {
     BlockLambdaBody tree = (BlockLambdaBody) copy();
@@ -194,7 +210,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:96
+   * @declaredat ASTNode:102
    */
   public BlockLambdaBody treeCopy() {
     BlockLambdaBody tree = (BlockLambdaBody) copy();
@@ -210,7 +226,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:110
+   * @declaredat ASTNode:116
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -242,6 +258,21 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
     return (Block) getChildNoTransform(0);
   }
   /**
+   * @aspect <NoAspect>
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:64
+   */
+  /** @apilevel internal */
+protected java.util.Map<ASTNode, java.util.Set<ASTNode>> contributorMap_BlockLambdaBody_lambdaReturns = null;
+
+  /** @apilevel internal */
+  protected void survey_BlockLambdaBody_lambdaReturns() {
+    if (contributorMap_BlockLambdaBody_lambdaReturns == null) {
+      contributorMap_BlockLambdaBody_lambdaReturns = new java.util.IdentityHashMap<ASTNode, java.util.Set<ASTNode>>();
+      collect_contributors_BlockLambdaBody_lambdaReturns(this, contributorMap_BlockLambdaBody_lambdaReturns);
+    }
+  }
+
+  /**
    * @attribute syn
    * @aspect PreciseRethrow
    * @declaredat /home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:43
@@ -257,7 +288,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
     isBlockBody_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isBlockBody_computed = null;
+  protected ASTState.Cycle isBlockBody_computed = null;
 
   /** @apilevel internal */
   protected boolean isBlockBody_value;
@@ -270,8 +301,8 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="LambdaBody", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:29")
   public boolean isBlockBody() {
-    ASTNode$State state = state();
-    if (isBlockBody_computed == ASTNode$State.NON_CYCLE || isBlockBody_computed == state().cycle()) {
+    ASTState state = state();
+    if (isBlockBody_computed == ASTState.NON_CYCLE || isBlockBody_computed == state().cycle()) {
       return isBlockBody_value;
     }
     isBlockBody_value = true;
@@ -279,7 +310,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
       isBlockBody_computed = state().cycle();
     
     } else {
-      isBlockBody_computed = ASTNode$State.NON_CYCLE;
+      isBlockBody_computed = ASTState.NON_CYCLE;
     
     }
     return isBlockBody_value;
@@ -289,7 +320,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
     isExprBody_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isExprBody_computed = null;
+  protected ASTState.Cycle isExprBody_computed = null;
 
   /** @apilevel internal */
   protected boolean isExprBody_value;
@@ -302,8 +333,8 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="LambdaBody", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:30")
   public boolean isExprBody() {
-    ASTNode$State state = state();
-    if (isExprBody_computed == ASTNode$State.NON_CYCLE || isExprBody_computed == state().cycle()) {
+    ASTState state = state();
+    if (isExprBody_computed == ASTState.NON_CYCLE || isExprBody_computed == state().cycle()) {
       return isExprBody_value;
     }
     isExprBody_value = false;
@@ -311,7 +342,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
       isExprBody_computed = state().cycle();
     
     } else {
-      isExprBody_computed = ASTNode$State.NON_CYCLE;
+      isExprBody_computed = ASTState.NON_CYCLE;
     
     }
     return isExprBody_value;
@@ -321,7 +352,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
     voidCompatible_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle voidCompatible_computed = null;
+  protected ASTState.Cycle voidCompatible_computed = null;
 
   /** @apilevel internal */
   protected boolean voidCompatible_value;
@@ -334,8 +365,8 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ReturnCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:40")
   public boolean voidCompatible() {
-    ASTNode$State state = state();
-    if (voidCompatible_computed == ASTNode$State.NON_CYCLE || voidCompatible_computed == state().cycle()) {
+    ASTState state = state();
+    if (voidCompatible_computed == ASTState.NON_CYCLE || voidCompatible_computed == state().cycle()) {
       return voidCompatible_value;
     }
     voidCompatible_value = noReturnsHasResult();
@@ -343,7 +374,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
       voidCompatible_computed = state().cycle();
     
     } else {
-      voidCompatible_computed = ASTNode$State.NON_CYCLE;
+      voidCompatible_computed = ASTState.NON_CYCLE;
     
     }
     return voidCompatible_value;
@@ -353,7 +384,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
     valueCompatible_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle valueCompatible_computed = null;
+  protected ASTState.Cycle valueCompatible_computed = null;
 
   /** @apilevel internal */
   protected boolean valueCompatible_value;
@@ -366,8 +397,8 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ReturnCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:41")
   public boolean valueCompatible() {
-    ASTNode$State state = state();
-    if (valueCompatible_computed == ASTNode$State.NON_CYCLE || valueCompatible_computed == state().cycle()) {
+    ASTState state = state();
+    if (valueCompatible_computed == ASTState.NON_CYCLE || valueCompatible_computed == state().cycle()) {
       return valueCompatible_value;
     }
     valueCompatible_value = allReturnsHasResult() && !getBlock().canCompleteNormally();
@@ -375,14 +406,35 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
       valueCompatible_computed = state().cycle();
     
     } else {
-      valueCompatible_computed = ASTNode$State.NON_CYCLE;
+      valueCompatible_computed = ASTState.NON_CYCLE;
     
     }
     return valueCompatible_value;
   }
+  /**
+   * @attribute syn
+   * @aspect ReturnCompatible
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:47
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="ReturnCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:47")
+  public Collection<TypeDecl> returnTypes() {
+    {
+        Set<TypeDecl> types = null;
+        for (ReturnStmt ret : lambdaReturns()) {
+          if (ret.hasResult()) {
+            if (types == null) {
+              types = new HashSet<TypeDecl>();
+            }
+            types.add(ret.getResult().type());
+          }
+        }
+        return types == null ? Collections.<TypeDecl>emptySet() : types;
+      }
+  }
   /** @apilevel internal */
   private void congruentTo_FunctionDescriptor_reset() {
-    congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
+    congruentTo_FunctionDescriptor_computed = null;
     congruentTo_FunctionDescriptor_values = null;
   }
   /** @apilevel internal */
@@ -392,18 +444,18 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
   /**
    * @attribute syn
    * @aspect LambdaExpr
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:85
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:89
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:85")
+  @ASTNodeAnnotation.Source(aspect="LambdaExpr", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaExpr.jrag:89")
   public boolean congruentTo(FunctionDescriptor fd) {
     Object _parameters = fd;
     if (congruentTo_FunctionDescriptor_computed == null) congruentTo_FunctionDescriptor_computed = new java.util.HashMap(4);
     if (congruentTo_FunctionDescriptor_values == null) congruentTo_FunctionDescriptor_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters) && congruentTo_FunctionDescriptor_computed != null
+    ASTState state = state();
+    if (congruentTo_FunctionDescriptor_values.containsKey(_parameters)
         && congruentTo_FunctionDescriptor_computed.containsKey(_parameters)
-        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTNode$State.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
+        && (congruentTo_FunctionDescriptor_computed.get(_parameters) == ASTState.NON_CYCLE || congruentTo_FunctionDescriptor_computed.get(_parameters) == state().cycle())) {
       return (Boolean) congruentTo_FunctionDescriptor_values.get(_parameters);
     }
     boolean congruentTo_FunctionDescriptor_value = congruentTo_compute(fd);
@@ -413,7 +465,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
     
     } else {
       congruentTo_FunctionDescriptor_values.put(_parameters, congruentTo_FunctionDescriptor_value);
-      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      congruentTo_FunctionDescriptor_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return congruentTo_FunctionDescriptor_value;
@@ -440,87 +492,112 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
       }
     }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:234
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
    * @apilevel internal
    */
   public boolean Define_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:252
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:436
       return false;
     }
     else {
       return getParent().Define_assignmentContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:418
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignmentContext
+   */
   protected boolean canDefine_assignmentContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
    * @apilevel internal
    */
   public boolean Define_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:253
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:437
       return false;
     }
     else {
       return getParent().Define_invocationContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:419
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute invocationContext
+   */
   protected boolean canDefine_invocationContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:236
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
    * @apilevel internal
    */
   public boolean Define_castContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:254
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:438
       return false;
     }
     else {
       return getParent().Define_castContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:420
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute castContext
+   */
   protected boolean canDefine_castContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:255
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:439
       return false;
     }
     else {
       return getParent().Define_stringContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:238
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
    * @apilevel internal
    */
   public boolean Define_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:256
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:440
       return false;
     }
     else {
       return getParent().Define_numericContext(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:422
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute numericContext
+   */
   protected boolean canDefine_numericContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:534
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:536
    * @apilevel internal
    */
   public TypeDecl Define_returnType(ASTNode _callerNode, ASTNode _childNode) {
@@ -551,6 +628,11 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
       return getParent().Define_returnType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:536
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute returnType
+   */
   protected boolean canDefine_returnType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -567,6 +649,11 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
       return getParent().Define_reachable(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:49
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reachable
+   */
   protected boolean canDefine_reachable(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -581,13 +668,13 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
   /**
    * @attribute coll
    * @aspect ReturnCompatible
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:47
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:64
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.COLL)
-  @ASTNodeAnnotation.Source(aspect="ReturnCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:47")
+  @ASTNodeAnnotation.Source(aspect="ReturnCompatible", declaredAt="/home/olivier/projects/extendj/java8/frontend/LambdaBody.jrag:64")
   public ArrayList<ReturnStmt> lambdaReturns() {
-    ASTNode$State state = state();
-    if (BlockLambdaBody_lambdaReturns_computed == ASTNode$State.NON_CYCLE || BlockLambdaBody_lambdaReturns_computed == state().cycle()) {
+    ASTState state = state();
+    if (BlockLambdaBody_lambdaReturns_computed == ASTState.NON_CYCLE || BlockLambdaBody_lambdaReturns_computed == state().cycle()) {
       return BlockLambdaBody_lambdaReturns_value;
     }
     BlockLambdaBody_lambdaReturns_value = lambdaReturns_compute();
@@ -595,7 +682,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
       BlockLambdaBody_lambdaReturns_computed = state().cycle();
     
     } else {
-      BlockLambdaBody_lambdaReturns_computed = ASTNode$State.NON_CYCLE;
+      BlockLambdaBody_lambdaReturns_computed = ASTState.NON_CYCLE;
     
     }
     return BlockLambdaBody_lambdaReturns_value;
@@ -603,10 +690,10 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
   /** @apilevel internal */
   private ArrayList<ReturnStmt> lambdaReturns_compute() {
     ASTNode node = this;
-    while (node != null && !(node instanceof Program)) {
+    while (node != null && !(node instanceof BlockLambdaBody)) {
       node = node.getParent();
     }
-    Program root = (Program) node;
+    BlockLambdaBody root = (BlockLambdaBody) node;
     root.survey_BlockLambdaBody_lambdaReturns();
     ArrayList<ReturnStmt> _computedValue = new ArrayList<ReturnStmt>();
     if (root.contributorMap_BlockLambdaBody_lambdaReturns.containsKey(this)) {
@@ -617,13 +704,14 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
     return _computedValue;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle BlockLambdaBody_lambdaReturns_computed = null;
+  protected ASTState.Cycle BlockLambdaBody_lambdaReturns_computed = null;
 
   /** @apilevel internal */
   protected ArrayList<ReturnStmt> BlockLambdaBody_lambdaReturns_value;
 
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:207
+    // @declaredat /home/olivier/projects/extendj/java8/frontend/TypeCheck.jrag:243
     if (!voidCompatible() && !valueCompatible()) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
@@ -636,6 +724,7 @@ public class BlockLambdaBody extends LambdaBody implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     if (!voidCompatible() && !valueCompatible()) {

@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +39,7 @@ import soot.coffi.CoffiMethodSource;
  * 7.5 Import Declarations
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/StaticImports.ast:4
+ * @astdecl StaticImportDecl : ImportDecl;
  * @production StaticImportDecl : {@link ImportDecl};
 
  */
@@ -60,24 +63,29 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Access"},
+    type = {"Access"},
+    kind = {"Child"}
+  )
   public StaticImportDecl(Access p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:17
+   * @declaredat ASTNode:22
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:23
+   * @declaredat ASTNode:28
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -86,13 +94,13 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
     importedMethods_String_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public StaticImportDecl clone() throws CloneNotSupportedException {
     StaticImportDecl node = (StaticImportDecl) super.clone();
@@ -104,7 +112,7 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   @Deprecated
   public abstract StaticImportDecl fullCopy();
@@ -113,7 +121,7 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:57
+   * @declaredat ASTNode:62
    */
   public abstract StaticImportDecl treeCopyNoTransform();
   /**
@@ -122,7 +130,7 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:65
+   * @declaredat ASTNode:70
    */
   public abstract StaticImportDecl treeCopy();
   /**
@@ -154,10 +162,10 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect StaticImports
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:98
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:106
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:98")
+  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:106")
   public abstract TypeDecl type();
   /** @apilevel internal */
   private void importedTypes_String_reset() {
@@ -169,27 +177,27 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
   public SimpleSet<TypeDecl> importedTypes(String name) {
     Object _parameters = name;
     if (importedTypes_String_values == null) importedTypes_String_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (importedTypes_String_values.containsKey(_parameters)) {
       Object _cache = importedTypes_String_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (SimpleSet<TypeDecl>) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       importedTypes_String_values.put(_parameters, _value);
       _value.value = emptySet();
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       SimpleSet<TypeDecl> new_importedTypes_String_value;
       do {
         _value.cycle = state.nextCycle();
         new_importedTypes_String_value = importedTypes_compute(name);
-        if ((new_importedTypes_String_value == null && ((SimpleSet<TypeDecl>)_value.value) != null) || (new_importedTypes_String_value != null && !new_importedTypes_String_value.equals(((SimpleSet<TypeDecl>)_value.value)))) {
+        if (!AttributeValue.equals(((SimpleSet<TypeDecl>)_value.value), new_importedTypes_String_value)) {
           state.setChangeInCycle();
           _value.value = new_importedTypes_String_value;
         }
@@ -201,7 +209,7 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       SimpleSet<TypeDecl> new_importedTypes_String_value = importedTypes_compute(name);
-      if ((new_importedTypes_String_value == null && ((SimpleSet<TypeDecl>)_value.value) != null) || (new_importedTypes_String_value != null && !new_importedTypes_String_value.equals(((SimpleSet<TypeDecl>)_value.value)))) {
+      if (!AttributeValue.equals(((SimpleSet<TypeDecl>)_value.value), new_importedTypes_String_value)) {
         state.setChangeInCycle();
         _value.value = new_importedTypes_String_value;
       }
@@ -226,31 +234,31 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
   }
   protected java.util.Map importedFields_String_values;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:55")
+  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:63")
   public SimpleSet<Variable> importedFields(String name) {
     Object _parameters = name;
     if (importedFields_String_values == null) importedFields_String_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (importedFields_String_values.containsKey(_parameters)) {
       Object _cache = importedFields_String_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (SimpleSet<Variable>) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       importedFields_String_values.put(_parameters, _value);
       _value.value = emptySet();
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       SimpleSet<Variable> new_importedFields_String_value;
       do {
         _value.cycle = state.nextCycle();
         new_importedFields_String_value = importedFields_compute(name);
-        if ((new_importedFields_String_value == null && ((SimpleSet<Variable>)_value.value) != null) || (new_importedFields_String_value != null && !new_importedFields_String_value.equals(((SimpleSet<Variable>)_value.value)))) {
+        if (!AttributeValue.equals(((SimpleSet<Variable>)_value.value), new_importedFields_String_value)) {
           state.setChangeInCycle();
           _value.value = new_importedFields_String_value;
         }
@@ -262,7 +270,7 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       SimpleSet<Variable> new_importedFields_String_value = importedFields_compute(name);
-      if ((new_importedFields_String_value == null && ((SimpleSet<Variable>)_value.value) != null) || (new_importedFields_String_value != null && !new_importedFields_String_value.equals(((SimpleSet<Variable>)_value.value)))) {
+      if (!AttributeValue.equals(((SimpleSet<Variable>)_value.value), new_importedFields_String_value)) {
         state.setChangeInCycle();
         _value.value = new_importedFields_String_value;
       }
@@ -284,7 +292,7 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
     }
   /** @apilevel internal */
   private void importedMethods_String_reset() {
-    importedMethods_String_computed = new java.util.HashMap(4);
+    importedMethods_String_computed = null;
     importedMethods_String_values = null;
   }
   /** @apilevel internal */
@@ -294,18 +302,18 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect StaticImports
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:76
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:84
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:76")
+  @ASTNodeAnnotation.Source(aspect="StaticImports", declaredAt="/home/olivier/projects/extendj/java5/frontend/StaticImports.jrag:84")
   public Collection<MethodDecl> importedMethods(String name) {
     Object _parameters = name;
     if (importedMethods_String_computed == null) importedMethods_String_computed = new java.util.HashMap(4);
     if (importedMethods_String_values == null) importedMethods_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (importedMethods_String_values.containsKey(_parameters) && importedMethods_String_computed != null
+    ASTState state = state();
+    if (importedMethods_String_values.containsKey(_parameters)
         && importedMethods_String_computed.containsKey(_parameters)
-        && (importedMethods_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || importedMethods_String_computed.get(_parameters) == state().cycle())) {
+        && (importedMethods_String_computed.get(_parameters) == ASTState.NON_CYCLE || importedMethods_String_computed.get(_parameters) == state().cycle())) {
       return (Collection<MethodDecl>) importedMethods_String_values.get(_parameters);
     }
     Collection<MethodDecl> importedMethods_String_value = importedMethods_compute(name);
@@ -315,7 +323,7 @@ public abstract class StaticImportDecl extends ImportDecl implements Cloneable {
     
     } else {
       importedMethods_String_values.put(_parameters, importedMethods_String_value);
-      importedMethods_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      importedMethods_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return importedMethods_String_value;

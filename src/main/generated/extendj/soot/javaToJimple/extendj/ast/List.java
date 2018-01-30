@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,13 +37,14 @@ import beaver.*;
 import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
+ * @astdecl List : ASTNode;
  * @production List : {@link ASTNode};
 
  */
 public class List<T extends ASTNode> extends ASTNode<T> implements Cloneable, Iterable<T> {
   /** Default list pretty printing prints all list elements. 
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:91
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:170
    */
   public void prettyPrint(PrettyPrinter out) {
     for (int i = 0; i < getNumChild(); ++i) {
@@ -82,7 +85,7 @@ public class List<T extends ASTNode> extends ASTNode<T> implements Cloneable, It
   /**
    * @declaredat ASTNode:25
    */
-  public List<T> addAll(java.util.Collection<? extends T> c) {
+  public List<T> addAll(Iterable<? extends T> c) {
     for (T node : c) {
       addChild(node);
     }
@@ -222,10 +225,10 @@ public class List<T extends ASTNode> extends ASTNode<T> implements Cloneable, It
   /**
    * @attribute syn
    * @aspect BooleanExpressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:21
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:24
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:21")
+  @ASTNodeAnnotation.Source(aspect="BooleanExpressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/BooleanExpressions.jrag:24")
   public boolean definesLabel() {
     boolean definesLabel_value = getParent().definesLabel();
     return definesLabel_value;

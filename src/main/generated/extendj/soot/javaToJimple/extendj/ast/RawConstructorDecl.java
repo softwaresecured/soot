@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/GenericMethods.ast:15
+ * @astdecl RawConstructorDecl : ParConstructorDecl;
  * @production RawConstructorDecl : {@link ParConstructorDecl};
 
  */
@@ -64,6 +67,11 @@ public class RawConstructorDecl extends ParConstructorDecl implements Cloneable 
   /**
    * @declaredat ASTNode:18
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "Parameter", "Exception", "ParsedConstructorInvocation", "Block", "TypeArgument", "GenericConstructorDecl", "TypeParameter", "Parameterization"},
+    type = {"Modifiers", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Stmt>", "Block", "List<Access>", "GenericConstructorDecl", "List<TypeVariable>", "Parameterization"},
+    kind = {"Child", "Token", "List", "List", "Opt", "Child", "List", "Token", "List", "Token"}
+  )
   public RawConstructorDecl(Modifiers p0, String p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, List<Access> p6, GenericConstructorDecl p7, List<TypeVariable> p8, Parameterization p9) {
     setChild(p0, 0);
     setID(p1);
@@ -77,7 +85,7 @@ public class RawConstructorDecl extends ParConstructorDecl implements Cloneable 
     setParameterization(p9);
   }
   /**
-   * @declaredat ASTNode:30
+   * @declaredat ASTNode:35
    */
   public RawConstructorDecl(Modifiers p0, beaver.Symbol p1, List<ParameterDeclaration> p2, List<Access> p3, Opt<Stmt> p4, Block p5, List<Access> p6, GenericConstructorDecl p7, List<TypeVariable> p8, Parameterization p9) {
     setChild(p0, 0);
@@ -92,39 +100,39 @@ public class RawConstructorDecl extends ParConstructorDecl implements Cloneable 
     setParameterization(p9);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   protected int numChildren() {
     return 7;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:49
+   * @declaredat ASTNode:54
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:58
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:57
+   * @declaredat ASTNode:62
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:66
    */
   public RawConstructorDecl clone() throws CloneNotSupportedException {
     RawConstructorDecl node = (RawConstructorDecl) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:71
    */
   public RawConstructorDecl copy() {
     try {
@@ -144,7 +152,7 @@ public class RawConstructorDecl extends ParConstructorDecl implements Cloneable 
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:85
+   * @declaredat ASTNode:90
    */
   @Deprecated
   public RawConstructorDecl fullCopy() {
@@ -155,7 +163,7 @@ public class RawConstructorDecl extends ParConstructorDecl implements Cloneable 
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:95
+   * @declaredat ASTNode:100
    */
   public RawConstructorDecl treeCopyNoTransform() {
     RawConstructorDecl tree = (RawConstructorDecl) copy();
@@ -181,7 +189,7 @@ public class RawConstructorDecl extends ParConstructorDecl implements Cloneable 
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:120
+   * @declaredat ASTNode:125
    */
   public RawConstructorDecl treeCopy() {
     RawConstructorDecl tree = (RawConstructorDecl) copy();
@@ -202,7 +210,7 @@ public class RawConstructorDecl extends ParConstructorDecl implements Cloneable 
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:139
+   * @declaredat ASTNode:144
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((RawConstructorDecl) node).tokenString_ID) && (tokenGenericConstructorDecl_GenericConstructorDecl == ((RawConstructorDecl) node).tokenGenericConstructorDecl_GenericConstructorDecl) && (tokenParameterization_Parameterization == ((RawConstructorDecl) node).tokenParameterization_Parameterization);    

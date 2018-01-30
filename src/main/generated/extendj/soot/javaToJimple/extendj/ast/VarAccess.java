@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:81
+ * @astdecl VarAccess : Access ::= <ID:String>;
  * @production VarAccess : {@link Access} ::= <span class="component">&lt;ID:String&gt;</span>;
 
  */
@@ -83,7 +86,7 @@ public class VarAccess extends Access implements Cloneable {
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:64
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:97
    */
   @Override public String toString() {
     return name();
@@ -101,13 +104,13 @@ public class VarAccess extends Access implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:236
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:179
    */
-  protected soot.Value evalField(Body b, Variable v) {
+  protected Value evalField(Body b, Variable v) {
     assert v.isField();
 
     if (v.hostType().isArrayDecl() && v.name().equals("length"))
-      return b.newLengthExpr(asImmediate(b, createLoadQualifier(b)), this);
+      return b.newLengthExpr(createLoadQualifier(b), this);
 
     if (v.isStatic()) {
       if (isQualified() && !qualifier().isTypeAccess())
@@ -115,7 +118,7 @@ public class VarAccess extends Access implements Cloneable {
 
       if (requiresAccessor()) {
         SootMethodRef fn = fieldQualifierType().erasure().fieldAccessor(v).sootRef();
-        return b.newStaticInvokeExpr(fn, Collections.<Value>emptyList(), this);
+        return b.newStaticInvokeExpr(fn, Collections.emptyList(), this);
       }
 
       return b.newStaticFieldRef(sootRef(), this);
@@ -126,43 +129,11 @@ public class VarAccess extends Access implements Cloneable {
       return b.newStaticInvokeExpr(fn, Collections.singletonList(base(b)), this);
     }
 
-    soot.Local base = createLoadQualifier(b);
-    return b.newInstanceFieldRef(base, sootRef(), this);
+    return b.newInstanceFieldRef(createLoadQualifier(b), sootRef(), this);
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:263
-   */
-  public soot.Value eval(Body b) {
-    Variable v = decl();
-
-    if (v instanceof VariableDeclarator ||
-        v instanceof ParameterDeclaration) {
-      if (v.hostType() != hostType())
-        return emitLoadLocalInNestedClass(b);
-
-      return v instanceof VariableDeclarator  ? ((VariableDeclarator  )v).local
-                                              : ((ParameterDeclaration)v).local;
-    }
-
-    if (v instanceof FieldDeclarator) {
-      FieldDeclarator f       = ((FieldDeclarator)v).erasedField();
-      soot.Value      result  = evalField(b, f);
-
-      if (f.type() != v.type())
-        result = f.type().emitCastTo(b, result, v.type(), this);
-
-      return result;
-    }
-
-    if (v instanceof EnumConstant)
-      return evalField(b, v);
-
-    return super.eval(b);
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:291
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:233
    */
   private SootFieldRef sootRef() {
     Variable v = decl();
@@ -171,62 +142,72 @@ public class VarAccess extends Access implements Cloneable {
       v = ((FieldDeclarator) v).erasedField();
 
     return Scene.v().makeFieldRef(
-      fieldQualifierType().getSootClassDecl(),
+      fieldQualifierType().sootClass(),
       v.name(),
-      v.type().getSootType(),
+      v.type().sootType(),
       v.isStatic()
     );
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:325
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:259
    */
-  public soot.Value emitStore(Body b, soot.Value lvalue, soot.Value rvalue, ASTNode location) {
+  protected void emitStore(Body b, Value lvalue, Value rvalue, ASTNode location) {
     Variable v = decl();
     if (v.isField() && requiresAccessor()) {
-      FieldDeclarator f = ((FieldDeclarator)v).erasedField();
-      if (f.isStatic()) {
-        SootMethodRef fn = fieldQualifierType().erasure().fieldAccessor(v).sootRef();
-        return asLocal(b, b.newStaticInvokeExpr(fn, Collections.singletonList(rvalue), this));
+      InvokeExpr invoke;
+      if (((FieldDeclarator)v).erasedField().isStatic()) {
+        invoke = b.newStaticInvokeExpr(
+          fieldQualifierType().erasure().fieldAccessor(v).sootRef(),
+          Collections.singletonList(rvalue),
+          this);
+      } else {
+        invoke = b.newStaticInvokeExpr(
+          fieldQualifierType().erasure().fieldWriteAccessor(v).sootRef(),
+          Arrays.asList(base(b), rvalue),
+          this);
       }
 
-      SootMethodRef         fn    = fieldQualifierType().erasure().fieldWriteAccessor(v).sootRef();
-      java.util.List<Local> list  = Arrays.asList(base(b), asLocal(b, rvalue, lvalue.getType()));
-      return asLocal(b, b.newStaticInvokeExpr(fn, list, this));
+      b.add(b.newInvokeStmt(invoke, this));
+      return;
     }
 
-    return super.emitStore(b, lvalue, rvalue, location);
+    super.emitStore(b, lvalue, rvalue, location);
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:343
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:283
    */
-  public soot.Value emitLoadLocalInNestedClass(Body b) {
+  public Value emitLoadLocalInNestedClass(Body b) {
     if (inExplicitConstructorInvocation() && enclosingBodyDecl() instanceof ConstructorDecl) {
       ConstructorDecl ctor = ((ConstructorDecl)enclosingBodyDecl());
       for (ParameterDeclaration p : ctor.getExplicitisedParameters())
-        if (p.name().equals(decl().name())) return p.local;
+        if (p.name().equals(decl().name())) return b.local(p);
 
       throw new RuntimeException("attempted to access a invalid/undeclared ctor param?");
     }
 
     return b.newInstanceFieldRef(
         b.emitThis(hostType(), this),
-        Scene.v().makeFieldRef(hostType().getSootClassDecl(), decl().capturedParamName(), decl().type().getSootType(), false),
+        Scene.v().makeFieldRef(
+          hostType().sootClass(),
+          decl().capturedParamName(),
+          decl().type().sootType(),
+          false),
         this
-        //hostType().getSootClassDecl().getField("val$" + v.name(), v.type().getSootType()).makeRef()
+        //hostType().sootClass().getField("val$" + v.name(), v.type().sootType()).makeRef()
       );
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:360
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:304
    */
-  public soot.Local createLoadQualifier(Body b) {
+  public Local createLoadQualifier(Body b) {
     Variable v = decl();
     if (v.isField()) {
       FieldDeclarator f = ((FieldDeclarator)v).erasedField();
       if (hasPrevExpr())
-        return asLocal(b, prevExpr().eval(b));
+        return b.asLocal(prevExpr().eval(b));
 
       if (f.isInstanceVariable())
         return emitThis(b, fieldQualifierType().erasure());
@@ -252,30 +233,35 @@ public class VarAccess extends Access implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID"},
+    type = {"String"},
+    kind = {"Token"}
+  )
   public VarAccess(String p0) {
     setID(p0);
   }
   /**
-   * @declaredat ASTNode:15
+   * @declaredat ASTNode:20
    */
   public VarAccess(beaver.Symbol p0) {
     setID(p0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -289,20 +275,20 @@ public class VarAccess extends Access implements Cloneable {
     enclosingLambda_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:41
+   * @declaredat ASTNode:46
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:45
+   * @declaredat ASTNode:50
    */
   public VarAccess clone() throws CloneNotSupportedException {
     VarAccess node = (VarAccess) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   public VarAccess copy() {
     try {
@@ -322,7 +308,7 @@ public class VarAccess extends Access implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:69
+   * @declaredat ASTNode:74
    */
   @Deprecated
   public VarAccess fullCopy() {
@@ -333,7 +319,7 @@ public class VarAccess extends Access implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:79
+   * @declaredat ASTNode:84
    */
   public VarAccess treeCopyNoTransform() {
     VarAccess tree = (VarAccess) copy();
@@ -354,7 +340,7 @@ public class VarAccess extends Access implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:99
+   * @declaredat ASTNode:104
    */
   public VarAccess treeCopy() {
     VarAccess tree = (VarAccess) copy();
@@ -370,7 +356,7 @@ public class VarAccess extends Access implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:113
+   * @declaredat ASTNode:118
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((VarAccess) node).tokenString_ID);    
@@ -433,7 +419,7 @@ public class VarAccess extends Access implements Cloneable {
   }
   /**
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:85
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:93
    */
   private TypeDecl refined_GenericsCodegen_VarAccess_fieldQualifierType()
 {
@@ -452,7 +438,7 @@ public class VarAccess extends Access implements Cloneable {
     return constant_value;
   }
 /** @apilevel internal */
-protected ASTNode$State.Cycle isConstant_cycle = null;
+protected ASTState.Cycle isConstant_cycle = null;
   /** @apilevel internal */
   private void isConstant_reset() {
     isConstant_computed = false;
@@ -472,7 +458,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     if (isConstant_computed) {
       return isConstant_value;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!isConstant_initialized) {
       isConstant_initialized = true;
       isConstant_value = false;
@@ -482,7 +468,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       do {
         isConstant_cycle = state.nextCycle();
         boolean new_isConstant_value = isConstant_compute();
-        if (new_isConstant_value != isConstant_value) {
+        if (isConstant_value != new_isConstant_value) {
           state.setChangeInCycle();
         }
         isConstant_value = new_isConstant_value;
@@ -493,7 +479,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     } else if (isConstant_cycle != state.cycle()) {
       isConstant_cycle = state.cycle();
       boolean new_isConstant_value = isConstant_compute();
-      if (new_isConstant_value != isConstant_value) {
+      if (isConstant_value != new_isConstant_value) {
         state.setChangeInCycle();
       }
       isConstant_value = new_isConstant_value;
@@ -636,27 +622,27 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = unassignedBefore(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -668,7 +654,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = unassignedBefore(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -683,7 +669,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     decls_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decls_computed = null;
+  protected ASTState.Cycle decls_computed = null;
 
   /** @apilevel internal */
   protected SimpleSet<Variable> decls_value;
@@ -691,13 +677,13 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   /**
    * @attribute syn
    * @aspect VariableScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:374
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:342
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:374")
+  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:342")
   public SimpleSet<Variable> decls() {
-    ASTNode$State state = state();
-    if (decls_computed == ASTNode$State.NON_CYCLE || decls_computed == state().cycle()) {
+    ASTState state = state();
+    if (decls_computed == ASTState.NON_CYCLE || decls_computed == state().cycle()) {
       return decls_value;
     }
     decls_value = decls_compute();
@@ -705,7 +691,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       decls_computed = state().cycle();
     
     } else {
-      decls_computed = ASTNode$State.NON_CYCLE;
+      decls_computed = ASTState.NON_CYCLE;
     
     }
     return decls_value;
@@ -733,7 +719,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     decl_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle decl_computed = null;
+  protected ASTState.Cycle decl_computed = null;
 
   /** @apilevel internal */
   protected Variable decl_value;
@@ -741,13 +727,13 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   /**
    * @attribute syn
    * @aspect VariableScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:391
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:359
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:391")
+  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:359")
   public Variable decl() {
-    ASTNode$State state = state();
-    if (decl_computed == ASTNode$State.NON_CYCLE || decl_computed == state().cycle()) {
+    ASTState state = state();
+    if (decl_computed == ASTState.NON_CYCLE || decl_computed == state().cycle()) {
       return decl_value;
     }
     decl_value = decl_compute();
@@ -755,7 +741,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       decl_computed = state().cycle();
     
     } else {
-      decl_computed = ASTNode$State.NON_CYCLE;
+      decl_computed = ASTState.NON_CYCLE;
     
     }
     return decl_value;
@@ -784,7 +770,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
         }
     
         if (decls().size() > 1) {
-          StringBuffer sb = new StringBuffer();
+          StringBuilder sb = new StringBuilder();
           sb.append("several fields named " + name());
           ArrayList<String> fields = new ArrayList<String>();
           for (Variable v : decls()) {
@@ -922,7 +908,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     isFieldAccess_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isFieldAccess_computed = null;
+  protected ASTState.Cycle isFieldAccess_computed = null;
 
   /** @apilevel internal */
   protected boolean isFieldAccess_value;
@@ -935,8 +921,8 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="AccessTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:53")
   public boolean isFieldAccess() {
-    ASTNode$State state = state();
-    if (isFieldAccess_computed == ASTNode$State.NON_CYCLE || isFieldAccess_computed == state().cycle()) {
+    ASTState state = state();
+    if (isFieldAccess_computed == ASTState.NON_CYCLE || isFieldAccess_computed == state().cycle()) {
       return isFieldAccess_value;
     }
     isFieldAccess_value = decl().isClassVariable() || decl().isInstanceVariable();
@@ -944,7 +930,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       isFieldAccess_computed = state().cycle();
     
     } else {
-      isFieldAccess_computed = ASTNode$State.NON_CYCLE;
+      isFieldAccess_computed = ASTState.NON_CYCLE;
     
     }
     return isFieldAccess_value;
@@ -968,7 +954,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -976,13 +962,13 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = decl().type();
@@ -990,7 +976,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -1036,7 +1022,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
           return false;
         }
         FieldDeclarator f = (FieldDeclarator) v;
-        if (f.isPrivate() && !hostType().hasField(v.name())) {
+        if (f.isPrivate() && v.hostType() != hostType()) {
           return true;
         }
         if (f.isProtected() && !f.hostPackage().equals(hostPackage())
@@ -1049,10 +1035,10 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   /**
    * @attribute syn
    * @aspect Enums
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:663
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:645
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:663")
+  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:645")
   public boolean isEnumConstant() {
     boolean isEnumConstant_value = varDecl() instanceof EnumConstant;
     return isEnumConstant_value;
@@ -1090,9 +1076,45 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     boolean isVariable_Variable_value = decl() == var;
     return isVariable_Variable_value;
   }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    {
+        Variable v = decl();
+    
+        if (v instanceof FieldDeclarator) {
+          FieldDeclarator f       = ((FieldDeclarator)v).erasedField();
+          Value           result  = evalField(b, f);
+    
+          if (f.type() != v.type())
+            result = f.type().emitCastTo(b, result, v.type(), this);
+    
+          return result;
+        }
+    
+        if (v instanceof VariableDeclarator   ||
+            v instanceof ParameterDeclaration ||
+            v instanceof CatchParameterDeclaration) {
+          if (v.hostType() != hostType())
+            return emitLoadLocalInNestedClass(b);
+    
+          return b.local(v);
+        }
+    
+        if (v instanceof EnumConstant)
+          return evalField(b, v);
+    
+        return eval_fail("unknown/unhandled variable type: " + v.getClass().getName());
+      }
+  }
   /** @apilevel internal */
   private void base_Body_reset() {
-    base_Body_computed = new java.util.HashMap(4);
+    base_Body_computed = null;
     base_Body_values = null;
   }
   /** @apilevel internal */
@@ -1102,28 +1124,28 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:307
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:249
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:307")
-  public soot.Local base(Body b) {
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:249")
+  public Local base(Body b) {
     Object _parameters = b;
     if (base_Body_computed == null) base_Body_computed = new java.util.HashMap(4);
     if (base_Body_values == null) base_Body_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (base_Body_values.containsKey(_parameters) && base_Body_computed != null
+    ASTState state = state();
+    if (base_Body_values.containsKey(_parameters)
         && base_Body_computed.containsKey(_parameters)
-        && (base_Body_computed.get(_parameters) == ASTNode$State.NON_CYCLE || base_Body_computed.get(_parameters) == state().cycle())) {
-      return (soot.Local) base_Body_values.get(_parameters);
+        && (base_Body_computed.get(_parameters) == ASTState.NON_CYCLE || base_Body_computed.get(_parameters) == state().cycle())) {
+      return (Local) base_Body_values.get(_parameters);
     }
-    soot.Local base_Body_value = asLocal(b, createLoadQualifier(b));
+    Local base_Body_value = b.asLocal(createLoadQualifier(b));
     if (state().inCircle()) {
       base_Body_values.put(_parameters, base_Body_value);
       base_Body_computed.put(_parameters, state().cycle());
     
     } else {
       base_Body_values.put(_parameters, base_Body_value);
-      base_Body_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      base_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return base_Body_value;
@@ -1164,10 +1186,10 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   /**
    * @attribute inh
    * @aspect TypeHierarchyCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:183
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:199
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:183")
+  @ASTNodeAnnotation.Source(aspect="TypeHierarchyCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:199")
   public boolean inExplicitConstructorInvocation() {
     boolean inExplicitConstructorInvocation_value = getParent().Define_inExplicitConstructorInvocation(this, null);
     return inExplicitConstructorInvocation_value;
@@ -1175,10 +1197,10 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   /** Checks if this var access is inside an instance initializer for an enum type. 
    * @attribute inh
    * @aspect Enums
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:581
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:563
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:581")
+  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:563")
   public boolean inEnumInitializer() {
     boolean inEnumInitializer_value = getParent().Define_inEnumInitializer(this, null);
     return inEnumInitializer_value;
@@ -1191,8 +1213,8 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="EnclosingLambda", declaredAt="/home/olivier/projects/extendj/java8/frontend/EnclosingLambda.jrag:32")
   public LambdaExpr enclosingLambda() {
-    ASTNode$State state = state();
-    if (enclosingLambda_computed == ASTNode$State.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
+    ASTState state = state();
+    if (enclosingLambda_computed == ASTState.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
       return enclosingLambda_value;
     }
     enclosingLambda_value = getParent().Define_enclosingLambda(this, null);
@@ -1200,7 +1222,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       enclosingLambda_computed = state().cycle();
     
     } else {
-      enclosingLambda_computed = ASTNode$State.NON_CYCLE;
+      enclosingLambda_computed = ASTState.NON_CYCLE;
     
     }
     return enclosingLambda_value;
@@ -1211,7 +1233,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     enclosingLambda_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle enclosingLambda_computed = null;
+  protected ASTState.Cycle enclosingLambda_computed = null;
 
   /** @apilevel internal */
   protected LambdaExpr enclosingLambda_value;
@@ -1224,6 +1246,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:109
     {
@@ -1243,7 +1266,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       }
       contributors.add(this);
     }
-    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:507
+    // @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:504
     if (decl().isField()
               && decl().getModifiers().hasDeprecatedAnnotation()
               && !withinDeprecatedAnnotation()
@@ -1258,7 +1281,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
         contributors.add(this);
       }
     }
-    // @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:595
+    // @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:577
     if (decl().isStatic()
               && decl().hostType() == hostType()
               && !isConstant()
@@ -1274,6 +1297,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_TypeDecl_accessors(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/jimple8/backend/GenerateClassfile.jrag:68
     if (requiresFieldAccessor() || requiresFieldWriteAccessor()) {
@@ -1301,6 +1325,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     }
     super.collect_contributors_TypeDecl_accessors(_root, _map);
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_signatureDependencies(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/soot8/backend/ResolverDependencies.jrag:21
     if (sootSigDepType().sootDependencyNeeded() && decl() instanceof FieldDeclarator) {
@@ -1315,6 +1340,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
     }
     super.collect_contributors_CompilationUnit_signatureDependencies(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : definiteAssignmentProblems()) {
@@ -1337,6 +1363,7 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       collection.add(error("may not reference a static field of an enum type from here"));
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_TypeDecl_accessors(HashSet<BodyDecl> collection) {
     super.contributeTo_TypeDecl_accessors(collection);
     if (requiresFieldAccessor() || requiresFieldWriteAccessor()) {
@@ -1346,10 +1373,11 @@ protected ASTNode$State.Cycle isConstant_cycle = null;
       collection.add(fieldQualifierType().erasure().fieldWriteAccessor(((FieldDeclarator)decl()).erasedField()));
     }
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_signatureDependencies(HashSet<Type> collection) {
     super.contributeTo_CompilationUnit_signatureDependencies(collection);
     if (sootSigDepType().sootDependencyNeeded() && decl() instanceof FieldDeclarator) {
-      collection.add(sootSigDepType().getSootType());
+      collection.add(sootSigDepType().sootType());
     }
   }
 }

@@ -3,7 +3,7 @@ package soot.javaToJimple.extendj.parser;
 
 import soot.javaToJimple.extendj.ast.*;
 import soot.javaToJimple.extendj.scanner.JavaScanner;
-import soot.javaToJimple.extendj.scanner.Unicode;
+import org.extendj.scanner.Unicode; 
 import beaver.*;
 import java.util.ArrayList;
 

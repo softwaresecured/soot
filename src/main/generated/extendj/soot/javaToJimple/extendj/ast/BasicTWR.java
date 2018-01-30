@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,14 +38,114 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java7/grammar/BasicTWR.ast:1
+ * @astdecl BasicTWR : Stmt ::= Resource:ResourceDeclaration Block;
  * @production BasicTWR : {@link Stmt} ::= <span class="component">Resource:{@link ResourceDeclaration}</span> <span class="component">{@link Block}</span>;
 
  */
 public class BasicTWR extends Stmt implements Cloneable, VariableScope {
   /**
+   * @aspect TryWithResources
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:80
+   */
+  public void jimpleEmit(Body b) {
+    final Body.Label  outerFinallyLbl = b.newLabel(this);
+    final Body.Label  tryEndLbl       = b.newLabel(this);
+    final TypeDecl    throwableType   = lookupType("java.lang", "Throwable");
+
+    // Store the resource in local.
+    final Body.Label resourceBeginLbl = b.addNewLabel(this);
+    getResource().jimpleEmit(b);
+    final Local      resource_local   = b.local(getResource());
+    final Body.Label resourceEndLbl   = b.addNewLabel(this);
+
+    // do the main block
+    final Body.Label blockBeginLbl    = b.addNewLabel(this);
+    getBlock().jimpleEmit(b);
+    final Body.Label blockEndLbl      = b.addNewLabel(this);
+    b.addGoTo(outerFinallyLbl, this);
+
+    // If there was an exception when initializing the resource
+    // we need to directly rethrow the exception.
+    final Local           ex_res                = b.newTemp(throwableType.sootType(), this);
+    final Body.CatchLabel resourceExceptionLbl  = b.newCatchLabel(ex_res, this);
+    b.addLabel(resourceExceptionLbl);
+    b.add(b.newThrowStmt(ex_res, this));
+    b.addTrap(throwableType, resourceBeginLbl, resourceEndLbl, resourceExceptionLbl);
+
+    //if (gen.addressOf(blockBeginLbl) != gen.addressOf(blockEndLbl)) {
+    {
+      final Body.Label      innerFinallyLbl   = b.newLabel(this);
+
+      // Catch primary exception:
+      // operand stack: .., #primary
+      final Local           ex_primary        = b.newTemp(throwableType.sootType(), this);
+      final Body.CatchLabel catchPrimaryLbl   = b.newCatchLabel(ex_primary, this);
+      b.addLabel(catchPrimaryLbl);
+
+      // Try-close resource:
+      final Body.Label      tryCloseBeginLbl  = b.addNewLabel(this);
+      jimpleEmit_closeResIfNotNull(b, resource_local, innerFinallyLbl);
+      final Body.Label      tryCloseEndLbl    = b.addNewLabel(this);
+      b.addGoTo(innerFinallyLbl, this);
+
+      // Catch suppressed exception.
+      // operand stack: .., #primary, #suppressed
+      final Local           ex_suppressed       = b.newTemp(throwableType.sootType(), this);
+      final Body.CatchLabel catchSuppressedLbl  = b.newCatchLabel(ex_suppressed, this);
+      b.addLabel(catchSuppressedLbl);
+      b.add(jimpleEmit_methodInvokeStmt(b, addSuppressedMethod(), throwableType,
+                                          ex_primary, Collections.singletonList(ex_suppressed)));
+
+      // Inner finally:
+      // operand stack: .., #primary
+      b.addLabel(innerFinallyLbl);
+      b.add(b.newThrowStmt(ex_primary, this));
+
+      // If there was an exception during the block of the try
+      // statement, then we should try to close the resource.
+      b.addTrap(throwableType, blockBeginLbl, blockEndLbl, catchPrimaryLbl);
+
+      // If an exception occurrs during the automatic closing
+      // of a resource after an exception in the try block...
+      b.addTrap(throwableType, tryCloseBeginLbl, tryCloseEndLbl, catchSuppressedLbl);
+    }
+
+    // Outer finally.
+    b.addLabel(outerFinallyLbl);
+    jimpleEmit_closeResIfNotNull(b, resource_local, tryEndLbl);
+
+    b.addLabel(tryEndLbl);
+  }
+  /**
+   * @aspect TryWithResources
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:150
+   */
+  private void jimpleEmit_closeResIfNotNull(Body b, Local res_var, Body.Label end) {
+    TypeDecl auto_close = lookupType("java.lang", "AutoCloseable");
+
+    b.add(b.newIfStmt(
+      b.newEqExpr(res_var, new NullLiteral().eval(b), this),
+      end.stmt,
+      this));
+
+    b.add(jimpleEmit_methodInvokeStmt(b, closeMethod(), auto_close, res_var, new ArrayList<>()));
+  }
+  /**
+   * @aspect TryWithResources
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:161
+   */
+  private soot.jimple.InvokeStmt jimpleEmit_methodInvokeStmt(Body b, MethodDecl decl, TypeDecl host,
+                                       Local base, java.util.List<? extends Immediate> args) {
+    assert !decl.isStatic();
+    final soot.jimple.InvokeExpr expr =
+      host.isInterfaceDecl()  ? b.newInterfaceInvokeExpr(base, decl.sootRef(), args, this)
+                              : b.  newVirtualInvokeExpr(base, decl.sootRef(), args, this);
+    return b.newInvokeStmt(expr, this);
+  }
+  /**
    * Lookup the java.lang.Throwable.close() method.
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:82
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:174
    */
   private MethodDecl closeMethod() {
     TypeDecl autoCloseableType = lookupType("java.lang", "AutoCloseable");
@@ -61,7 +163,7 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
   /**
    * Lookup the java.lang.Throwable.addSuppressed(Throwable) method.
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:99
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:191
    */
   private MethodDecl addSuppressedMethod() {
     TypeDecl throwableType = lookupType("java.lang", "Throwable");
@@ -96,47 +198,52 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Resource", "Block"},
+    type = {"ResourceDeclaration", "Block"},
+    kind = {"Child", "Child"}
+  )
   public BasicTWR(ResourceDeclaration p0, Block p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
-    localLookup_String_reset();
     localVariableDeclaration_String_reset();
+    localLookup_String_reset();
     lookupVariable_String_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:35
+   * @declaredat ASTNode:40
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:39
+   * @declaredat ASTNode:44
    */
   public BasicTWR clone() throws CloneNotSupportedException {
     BasicTWR node = (BasicTWR) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public BasicTWR copy() {
     try {
@@ -156,7 +263,7 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:63
+   * @declaredat ASTNode:68
    */
   @Deprecated
   public BasicTWR fullCopy() {
@@ -167,7 +274,7 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:73
+   * @declaredat ASTNode:78
    */
   public BasicTWR treeCopyNoTransform() {
     BasicTWR tree = (BasicTWR) copy();
@@ -188,7 +295,7 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:93
+   * @declaredat ASTNode:98
    */
   public BasicTWR treeCopy() {
     BasicTWR tree = (BasicTWR) copy();
@@ -204,7 +311,7 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:107
+   * @declaredat ASTNode:112
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -273,54 +380,8 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
     return modifiedInScope_Variable_value;
   }
   /** @apilevel internal */
-  private void localLookup_String_reset() {
-    localLookup_String_computed = new java.util.HashMap(4);
-    localLookup_String_values = null;
-  }
-  /** @apilevel internal */
-  protected java.util.Map localLookup_String_values;
-  /** @apilevel internal */
-  protected java.util.Map localLookup_String_computed;
-  /**
-   * @attribute syn
-   * @aspect MultiCatch
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/MultiCatch.jrag:103
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MultiCatch", declaredAt="/home/olivier/projects/extendj/jimple8/backend/MultiCatch.jrag:103")
-  public SimpleSet<Variable> localLookup(String name) {
-    Object _parameters = name;
-    if (localLookup_String_computed == null) localLookup_String_computed = new java.util.HashMap(4);
-    if (localLookup_String_values == null) localLookup_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (localLookup_String_values.containsKey(_parameters) && localLookup_String_computed != null
-        && localLookup_String_computed.containsKey(_parameters)
-        && (localLookup_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || localLookup_String_computed.get(_parameters) == state().cycle())) {
-      return (SimpleSet<Variable>) localLookup_String_values.get(_parameters);
-    }
-    SimpleSet<Variable> localLookup_String_value = localLookup_compute(name);
-    if (state().inCircle()) {
-      localLookup_String_values.put(_parameters, localLookup_String_value);
-      localLookup_String_computed.put(_parameters, state().cycle());
-    
-    } else {
-      localLookup_String_values.put(_parameters, localLookup_String_value);
-      localLookup_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
-    
-    }
-    return localLookup_String_value;
-  }
-  /** @apilevel internal */
-  private SimpleSet<Variable> localLookup_compute(String name) {
-      VariableDeclarator v = localVariableDeclaration(name);
-      if (v != null) {
-        return v;
-      }
-      return lookupVariable(name);
-    }
-  /** @apilevel internal */
   private void localVariableDeclaration_String_reset() {
-    localVariableDeclaration_String_computed = new java.util.HashMap(4);
+    localVariableDeclaration_String_computed = null;
     localVariableDeclaration_String_values = null;
   }
   /** @apilevel internal */
@@ -329,19 +390,19 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
   protected java.util.Map localVariableDeclaration_String_computed;
   /**
    * @attribute syn
-   * @aspect MultiCatch
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/MultiCatch.jrag:111
+   * @aspect TryWithResources
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:219
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="MultiCatch", declaredAt="/home/olivier/projects/extendj/jimple8/backend/MultiCatch.jrag:111")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:219")
   public VariableDeclarator localVariableDeclaration(String name) {
     Object _parameters = name;
     if (localVariableDeclaration_String_computed == null) localVariableDeclaration_String_computed = new java.util.HashMap(4);
     if (localVariableDeclaration_String_values == null) localVariableDeclaration_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (localVariableDeclaration_String_values.containsKey(_parameters) && localVariableDeclaration_String_computed != null
+    ASTState state = state();
+    if (localVariableDeclaration_String_values.containsKey(_parameters)
         && localVariableDeclaration_String_computed.containsKey(_parameters)
-        && (localVariableDeclaration_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || localVariableDeclaration_String_computed.get(_parameters) == state().cycle())) {
+        && (localVariableDeclaration_String_computed.get(_parameters) == ASTState.NON_CYCLE || localVariableDeclaration_String_computed.get(_parameters) == state().cycle())) {
       return (VariableDeclarator) localVariableDeclaration_String_values.get(_parameters);
     }
     VariableDeclarator localVariableDeclaration_String_value = getResource().declaresVariable(name) ? getResource() : null;
@@ -351,26 +412,71 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
     
     } else {
       localVariableDeclaration_String_values.put(_parameters, localVariableDeclaration_String_value);
-      localVariableDeclaration_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      localVariableDeclaration_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return localVariableDeclaration_String_value;
   }
+  /** @apilevel internal */
+  private void localLookup_String_reset() {
+    localLookup_String_computed = null;
+    localLookup_String_values = null;
+  }
+  /** @apilevel internal */
+  protected java.util.Map localLookup_String_values;
+  /** @apilevel internal */
+  protected java.util.Map localLookup_String_computed;
+  /**
+   * @attribute syn
+   * @aspect TryWithResources
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:222
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:222")
+  public SimpleSet<Variable> localLookup(String name) {
+    Object _parameters = name;
+    if (localLookup_String_computed == null) localLookup_String_computed = new java.util.HashMap(4);
+    if (localLookup_String_values == null) localLookup_String_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (localLookup_String_values.containsKey(_parameters)
+        && localLookup_String_computed.containsKey(_parameters)
+        && (localLookup_String_computed.get(_parameters) == ASTState.NON_CYCLE || localLookup_String_computed.get(_parameters) == state().cycle())) {
+      return (SimpleSet<Variable>) localLookup_String_values.get(_parameters);
+    }
+    SimpleSet<Variable> localLookup_String_value = localLookup_compute(name);
+    if (state().inCircle()) {
+      localLookup_String_values.put(_parameters, localLookup_String_value);
+      localLookup_String_computed.put(_parameters, state().cycle());
+    
+    } else {
+      localLookup_String_values.put(_parameters, localLookup_String_value);
+      localLookup_String_computed.put(_parameters, ASTState.NON_CYCLE);
+    
+    }
+    return localLookup_String_value;
+  }
+  /** @apilevel internal */
+  private SimpleSet<Variable> localLookup_compute(String name) {
+      VariableDeclarator v = localVariableDeclaration(name);
+      if (v != null) return v;
+  
+      return lookupVariable(name);
+    }
   /**
    * @attribute inh
-   * @aspect MultiCatch
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/MultiCatch.jrag:116
+   * @aspect TryWithResources
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:217
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="MultiCatch", declaredAt="/home/olivier/projects/extendj/jimple8/backend/MultiCatch.jrag:116")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:217")
   public SimpleSet<Variable> lookupVariable(String name) {
     Object _parameters = name;
     if (lookupVariable_String_computed == null) lookupVariable_String_computed = new java.util.HashMap(4);
     if (lookupVariable_String_values == null) lookupVariable_String_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (lookupVariable_String_values.containsKey(_parameters) && lookupVariable_String_computed != null
+    ASTState state = state();
+    if (lookupVariable_String_values.containsKey(_parameters)
         && lookupVariable_String_computed.containsKey(_parameters)
-        && (lookupVariable_String_computed.get(_parameters) == ASTNode$State.NON_CYCLE || lookupVariable_String_computed.get(_parameters) == state().cycle())) {
+        && (lookupVariable_String_computed.get(_parameters) == ASTState.NON_CYCLE || lookupVariable_String_computed.get(_parameters) == state().cycle())) {
       return (SimpleSet<Variable>) lookupVariable_String_values.get(_parameters);
     }
     SimpleSet<Variable> lookupVariable_String_value = getParent().Define_lookupVariable(this, null, name);
@@ -380,14 +486,14 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
     
     } else {
       lookupVariable_String_values.put(_parameters, lookupVariable_String_value);
-      lookupVariable_String_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      lookupVariable_String_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return lookupVariable_String_value;
   }
   /** @apilevel internal */
   private void lookupVariable_String_reset() {
-    lookupVariable_String_computed = new java.util.HashMap(4);
+    lookupVariable_String_computed = null;
     lookupVariable_String_values = null;
   }
   /** @apilevel internal */
@@ -395,34 +501,23 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
   /** @apilevel internal */
   protected java.util.Map lookupVariable_String_computed;
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
-   * @apilevel internal
-   */
-  public SimpleSet<Variable> Define_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
-    if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/MultiCatch.jrag:101
-      return localLookup(name);
-    }
-    else {
-      return getParent().Define_lookupVariable(this, _callerNode, name);
-    }
-  }
-  protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
-    return true;
-  }
-  /**
    * @declaredat /home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:133
    * @apilevel internal
    */
   public Modifiers Define_declarationModifiers(ASTNode _callerNode, ASTNode _childNode) {
     if (getResourceNoTransform() != null && _callerNode == getResource()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:119
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:211
       return getResource().getModifiers();
     }
     else {
       return getParent().Define_declarationModifiers(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:133
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declarationModifiers
+   */
   protected boolean canDefine_declarationModifiers(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -432,14 +527,40 @@ public class BasicTWR extends Stmt implements Cloneable, VariableScope {
    */
   public Access Define_declarationType(ASTNode _callerNode, ASTNode _childNode) {
     if (getResourceNoTransform() != null && _callerNode == getResource()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:121
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:213
       return getResource().getResourceType();
     }
     else {
       return getParent().Define_declarationType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:144
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute declarationType
+   */
   protected boolean canDefine_declarationType(ASTNode _callerNode, ASTNode _childNode) {
+    return true;
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   */
+  public SimpleSet<Variable> Define_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
+    if (getBlockNoTransform() != null && _callerNode == getBlock()) {
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/TryWithResources.jrag:215
+      return localLookup(name);
+    }
+    else {
+      return getParent().Define_lookupVariable(this, _callerNode, name);
+    }
+  }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
+  protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /** @apilevel internal */

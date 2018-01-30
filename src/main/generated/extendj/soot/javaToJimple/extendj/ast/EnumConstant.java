@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Enums.ast:3
+ * @astdecl EnumConstant : BodyDecl ::= Modifiers <ID:String> Arg:Expr* [Init:Expr] TypeAccess:Access;
  * @production EnumConstant : {@link BodyDecl} ::= <span class="component">{@link Modifiers}</span> <span class="component">&lt;ID:String&gt;</span> <span class="component">Arg:{@link Expr}*</span> <span class="component">[Init:{@link Expr}]</span> <span class="component">TypeAccess:{@link Access}</span>;
 
  */
@@ -194,6 +197,11 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "ID", "Arg", "Init"},
+    type = {"Modifiers", "String", "List<Expr>", "Opt<Expr>"},
+    kind = {"Child", "Token", "List", "Opt"}
+  )
   public EnumConstant(Modifiers p0, String p1, List<Expr> p2, Opt<Expr> p3) {
     setChild(p0, 0);
     setID(p1);
@@ -201,7 +209,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
     setChild(p3, 2);
   }
   /**
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   public EnumConstant(Modifiers p0, beaver.Symbol p1, List<Expr> p2, Opt<Expr> p3) {
     setChild(p0, 0);
@@ -210,20 +218,20 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
     setChild(p3, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -233,20 +241,20 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
     localMethodsSignatureMap_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:46
+   * @declaredat ASTNode:51
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:50
+   * @declaredat ASTNode:55
    */
   public EnumConstant clone() throws CloneNotSupportedException {
     EnumConstant node = (EnumConstant) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:55
+   * @declaredat ASTNode:60
    */
   public EnumConstant copy() {
     try {
@@ -266,7 +274,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:74
+   * @declaredat ASTNode:79
    */
   @Deprecated
   public EnumConstant fullCopy() {
@@ -277,7 +285,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:84
+   * @declaredat ASTNode:89
    */
   public EnumConstant treeCopyNoTransform() {
     EnumConstant tree = (EnumConstant) copy();
@@ -303,7 +311,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:109
+   * @declaredat ASTNode:114
    */
   public EnumConstant treeCopy() {
     EnumConstant tree = (EnumConstant) copy();
@@ -324,7 +332,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:128
+   * @declaredat ASTNode:133
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((EnumConstant) node).tokenString_ID);    
@@ -763,7 +771,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
     isEffectivelyFinal_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isEffectivelyFinal_computed = null;
+  protected ASTState.Cycle isEffectivelyFinal_computed = null;
 
   /** @apilevel internal */
   protected boolean isEffectivelyFinal_value;
@@ -776,8 +784,8 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:228")
   public boolean isEffectivelyFinal() {
-    ASTNode$State state = state();
-    if (isEffectivelyFinal_computed == ASTNode$State.NON_CYCLE || isEffectivelyFinal_computed == state().cycle()) {
+    ASTState state = state();
+    if (isEffectivelyFinal_computed == ASTState.NON_CYCLE || isEffectivelyFinal_computed == state().cycle()) {
       return isEffectivelyFinal_value;
     }
     isEffectivelyFinal_value = isFinal();
@@ -785,7 +793,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
       isEffectivelyFinal_computed = state().cycle();
     
     } else {
-      isEffectivelyFinal_computed = ASTNode$State.NON_CYCLE;
+      isEffectivelyFinal_computed = ASTState.NON_CYCLE;
     
     }
     return isEffectivelyFinal_value;
@@ -844,7 +852,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
     throwTypes_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle throwTypes_computed = null;
+  protected ASTState.Cycle throwTypes_computed = null;
 
   /** @apilevel internal */
   protected Collection<TypeDecl> throwTypes_value;
@@ -857,8 +865,8 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:253")
   public Collection<TypeDecl> throwTypes() {
-    ASTNode$State state = state();
-    if (throwTypes_computed == ASTNode$State.NON_CYCLE || throwTypes_computed == state().cycle()) {
+    ASTState state = state();
+    if (throwTypes_computed == ASTState.NON_CYCLE || throwTypes_computed == state().cycle()) {
       return throwTypes_value;
     }
     throwTypes_value = throwTypes_compute();
@@ -866,7 +874,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
       throwTypes_computed = state().cycle();
     
     } else {
-      throwTypes_computed = ASTNode$State.NON_CYCLE;
+      throwTypes_computed = ASTState.NON_CYCLE;
     
     }
     return throwTypes_value;
@@ -908,7 +916,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:277")
   public Access getTypeAccess() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getTypeAccess_computed) {
       return (Access) getChild(getTypeAccessChildPosition());
     }
@@ -923,10 +931,10 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   /**
    * @attribute syn
    * @aspect Enums
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:821
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:801
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:821")
+  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:801")
   public SimpleSet<MethodDecl> localMethodsSignature(String signature) {
     {
         SimpleSet<MethodDecl> set = localMethodsSignatureMap().get(signature);
@@ -942,7 +950,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
     localMethodsSignatureMap_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle localMethodsSignatureMap_computed = null;
+  protected ASTState.Cycle localMethodsSignatureMap_computed = null;
 
   /** @apilevel internal */
   protected Map<String, SimpleSet<MethodDecl>> localMethodsSignatureMap_value;
@@ -950,13 +958,13 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   /** Maps method signature to method declaration. 
    * @attribute syn
    * @aspect Enums
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:830
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:810
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:830")
+  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:810")
   public Map<String, SimpleSet<MethodDecl>> localMethodsSignatureMap() {
-    ASTNode$State state = state();
-    if (localMethodsSignatureMap_computed == ASTNode$State.NON_CYCLE || localMethodsSignatureMap_computed == state().cycle()) {
+    ASTState state = state();
+    if (localMethodsSignatureMap_computed == ASTState.NON_CYCLE || localMethodsSignatureMap_computed == state().cycle()) {
       return localMethodsSignatureMap_value;
     }
     localMethodsSignatureMap_value = localMethodsSignatureMap_compute();
@@ -964,7 +972,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
       localMethodsSignatureMap_computed = state().cycle();
     
     } else {
-      localMethodsSignatureMap_computed = ASTNode$State.NON_CYCLE;
+      localMethodsSignatureMap_computed = ASTState.NON_CYCLE;
     
     }
     return localMethodsSignatureMap_value;
@@ -984,10 +992,10 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   /**
    * @attribute syn
    * @aspect Enums
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:853
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:835
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:853")
+  @ASTNodeAnnotation.Source(aspect="Enums", declaredAt="/home/olivier/projects/extendj/java5/frontend/Enums.jrag:835")
   public boolean implementsMethod(MethodDecl method) {
     {
         SimpleSet<MethodDecl> methods = localMethodsSignature(method.signature());
@@ -1051,10 +1059,10 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:278
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:278")
   public boolean isProtected() {
     boolean isProtected_value = getModifiers().isProtected();
     return isProtected_value;
@@ -1062,13 +1070,24 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:282")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:280")
   public boolean isPrivate() {
     boolean isPrivate_value = getModifiers().isPrivate();
     return isPrivate_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect EmitJimple
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:74
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="EmitJimple", declaredAt="/home/olivier/projects/extendj/jimple8/backend/EmitJimple.jrag:74")
+  public soot.Type sootType() {
+    soot.Type sootType_value = type().sootType();
+    return sootType_value;
   }
   /**
    * @attribute syn
@@ -1084,10 +1103,10 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:641
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:637
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:641")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:637")
   public String hostPackage() {
     String hostPackage_value = getParent().Define_hostPackage(this, null);
     return hostPackage_value;
@@ -1095,10 +1114,10 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1385")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384")
   public FieldDecl fieldDecl() {
     FieldDecl fieldDecl_value = getParent().Define_fieldDecl(this, null);
     return fieldDecl_value;
@@ -1116,17 +1135,27 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
       return getParent().Define_mayUseAnnotationTarget(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:131
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute mayUseAnnotationTarget
+   */
   protected boolean canDefine_mayUseAnnotationTarget(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:207
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
    * @apilevel internal
    */
   public boolean Define_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
     int childIndex = this.getIndexOfChild(_callerNode);
     return isStatic();
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeHierarchyCheck.jrag:223
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute inStaticContext
+   */
   protected boolean canDefine_inStaticContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1136,13 +1165,18 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
    */
   public NameType Define_nameType(ASTNode _callerNode, ASTNode _childNode) {
     if (getTypeAccessNoTransform() != null && _callerNode == getTypeAccess()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:646
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Enums.jrag:628
       return NameType.TYPE_NAME;
     }
     else {
       return getParent().Define_nameType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/SyntacticClassification.jrag:36
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute nameType
+   */
   protected boolean canDefine_nameType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

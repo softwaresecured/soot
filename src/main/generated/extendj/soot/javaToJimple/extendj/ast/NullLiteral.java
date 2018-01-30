@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,21 +39,11 @@ import soot.coffi.CoffiMethodSource;
  * Java null literal.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Literals.ast:29
+ * @astdecl NullLiteral : Literal;
  * @production NullLiteral : {@link Literal};
 
  */
 public class NullLiteral extends Literal implements Cloneable {
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:77
-   */
-  public soot.Value eval(Body b) {
-    // FIXME: There is only one global null const. We can't associate it uniquely with a single line
-    //        and we cannot assign it to a temporary. Our only hope is that the src loc stays valid
-    //        long enough to be picked up by other Hosts.
-    //        This sucks.
-    return b.setSrcLoc(soot.jimple.NullConstant.v(), this);
-  }
   /**
    * @declaredat ASTNode:1
    */
@@ -70,50 +62,55 @@ public class NullLiteral extends Literal implements Cloneable {
   /**
    * @declaredat ASTNode:12
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"LITERAL"},
+    type = {"String"},
+    kind = {"Token"}
+  )
   public NullLiteral(String p0) {
     setLITERAL(p0);
   }
   /**
-   * @declaredat ASTNode:15
+   * @declaredat ASTNode:20
    */
   public NullLiteral(beaver.Symbol p0) {
     setLITERAL(p0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:19
+   * @declaredat ASTNode:24
    */
   protected int numChildren() {
     return 0;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:25
+   * @declaredat ASTNode:30
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:29
+   * @declaredat ASTNode:34
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     type_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:34
+   * @declaredat ASTNode:39
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   public NullLiteral clone() throws CloneNotSupportedException {
     NullLiteral node = (NullLiteral) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:43
+   * @declaredat ASTNode:48
    */
   public NullLiteral copy() {
     try {
@@ -133,7 +130,7 @@ public class NullLiteral extends Literal implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:62
+   * @declaredat ASTNode:67
    */
   @Deprecated
   public NullLiteral fullCopy() {
@@ -144,7 +141,7 @@ public class NullLiteral extends Literal implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:72
+   * @declaredat ASTNode:77
    */
   public NullLiteral treeCopyNoTransform() {
     NullLiteral tree = (NullLiteral) copy();
@@ -165,7 +162,7 @@ public class NullLiteral extends Literal implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:92
+   * @declaredat ASTNode:97
    */
   public NullLiteral treeCopy() {
     NullLiteral tree = (NullLiteral) copy();
@@ -181,7 +178,7 @@ public class NullLiteral extends Literal implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:106
+   * @declaredat ASTNode:111
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_LITERAL == ((NullLiteral) node).tokenString_LITERAL);    
@@ -232,7 +229,7 @@ public class NullLiteral extends Literal implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -240,13 +237,13 @@ public class NullLiteral extends Literal implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = typeNull();
@@ -254,7 +251,7 @@ public class NullLiteral extends Literal implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -269,6 +266,17 @@ public class NullLiteral extends Literal implements Cloneable {
   public boolean isNullLiteral() {
     boolean isNullLiteral_value = true;
     return isNullLiteral_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:53
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:53")
+  public soot.jimple.Constant eval(Body b) {
+    soot.jimple.Constant eval_Body_value = b.setSrcLoc(NullConstant.v(), this);
+    return eval_Body_value;
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {

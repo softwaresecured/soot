@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:279
+ * @astdecl Modifiers : ASTNode ::= Modifier*;
  * @production Modifiers : {@link ASTNode} ::= <span class="component">{@link Modifier}*</span>;
 
  */
@@ -137,7 +140,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   public static final int ACC_ENUM = 0x4000;
   /**
    * @aspect GenericsCodegen
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:93
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/GenericsCodegen.jrag:101
    */
   public static final int ACC_BRIDGE = 0x0040;
   /**
@@ -160,24 +163,29 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifier"},
+    type = {"List<Modifier>"},
+    kind = {"List"}
+  )
   public Modifiers(List<Modifier> p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -195,20 +203,20 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isSynthetic_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public Modifiers clone() throws CloneNotSupportedException {
     Modifiers node = (Modifiers) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:58
    */
   public Modifiers copy() {
     try {
@@ -228,7 +236,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:72
+   * @declaredat ASTNode:77
    */
   @Deprecated
   public Modifiers fullCopy() {
@@ -239,7 +247,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:82
+   * @declaredat ASTNode:87
    */
   public Modifiers treeCopyNoTransform() {
     Modifiers tree = (Modifiers) copy();
@@ -260,7 +268,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:102
+   * @declaredat ASTNode:107
    */
   public Modifiers treeCopy() {
     Modifiers tree = (Modifiers) copy();
@@ -276,7 +284,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:116
+   * @declaredat ASTNode:121
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -393,7 +401,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   }
   /**
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:368
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:366
    */
   private Collection<Problem> refined_Modifiers_Modifiers_modifierProblems()
 {
@@ -460,10 +468,10 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:368
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:366
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:368")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:366")
   public Collection<Problem> modifierProblems() {
     {
         Collection<Problem> problems = refined_Modifiers_Modifiers_modifierProblems();
@@ -478,7 +486,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isPublic_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isPublic_computed = null;
+  protected ASTState.Cycle isPublic_computed = null;
 
   /** @apilevel internal */
   protected boolean isPublic_value;
@@ -486,13 +494,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:444
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:442
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:444")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:442")
   public boolean isPublic() {
-    ASTNode$State state = state();
-    if (isPublic_computed == ASTNode$State.NON_CYCLE || isPublic_computed == state().cycle()) {
+    ASTState state = state();
+    if (isPublic_computed == ASTState.NON_CYCLE || isPublic_computed == state().cycle()) {
       return isPublic_value;
     }
     isPublic_value = hasModifier("public");
@@ -500,7 +508,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isPublic_computed = state().cycle();
     
     } else {
-      isPublic_computed = ASTNode$State.NON_CYCLE;
+      isPublic_computed = ASTState.NON_CYCLE;
     
     }
     return isPublic_value;
@@ -510,7 +518,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isPrivate_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isPrivate_computed = null;
+  protected ASTState.Cycle isPrivate_computed = null;
 
   /** @apilevel internal */
   protected boolean isPrivate_value;
@@ -518,13 +526,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:445
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:443
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:445")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:443")
   public boolean isPrivate() {
-    ASTNode$State state = state();
-    if (isPrivate_computed == ASTNode$State.NON_CYCLE || isPrivate_computed == state().cycle()) {
+    ASTState state = state();
+    if (isPrivate_computed == ASTState.NON_CYCLE || isPrivate_computed == state().cycle()) {
       return isPrivate_value;
     }
     isPrivate_value = hasModifier("private");
@@ -532,7 +540,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isPrivate_computed = state().cycle();
     
     } else {
-      isPrivate_computed = ASTNode$State.NON_CYCLE;
+      isPrivate_computed = ASTState.NON_CYCLE;
     
     }
     return isPrivate_value;
@@ -542,7 +550,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isProtected_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isProtected_computed = null;
+  protected ASTState.Cycle isProtected_computed = null;
 
   /** @apilevel internal */
   protected boolean isProtected_value;
@@ -550,13 +558,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:446
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:444
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:446")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:444")
   public boolean isProtected() {
-    ASTNode$State state = state();
-    if (isProtected_computed == ASTNode$State.NON_CYCLE || isProtected_computed == state().cycle()) {
+    ASTState state = state();
+    if (isProtected_computed == ASTState.NON_CYCLE || isProtected_computed == state().cycle()) {
       return isProtected_value;
     }
     isProtected_value = hasModifier("protected");
@@ -564,7 +572,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isProtected_computed = state().cycle();
     
     } else {
-      isProtected_computed = ASTNode$State.NON_CYCLE;
+      isProtected_computed = ASTState.NON_CYCLE;
     
     }
     return isProtected_value;
@@ -574,7 +582,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isStatic_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isStatic_computed = null;
+  protected ASTState.Cycle isStatic_computed = null;
 
   /** @apilevel internal */
   protected boolean isStatic_value;
@@ -582,13 +590,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:447
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:445
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:447")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:445")
   public boolean isStatic() {
-    ASTNode$State state = state();
-    if (isStatic_computed == ASTNode$State.NON_CYCLE || isStatic_computed == state().cycle()) {
+    ASTState state = state();
+    if (isStatic_computed == ASTState.NON_CYCLE || isStatic_computed == state().cycle()) {
       return isStatic_value;
     }
     isStatic_value = hasModifier("static");
@@ -596,7 +604,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isStatic_computed = state().cycle();
     
     } else {
-      isStatic_computed = ASTNode$State.NON_CYCLE;
+      isStatic_computed = ASTState.NON_CYCLE;
     
     }
     return isStatic_value;
@@ -606,7 +614,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isFinal_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isFinal_computed = null;
+  protected ASTState.Cycle isFinal_computed = null;
 
   /** @apilevel internal */
   protected boolean isFinal_value;
@@ -614,13 +622,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:448
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:446
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:448")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:446")
   public boolean isFinal() {
-    ASTNode$State state = state();
-    if (isFinal_computed == ASTNode$State.NON_CYCLE || isFinal_computed == state().cycle()) {
+    ASTState state = state();
+    if (isFinal_computed == ASTState.NON_CYCLE || isFinal_computed == state().cycle()) {
       return isFinal_value;
     }
     isFinal_value = hasModifier("final");
@@ -628,7 +636,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isFinal_computed = state().cycle();
     
     } else {
-      isFinal_computed = ASTNode$State.NON_CYCLE;
+      isFinal_computed = ASTState.NON_CYCLE;
     
     }
     return isFinal_value;
@@ -638,7 +646,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isAbstract_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isAbstract_computed = null;
+  protected ASTState.Cycle isAbstract_computed = null;
 
   /** @apilevel internal */
   protected boolean isAbstract_value;
@@ -646,13 +654,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:449
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:447
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:449")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:447")
   public boolean isAbstract() {
-    ASTNode$State state = state();
-    if (isAbstract_computed == ASTNode$State.NON_CYCLE || isAbstract_computed == state().cycle()) {
+    ASTState state = state();
+    if (isAbstract_computed == ASTState.NON_CYCLE || isAbstract_computed == state().cycle()) {
       return isAbstract_value;
     }
     isAbstract_value = hasModifier("abstract");
@@ -660,7 +668,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isAbstract_computed = state().cycle();
     
     } else {
-      isAbstract_computed = ASTNode$State.NON_CYCLE;
+      isAbstract_computed = ASTState.NON_CYCLE;
     
     }
     return isAbstract_value;
@@ -670,7 +678,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isVolatile_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isVolatile_computed = null;
+  protected ASTState.Cycle isVolatile_computed = null;
 
   /** @apilevel internal */
   protected boolean isVolatile_value;
@@ -678,13 +686,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:450
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:448
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:450")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:448")
   public boolean isVolatile() {
-    ASTNode$State state = state();
-    if (isVolatile_computed == ASTNode$State.NON_CYCLE || isVolatile_computed == state().cycle()) {
+    ASTState state = state();
+    if (isVolatile_computed == ASTState.NON_CYCLE || isVolatile_computed == state().cycle()) {
       return isVolatile_value;
     }
     isVolatile_value = hasModifier("volatile");
@@ -692,7 +700,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isVolatile_computed = state().cycle();
     
     } else {
-      isVolatile_computed = ASTNode$State.NON_CYCLE;
+      isVolatile_computed = ASTState.NON_CYCLE;
     
     }
     return isVolatile_value;
@@ -702,7 +710,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isTransient_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isTransient_computed = null;
+  protected ASTState.Cycle isTransient_computed = null;
 
   /** @apilevel internal */
   protected boolean isTransient_value;
@@ -710,13 +718,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:451
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:449
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:451")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:449")
   public boolean isTransient() {
-    ASTNode$State state = state();
-    if (isTransient_computed == ASTNode$State.NON_CYCLE || isTransient_computed == state().cycle()) {
+    ASTState state = state();
+    if (isTransient_computed == ASTState.NON_CYCLE || isTransient_computed == state().cycle()) {
       return isTransient_value;
     }
     isTransient_value = hasModifier("transient");
@@ -724,7 +732,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isTransient_computed = state().cycle();
     
     } else {
-      isTransient_computed = ASTNode$State.NON_CYCLE;
+      isTransient_computed = ASTState.NON_CYCLE;
     
     }
     return isTransient_value;
@@ -734,7 +742,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isStrictfp_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isStrictfp_computed = null;
+  protected ASTState.Cycle isStrictfp_computed = null;
 
   /** @apilevel internal */
   protected boolean isStrictfp_value;
@@ -742,13 +750,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:452
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:450
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:452")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:450")
   public boolean isStrictfp() {
-    ASTNode$State state = state();
-    if (isStrictfp_computed == ASTNode$State.NON_CYCLE || isStrictfp_computed == state().cycle()) {
+    ASTState state = state();
+    if (isStrictfp_computed == ASTState.NON_CYCLE || isStrictfp_computed == state().cycle()) {
       return isStrictfp_value;
     }
     isStrictfp_value = hasModifier("strictfp");
@@ -756,7 +764,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isStrictfp_computed = state().cycle();
     
     } else {
-      isStrictfp_computed = ASTNode$State.NON_CYCLE;
+      isStrictfp_computed = ASTState.NON_CYCLE;
     
     }
     return isStrictfp_value;
@@ -766,7 +774,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isSynchronized_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isSynchronized_computed = null;
+  protected ASTState.Cycle isSynchronized_computed = null;
 
   /** @apilevel internal */
   protected boolean isSynchronized_value;
@@ -774,13 +782,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:453
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:451
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:453")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:451")
   public boolean isSynchronized() {
-    ASTNode$State state = state();
-    if (isSynchronized_computed == ASTNode$State.NON_CYCLE || isSynchronized_computed == state().cycle()) {
+    ASTState state = state();
+    if (isSynchronized_computed == ASTState.NON_CYCLE || isSynchronized_computed == state().cycle()) {
       return isSynchronized_value;
     }
     isSynchronized_value = hasModifier("synchronized");
@@ -788,7 +796,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isSynchronized_computed = state().cycle();
     
     } else {
-      isSynchronized_computed = ASTNode$State.NON_CYCLE;
+      isSynchronized_computed = ASTState.NON_CYCLE;
     
     }
     return isSynchronized_value;
@@ -798,7 +806,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isNative_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isNative_computed = null;
+  protected ASTState.Cycle isNative_computed = null;
 
   /** @apilevel internal */
   protected boolean isNative_value;
@@ -806,13 +814,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:454
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:452
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:454")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:452")
   public boolean isNative() {
-    ASTNode$State state = state();
-    if (isNative_computed == ASTNode$State.NON_CYCLE || isNative_computed == state().cycle()) {
+    ASTState state = state();
+    if (isNative_computed == ASTState.NON_CYCLE || isNative_computed == state().cycle()) {
       return isNative_value;
     }
     isNative_value = hasModifier("native");
@@ -820,7 +828,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isNative_computed = state().cycle();
     
     } else {
-      isNative_computed = ASTNode$State.NON_CYCLE;
+      isNative_computed = ASTState.NON_CYCLE;
     
     }
     return isNative_value;
@@ -830,7 +838,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     isSynthetic_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isSynthetic_computed = null;
+  protected ASTState.Cycle isSynthetic_computed = null;
 
   /** @apilevel internal */
   protected boolean isSynthetic_value;
@@ -838,13 +846,13 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:456
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:454
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:456")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:454")
   public boolean isSynthetic() {
-    ASTNode$State state = state();
-    if (isSynthetic_computed == ASTNode$State.NON_CYCLE || isSynthetic_computed == state().cycle()) {
+    ASTState state = state();
+    if (isSynthetic_computed == ASTState.NON_CYCLE || isSynthetic_computed == state().cycle()) {
       return isSynthetic_value;
     }
     isSynthetic_value = hasModifier("synthetic");
@@ -852,7 +860,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       isSynthetic_computed = state().cycle();
     
     } else {
-      isSynthetic_computed = ASTNode$State.NON_CYCLE;
+      isSynthetic_computed = ASTState.NON_CYCLE;
     
     }
     return isSynthetic_value;
@@ -860,10 +868,10 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:458
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:456
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:458")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:456")
   public int numProtectionModifiers() {
     int numProtectionModifiers_value = numModifier("public") + numModifier("protected") + numModifier("private");
     return numProtectionModifiers_value;
@@ -871,10 +879,10 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:461
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:459
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:461")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:459")
   public int numCompletenessModifiers() {
     int numCompletenessModifiers_value = numModifier("abstract") + numModifier("final") + numModifier("volatile");
     return numCompletenessModifiers_value;
@@ -882,10 +890,10 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:464
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:462
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:464")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:462")
   public int numModifier(String name) {
     {
         int n = 0;
@@ -900,10 +908,10 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:474
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:472
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:474")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:472")
   public boolean hasModifier(String name) {
     {
         for (Modifier modifier : getModifierList()) {
@@ -954,10 +962,10 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:442
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:439
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:442")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:439")
   public boolean hasAnnotationSuppressWarnings(String annot) {
     {
         Annotation a = annotation(lookupType("java.lang", "SuppressWarnings"));
@@ -971,10 +979,10 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect Annotations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:479
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:476
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:479")
+  @ASTNodeAnnotation.Source(aspect="Annotations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Annotations.jrag:476")
   public boolean hasDeprecatedAnnotation() {
     boolean hasDeprecatedAnnotation_value = hasAnnotation("java.lang", "Deprecated");
     return hasDeprecatedAnnotation_value;
@@ -1016,13 +1024,35 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute inh
    * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:428
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:428")
+  public TypeDecl hostType() {
+    TypeDecl hostType_value = getParent().Define_hostType(this, null);
+    return hostType_value;
+  }
+  /**
+   * @attribute inh
+   * @aspect Modifiers
    * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:430
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:430")
-  public TypeDecl hostType() {
-    TypeDecl hostType_value = getParent().Define_hostType(this, null);
-    return hostType_value;
+  public boolean mayBePublic() {
+    boolean mayBePublic_value = getParent().Define_mayBePublic(this, null);
+    return mayBePublic_value;
+  }
+  /**
+   * @attribute inh
+   * @aspect Modifiers
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:431
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:431")
+  public boolean mayBePrivate() {
+    boolean mayBePrivate_value = getParent().Define_mayBePrivate(this, null);
+    return mayBePrivate_value;
   }
   /**
    * @attribute inh
@@ -1031,9 +1061,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:432")
-  public boolean mayBePublic() {
-    boolean mayBePublic_value = getParent().Define_mayBePublic(this, null);
-    return mayBePublic_value;
+  public boolean mayBeProtected() {
+    boolean mayBeProtected_value = getParent().Define_mayBeProtected(this, null);
+    return mayBeProtected_value;
   }
   /**
    * @attribute inh
@@ -1042,9 +1072,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:433")
-  public boolean mayBePrivate() {
-    boolean mayBePrivate_value = getParent().Define_mayBePrivate(this, null);
-    return mayBePrivate_value;
+  public boolean mayBeStatic() {
+    boolean mayBeStatic_value = getParent().Define_mayBeStatic(this, null);
+    return mayBeStatic_value;
   }
   /**
    * @attribute inh
@@ -1053,9 +1083,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:434")
-  public boolean mayBeProtected() {
-    boolean mayBeProtected_value = getParent().Define_mayBeProtected(this, null);
-    return mayBeProtected_value;
+  public boolean mayBeFinal() {
+    boolean mayBeFinal_value = getParent().Define_mayBeFinal(this, null);
+    return mayBeFinal_value;
   }
   /**
    * @attribute inh
@@ -1064,9 +1094,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:435")
-  public boolean mayBeStatic() {
-    boolean mayBeStatic_value = getParent().Define_mayBeStatic(this, null);
-    return mayBeStatic_value;
+  public boolean mayBeAbstract() {
+    boolean mayBeAbstract_value = getParent().Define_mayBeAbstract(this, null);
+    return mayBeAbstract_value;
   }
   /**
    * @attribute inh
@@ -1075,9 +1105,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:436")
-  public boolean mayBeFinal() {
-    boolean mayBeFinal_value = getParent().Define_mayBeFinal(this, null);
-    return mayBeFinal_value;
+  public boolean mayBeVolatile() {
+    boolean mayBeVolatile_value = getParent().Define_mayBeVolatile(this, null);
+    return mayBeVolatile_value;
   }
   /**
    * @attribute inh
@@ -1086,9 +1116,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:437")
-  public boolean mayBeAbstract() {
-    boolean mayBeAbstract_value = getParent().Define_mayBeAbstract(this, null);
-    return mayBeAbstract_value;
+  public boolean mayBeTransient() {
+    boolean mayBeTransient_value = getParent().Define_mayBeTransient(this, null);
+    return mayBeTransient_value;
   }
   /**
    * @attribute inh
@@ -1097,9 +1127,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:438")
-  public boolean mayBeVolatile() {
-    boolean mayBeVolatile_value = getParent().Define_mayBeVolatile(this, null);
-    return mayBeVolatile_value;
+  public boolean mayBeStrictfp() {
+    boolean mayBeStrictfp_value = getParent().Define_mayBeStrictfp(this, null);
+    return mayBeStrictfp_value;
   }
   /**
    * @attribute inh
@@ -1108,9 +1138,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:439")
-  public boolean mayBeTransient() {
-    boolean mayBeTransient_value = getParent().Define_mayBeTransient(this, null);
-    return mayBeTransient_value;
+  public boolean mayBeSynchronized() {
+    boolean mayBeSynchronized_value = getParent().Define_mayBeSynchronized(this, null);
+    return mayBeSynchronized_value;
   }
   /**
    * @attribute inh
@@ -1119,28 +1149,6 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:440")
-  public boolean mayBeStrictfp() {
-    boolean mayBeStrictfp_value = getParent().Define_mayBeStrictfp(this, null);
-    return mayBeStrictfp_value;
-  }
-  /**
-   * @attribute inh
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:441
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:441")
-  public boolean mayBeSynchronized() {
-    boolean mayBeSynchronized_value = getParent().Define_mayBeSynchronized(this, null);
-    return mayBeSynchronized_value;
-  }
-  /**
-   * @attribute inh
-   * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:442
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:442")
   public boolean mayBeNative() {
     boolean mayBeNative_value = getParent().Define_mayBeNative(this, null);
     return mayBeNative_value;
@@ -1172,6 +1180,11 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
       return getParent().Define_lookupAnnotation(this, _callerNode, typeDecl);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Annotations.jrag:604
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupAnnotation
+   */
   protected boolean canDefine_lookupAnnotation(ASTNode _callerNode, ASTNode _childNode, TypeDecl typeDecl) {
     return true;
   }
@@ -1183,8 +1196,9 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
-    // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:366
+    // @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:364
     {
       java.util.Set<ASTNode> contributors = _map.get(_root);
       if (contributors == null) {
@@ -1195,6 +1209,7 @@ public class Modifiers extends ASTNode<ASTNode> implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : modifierProblems()) {

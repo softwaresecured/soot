@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,83 +38,11 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:248
+ * @astdecl AddExpr : AdditiveExpr;
  * @production AddExpr : {@link AdditiveExpr};
 
  */
 public class AddExpr extends AdditiveExpr implements Cloneable {
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:856
-   */
-  public soot.Value emitOperation(Body b, soot.Value left, soot.Value right) {
-    return asLocal(b, b.newAddExpr(asImmediate(b, left), asImmediate(b, right), this));
-  }
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:891
-   */
-  public soot.Value eval(Body b) {
-    if(type().isString() && isConstant())
-      return soot.jimple.StringConstant.v(constant().stringValue());
-    if(isStringAdd()) {
-      Local v;
-      if(firstStringAddPart()) {
-        // new StringBuffer
-        v = b.newTemp(b.newNewExpr(
-          lookupType("java.lang", "StringBuffer").sootRef(), this));
-        //b.setLine(this);
-        b.add(b.newInvokeStmt(
-          b.newSpecialInvokeExpr(v,
-          Scene.v().getMethod("<java.lang.StringBuffer: void <init>()>").makeRef(),
-          Collections.<Value>emptyList(),
-          this
-        ), this));
-        //b.setLine(this);
-        b.add(b.newInvokeStmt(
-          b.newVirtualInvokeExpr(v,
-            stringBufferAppendMethodForType(getLeftOperand().type()).sootRef(),
-            Collections.singletonList(asImmediate(b, getLeftOperand().eval(b))),
-            this
-          ), this));
-      }
-      else
-        v = (Local)getLeftOperand().eval(b);
-      // append
-      //b.setLine(this);
-      b.add(b.newInvokeStmt(
-        b.newVirtualInvokeExpr(v,
-          stringBufferAppendMethodForType(getRightOperand().type()).sootRef(),
-          Collections.singletonList(asImmediate(b, getRightOperand().eval(b))),
-          this
-        ), this));
-      if(lastStringAddPart()) {
-        return b.newTemp(
-          b.newVirtualInvokeExpr(v,
-            Scene.v().getMethod("<java.lang.StringBuffer: java.lang.String toString()>").makeRef(),
-            Collections.<Value>emptyList(),
-            this
-        ));
-      }
-      else
-        return v;
-    }
-    else
-    return b.newAddExpr(
-      b.newTemp(
-        getLeftOperand().type().emitCastTo(b,  // Binary numeric promotion
-          getLeftOperand(),
-          type()
-        )
-      ),
-      asImmediate(b,
-        getRightOperand().type().emitCastTo(b, // Binary numeric promotion
-          getRightOperand(),
-          type()
-        )
-      ),
-      this
-    );
-  }
   /**
    * @declaredat ASTNode:1
    */
@@ -132,45 +62,50 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
   /**
    * @declaredat ASTNode:13
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"LeftOperand", "RightOperand"},
+    type = {"Expr", "Expr"},
+    kind = {"Child", "Child"}
+  )
   public AddExpr(Expr p0, Expr p1) {
     setChild(p0, 0);
     setChild(p1, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     type_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public AddExpr clone() throws CloneNotSupportedException {
     AddExpr node = (AddExpr) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public AddExpr copy() {
     try {
@@ -190,7 +125,7 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:66
    */
   @Deprecated
   public AddExpr fullCopy() {
@@ -201,7 +136,7 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:71
+   * @declaredat ASTNode:76
    */
   public AddExpr treeCopyNoTransform() {
     AddExpr tree = (AddExpr) copy();
@@ -222,7 +157,7 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:91
+   * @declaredat ASTNode:96
    */
   public AddExpr treeCopy() {
     AddExpr tree = (AddExpr) copy();
@@ -238,7 +173,7 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:105
+   * @declaredat ASTNode:110
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -309,10 +244,10 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
   /** The operator string used for pretty printing this expression. 
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:266
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:345
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:266")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:345")
   public String printOp() {
     String printOp_value = "+";
     return printOp_value;
@@ -323,7 +258,7 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
     type_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle type_computed = null;
+  protected ASTState.Cycle type_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl type_value;
@@ -331,13 +266,13 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeAnalysis
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:296")
+  @ASTNodeAnnotation.Source(aspect="TypeAnalysis", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:295")
   public TypeDecl type() {
-    ASTNode$State state = state();
-    if (type_computed == ASTNode$State.NON_CYCLE || type_computed == state().cycle()) {
+    ASTState state = state();
+    if (type_computed == ASTState.NON_CYCLE || type_computed == state().cycle()) {
       return type_value;
     }
     type_value = type_compute();
@@ -345,7 +280,7 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
       type_computed = state().cycle();
     
     } else {
-      type_computed = ASTNode$State.NON_CYCLE;
+      type_computed = ASTState.NON_CYCLE;
     
     }
     return type_value;
@@ -367,10 +302,10 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
   /**
    * @attribute syn
    * @aspect TypeCheck
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:221
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:223
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:221")
+  @ASTNodeAnnotation.Source(aspect="TypeCheck", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:223")
   public Collection<Problem> typeProblems() {
     {
         Collection<Problem> problems = new LinkedList<Problem>();
@@ -420,22 +355,96 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
     return lastStringAddPart_value;
   }
   /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:743
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:743")
+  public Value emitOperation(Body b, Value l, Value r) {
+    Value emitOperation_Body_Value_Value_value = b.newAddExpr  (l, r, this);
+    return emitOperation_Body_Value_Value_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Expressions
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:42")
+  public Value eval(Body b) {
+    {
+        if (type().isString() && isConstant())
+          return soot.jimple.StringConstant.v(constant().stringValue());
+    
+        if (isStringAdd()) {
+          Local v;
+          if (firstStringAddPart()) {
+            // new StringBuffer
+            v = b.newTemp(b.newNewExpr(
+              lookupType("java.lang", "StringBuffer").sootRef(), this));
+            //b.setLine(this);
+            b.add(b.newInvokeStmt(
+              b.newSpecialInvokeExpr(v,
+              Scene.v().getMethod("<java.lang.StringBuffer: void <init>()>").makeRef(),
+              Collections.emptyList(),
+              this
+            ), this));
+            //b.setLine(this);
+            b.add(b.newInvokeStmt(
+              b.newVirtualInvokeExpr(v,
+                stringBufferAppendMethodForType(getLeftOperand().type()).sootRef(),
+                Collections.singletonList(getLeftOperand().eval(b)),
+                this
+              ), this));
+          }
+          else
+            v = b.asLocal(getLeftOperand().eval(b));
+    
+          // append
+          //b.setLine(this);
+          b.add(b.newInvokeStmt(
+            b.newVirtualInvokeExpr(v,
+              stringBufferAppendMethodForType(getRightOperand().type()).sootRef(),
+              Collections.singletonList(getRightOperand().eval(b)),
+              this
+            ), this));
+    
+          if (lastStringAddPart())
+            return b.newTemp(b.newVirtualInvokeExpr(v,
+              Scene.v().getMethod("<java.lang.StringBuffer: java.lang.String toString()>").makeRef(),
+              Collections.emptyList(),
+              this
+            ));
+    
+          return v;
+        }
+    
+        return super.eval(b);
+      }
+  }
+  /**
    * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:69
    * @apilevel internal
    */
   public TypeDecl Define_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
     if (getRightOperandNoTransform() != null && _callerNode == getRightOperand()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:81
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:92
       return getLeftOperand().type().isString() ? typeObject() : typeNull();
     }
     else if (getLeftOperandNoTransform() != null && _callerNode == getLeftOperand()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:77
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:88
       return getRightOperand().type().isString() ? typeObject() : typeNull();
     }
     else {
       return getParent().Define_assignConvertedType(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/GenericMethodsInference.jrag:69
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignConvertedType
+   */
   protected boolean canDefine_assignConvertedType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -445,7 +454,7 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
    */
   public TypeDecl Define_targetType(ASTNode _callerNode, ASTNode _childNode) {
     if (getRightOperandNoTransform() != null && _callerNode == getRightOperand()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:53
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:71
       {
           if (getRightOperand().stringContext()) {
             return getLeftOperand().type();
@@ -457,7 +466,7 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
         }
     }
     else if (getLeftOperandNoTransform() != null && _callerNode == getLeftOperand()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:44
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:62
       {
           if (getLeftOperand().stringContext()) {
             return getRightOperand().type();
@@ -472,16 +481,21 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
       return super.Define_targetType(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:31
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute targetType
+   */
   protected boolean canDefine_targetType(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:237
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
    * @apilevel internal
    */
   public boolean Define_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     if (getRightOperandNoTransform() != null && _callerNode == getRightOperand()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:272
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:456
       {
           if (!getRightOperand().isPolyExpression() && !getLeftOperand().isPolyExpression()) {
             if (getLeftOperand().type().isString() && !getRightOperand().type().isString()) {
@@ -492,7 +506,7 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
         }
     }
     else if (getLeftOperandNoTransform() != null && _callerNode == getLeftOperand()) {
-      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:264
+      // @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:448
       {
           if (!getRightOperand().isPolyExpression() && !getLeftOperand().isPolyExpression()) {
             if (getRightOperand().type().isString() && !getLeftOperand().type().isString()) {
@@ -506,6 +520,11 @@ public class AddExpr extends AdditiveExpr implements Cloneable {
       return super.Define_stringContext(_callerNode, _childNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/TargetType.jrag:421
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute stringContext
+   */
   protected boolean canDefine_stringContext(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }

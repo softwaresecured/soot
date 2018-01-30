@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java5/grammar/Generics.ast:78
+ * @astdecl GenericMethodDeclSubstituted : GenericMethodDecl ::= <Original:GenericMethodDecl>;
  * @production GenericMethodDeclSubstituted : {@link GenericMethodDecl} ::= <span class="component">&lt;Original:GenericMethodDecl&gt;</span>;
 
  */
@@ -63,6 +66,11 @@ public class GenericMethodDeclSubstituted extends GenericMethodDecl implements C
   /**
    * @declaredat ASTNode:17
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifiers", "TypeAccess", "ID", "Parameter", "Exception", "Block", "TypeParameter", "Original"},
+    type = {"Modifiers", "Access", "String", "List<ParameterDeclaration>", "List<Access>", "Opt<Block>", "List<TypeVariable>", "GenericMethodDecl"},
+    kind = {"Child", "Child", "Token", "List", "List", "Opt", "List", "Token"}
+  )
   public GenericMethodDeclSubstituted(Modifiers p0, Access p1, String p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<TypeVariable> p6, GenericMethodDecl p7) {
     setChild(p0, 0);
     setChild(p1, 1);
@@ -74,7 +82,7 @@ public class GenericMethodDeclSubstituted extends GenericMethodDecl implements C
     setOriginal(p7);
   }
   /**
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public GenericMethodDeclSubstituted(Modifiers p0, Access p1, beaver.Symbol p2, List<ParameterDeclaration> p3, List<Access> p4, Opt<Block> p5, List<TypeVariable> p6, GenericMethodDecl p7) {
     setChild(p0, 0);
@@ -87,39 +95,39 @@ public class GenericMethodDeclSubstituted extends GenericMethodDecl implements C
     setOriginal(p7);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:38
+   * @declaredat ASTNode:43
    */
   protected int numChildren() {
     return 6;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public void flushAttrCache() {
     super.flushAttrCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:52
+   * @declaredat ASTNode:57
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:56
+   * @declaredat ASTNode:61
    */
   public GenericMethodDeclSubstituted clone() throws CloneNotSupportedException {
     GenericMethodDeclSubstituted node = (GenericMethodDeclSubstituted) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:66
    */
   public GenericMethodDeclSubstituted copy() {
     try {
@@ -139,7 +147,7 @@ public class GenericMethodDeclSubstituted extends GenericMethodDecl implements C
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:80
+   * @declaredat ASTNode:85
    */
   @Deprecated
   public GenericMethodDeclSubstituted fullCopy() {
@@ -150,7 +158,7 @@ public class GenericMethodDeclSubstituted extends GenericMethodDecl implements C
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:90
+   * @declaredat ASTNode:95
    */
   public GenericMethodDeclSubstituted treeCopyNoTransform() {
     GenericMethodDeclSubstituted tree = (GenericMethodDeclSubstituted) copy();
@@ -171,7 +179,7 @@ public class GenericMethodDeclSubstituted extends GenericMethodDecl implements C
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:110
+   * @declaredat ASTNode:115
    */
   public GenericMethodDeclSubstituted treeCopy() {
     GenericMethodDeclSubstituted tree = (GenericMethodDeclSubstituted) copy();
@@ -187,7 +195,7 @@ public class GenericMethodDeclSubstituted extends GenericMethodDecl implements C
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:124
+   * @declaredat ASTNode:129
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((GenericMethodDeclSubstituted) node).tokenString_ID) && (tokenGenericMethodDecl_Original == ((GenericMethodDeclSubstituted) node).tokenGenericMethodDecl_Original);    

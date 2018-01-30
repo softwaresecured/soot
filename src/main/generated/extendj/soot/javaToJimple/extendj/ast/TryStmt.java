@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:319
+ * @astdecl TryStmt : Stmt ::= Block CatchClause* [Finally:Block] ExceptionHandler:Block;
  * @production TryStmt : {@link Stmt} ::= <span class="component">{@link Block}</span> <span class="component">{@link CatchClause}*</span> <span class="component">[Finally:{@link Block}]</span> <span class="component">ExceptionHandler:{@link Block}</span>;
 
  */
@@ -103,79 +106,84 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   }
   /**
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:344
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:282
    */
   public void emitFinallyCode(Body b) {
-    if(hasFinally()) {
-      // Clear cached attributes to force re-evaluation of local variables
-      // NOTE: NEVER FLUSH. Some parts of extendj assume that they can compare by identity.
-      // TODO: Verify we're still outputting something sane.
-      getFinally().flushTreeCache();
-      getFinally().jimplify2(b);
-    }
+    if (!hasFinally()) return;
+
+    // Clear cached attributes to force re-evaluation of local variables
+    // NOTE: NEVER FLUSH. Some parts of extendj assume that they can compare by identity.
+    // TODO: Verify we're still outputting something sane.
+    // NOTE: This looks like we'll be spewing out copies of the finally code-block at each point
+    //       it is triggered, rather than a jump in/out...
+    getFinally().flushTreeCache();
+    getFinally().jimpleEmit(b);
   }
   /**
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:382
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:316
    */
-  public void jimplify2(Body b) {
-    ArrayList<soot.jimple.Stmt> ranges = exceptionRanges();
-    b.addLabel(label_begin());
-    ranges.add(label_begin());
-    getBlock().jimplify2(b);
-    soot.jimple.Stmt label_block_end  = null;
-    soot.jimple.Stmt label_end        = null;
+  public void jimpleEmit(Body b) {
+    final ArrayList<soot.jimple.Stmt> ranges      = exceptionRanges(b);
+    final Body.Label                  label_begin = b.addNewLabel(this);
 
-    if(getBlock().canCompleteNormally()) {
-      if(hasFinally() && getNumCatchClause() != 0) {
-        label_block_end = label_block_end();
-        b.addLabel(label_block_end);
-      }
+    ranges.add(label_begin.stmt);
+    getBlock().jimpleEmit(b);
+
+    final boolean         can_reach_past_finally  = true;//!hasFinally() || getFinally().canCompleteNormally();
+    final Body.CatchLabel label_block_end         =
+      hasCatches() ? getCatchClause(0).label_catch(b) : null;
+
+    //if (getBlock().canCompleteNormally()) {
+      // if (hasFinally() && hasCatches())
+      //   b.addLabel(label_block_end);
+
       emitFinallyCode(b);
+
       //b.setLine(this);
-      if((!hasFinally() || getFinally().canCompleteNormally()) && (getNumCatchClause() != 0 || hasFinally()/*needsFinallyTrap()*/)) {
-        label_end = label_end();
-        b.add(b.newGotoStmt(label_end, this));
-      }
-    }
+      // if ((hasFinally() && getFinally().canCompleteNormally()) || hasCatches())
+         b.addGoTo(label_end(b), this);
+    //}
 
-    if (getNumCatchClause() != 0) {
-      if (label_block_end == null)
-        label_block_end = getCatchClause(0).label();
-
-      ranges.add(label_block_end);
-      ranges.add(label_block_end);
+    if (hasCatches()) {
+      ranges.add(label_block_end.stmt);
+      ranges.add(label_block_end.stmt);
 
       for (CatchClause cc : getCatchClauses()) {
         //beginExceptionRange(b, ranges);
-        cc.jimplify2(b);
-        if (cc.getBlock().canCompleteNormally()) {
+        cc.jimpleEmit(b);
+        //if (cc.getBlock().canCompleteNormally()) {
           // b.setLine(cc);
-          endExceptionRange(b, ranges, cc.newLabel());
+          BreakContinueReturnUtil.endExceptionRange(b, ranges, cc);
           emitFinallyCode(b);
 
-          if (!hasFinally() || getFinally().canCompleteNormally()) {
-            label_end = label_end();
-            b.add(b.newGotoStmt(label_end, this));
-          }
+          if (can_reach_past_finally)
+            b.addGoTo(label_end(b), this);
 
-          beginExceptionRange(b, ranges);
-        }
+          BreakContinueReturnUtil.beginExceptionRange(b, ranges);
+        //}
         // b.setLine(cc);
-        //endExceptionRange(b, ranges);
+        //BreakContinueReturnUtil.endExceptionRange(b, ranges);
       }
     }
 
-    if (hasFinally() /*&& needsFinallyTrap()*/) {
-      b.addLabel(label_exception_handler());
-      emitExceptionHandler(b);
+    final Body.Label label_exception_finally = hasFinally() ? b.addNewLabel(this) : null;
+    if (hasFinally()) {
+      FinallyInfo info = finally_info(b);
+      b.addLabel(info.label_catch);
+
+      emitFinallyCode(b);
+
+      //if (getFinally().canCompleteNormally()) {
+        b.add(info.rethrow);
+      //}
+
       //b.setLine(getFinally());
       //if(getFinally().canCompleteNormally())
-      //  b.add(b.newGotoStmt(label_end(), this));
+      //  b.add(b.newGotoStmt(label_end(b), this));
     }
 
-    if (label_end != null)
-      b.addLabel(label_end);
+    b.addLabel(label_end(b));
 
     // createExceptionTable
     for (CatchClause cc : getCatchClauses()) {
@@ -185,44 +193,30 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
         if (bgn != end) {
           // TODO: Is this still correct in for multi-catch clauses?
           for (TypeDecl t : cc.caughtExceptions())
-            b.addTrap(t, bgn, end, cc.label());
+            b.addTrap(t, bgn, end, cc.label_catch(b));
         }
 
-        if (end == label_block_end) break;
+        if (end == label_block_end.stmt) break;
       }
     }
 
-    if (hasFinally() /*&& needsFinallyTrap()*/) {
+    if (hasFinally()) {
+      FinallyInfo info = finally_info(b);
       for (Iterator<soot.jimple.Stmt> iter = ranges.iterator(); iter.hasNext(); ) {
         soot.jimple.Stmt bgn =                  iter.next();
-        soot.jimple.Stmt end = iter.hasNext() ? iter.next() : label_exception_handler();
+        soot.jimple.Stmt end = iter.hasNext() ? iter.next() : info.label_catch.stmt;
 
         if (bgn != end)
-          b.addTrap(typeThrowable(), bgn, end, label_exception_handler());
+          b.addTrap(typeThrowable(), bgn, end, info.label_catch);
       }
       /*
       b.addTrap(
         typeThrowable(),
         label_begin(),
-        label_exception_handler(),
-        label_exception_handler()
+        lbl_exception_handler,
+        lbl_exception_handler
       );
       */
-    }
-  }
-  /**
-   * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:501
-   */
-  public void emitExceptionHandler(Body b) {
-    Local l = b.newTemp(typeThrowable().getSootType(), this);
-    //b.setLine(this);
-    b.add(b.newIdentityStmt(l, b.newCaughtExceptionRef(this), this));
-    emitFinallyCode(b);
-    if (hasFinally()) {// && getFinally().canCompleteNormally()) {
-      soot.jimple.Stmt throwStmt = b.newThrowStmt(l, this);
-      throwStmt.addTag(new soot.tagkit.ThrowCreatedByCompilerTag());
-      b.add(throwStmt);
     }
   }
   /**
@@ -246,26 +240,31 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Block", "CatchClause", "Finally"},
+    type = {"Block", "List<CatchClause>", "Opt<Block>"},
+    kind = {"Child", "List", "Opt"}
+  )
   public TryStmt(Block p0, List<CatchClause> p1, Opt<Block> p2) {
     setChild(p0, 0);
     setChild(p1, 1);
     setChild(p2, 2);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:21
+   * @declaredat ASTNode:26
    */
   protected int numChildren() {
     return 3;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:27
+   * @declaredat ASTNode:32
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:31
+   * @declaredat ASTNode:36
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -280,33 +279,27 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     catchableException_TypeDecl_reset();
     getExceptionHandler_reset();
     canCompleteNormally_reset();
-    label_begin_reset();
-    label_block_end_reset();
-    label_end_reset();
-    label_finally_reset();
-    label_finally_block_reset();
-    label_exception_handler_reset();
-    label_catch_end_reset();
-    exceptionRanges_reset();
+    finally_info_Body_reset();
+    label_end_Body_reset();
     handlesException_TypeDecl_reset();
     typeError_reset();
     typeRuntimeException_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:57
+   * @declaredat ASTNode:56
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:60
    */
   public TryStmt clone() throws CloneNotSupportedException {
     TryStmt node = (TryStmt) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:66
+   * @declaredat ASTNode:65
    */
   public TryStmt copy() {
     try {
@@ -326,7 +319,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:85
+   * @declaredat ASTNode:84
    */
   @Deprecated
   public TryStmt fullCopy() {
@@ -337,7 +330,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:95
+   * @declaredat ASTNode:94
    */
   public TryStmt treeCopyNoTransform() {
     TryStmt tree = (TryStmt) copy();
@@ -363,7 +356,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:120
+   * @declaredat ASTNode:119
    */
   public TryStmt treeCopy() {
     TryStmt tree = (TryStmt) copy();
@@ -384,7 +377,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:139
+   * @declaredat ASTNode:138
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -599,7 +592,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     branches_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle branches_computed = null;
+  protected ASTState.Cycle branches_computed = null;
 
   /** @apilevel internal */
   protected Collection<Stmt> branches_value;
@@ -612,8 +605,8 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="BranchTarget", declaredAt="/home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:156")
   public Collection<Stmt> branches() {
-    ASTNode$State state = state();
-    if (branches_computed == ASTNode$State.NON_CYCLE || branches_computed == state().cycle()) {
+    ASTState state = state();
+    if (branches_computed == ASTState.NON_CYCLE || branches_computed == state().cycle()) {
       return branches_value;
     }
     branches_value = branches_compute();
@@ -621,7 +614,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       branches_computed = state().cycle();
     
     } else {
-      branches_computed = ASTNode$State.NON_CYCLE;
+      branches_computed = ASTState.NON_CYCLE;
     
     }
     return branches_value;
@@ -641,7 +634,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     escapedBranches_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle escapedBranches_computed = null;
+  protected ASTState.Cycle escapedBranches_computed = null;
 
   /** @apilevel internal */
   protected Collection<Stmt> escapedBranches_value;
@@ -654,8 +647,8 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="BranchTarget", declaredAt="/home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:166")
   public Collection<Stmt> escapedBranches() {
-    ASTNode$State state = state();
-    if (escapedBranches_computed == ASTNode$State.NON_CYCLE || escapedBranches_computed == state().cycle()) {
+    ASTState state = state();
+    if (escapedBranches_computed == ASTState.NON_CYCLE || escapedBranches_computed == state().cycle()) {
       return escapedBranches_value;
     }
     escapedBranches_value = escapedBranches_compute();
@@ -663,7 +656,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       escapedBranches_computed = state().cycle();
     
     } else {
-      escapedBranches_computed = ASTNode$State.NON_CYCLE;
+      escapedBranches_computed = ASTState.NON_CYCLE;
     
     }
     return escapedBranches_value;
@@ -690,27 +683,27 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   public boolean assignedAfter(Variable v) {
     Object _parameters = v;
     if (assignedAfter_Variable_values == null) assignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfter_Variable_value = assignedAfter_compute(v);
-        if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfter_Variable_value;
         }
@@ -722,7 +715,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfter_Variable_value = assignedAfter_compute(v);
-      if (new_assignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfter_Variable_value;
       }
@@ -770,27 +763,27 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   public boolean unassignedAfterFinally(Variable v) {
     Object _parameters = v;
     if (unassignedAfterFinally_Variable_values == null) unassignedAfterFinally_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfterFinally_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfterFinally_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfterFinally_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfterFinally_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfterFinally_Variable_value = getFinally().unassignedAfter(v);
-        if (new_unassignedAfterFinally_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfterFinally_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfterFinally_Variable_value;
         }
@@ -802,7 +795,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfterFinally_Variable_value = getFinally().unassignedAfter(v);
-      if (new_unassignedAfterFinally_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfterFinally_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfterFinally_Variable_value;
       }
@@ -821,27 +814,27 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   public boolean assignedAfterFinally(Variable v) {
     Object _parameters = v;
     if (assignedAfterFinally_Variable_values == null) assignedAfterFinally_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (assignedAfterFinally_Variable_values.containsKey(_parameters)) {
       Object _cache = assignedAfterFinally_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       assignedAfterFinally_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_assignedAfterFinally_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_assignedAfterFinally_Variable_value = getFinally().assignedAfter(v);
-        if (new_assignedAfterFinally_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_assignedAfterFinally_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_assignedAfterFinally_Variable_value;
         }
@@ -853,7 +846,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_assignedAfterFinally_Variable_value = getFinally().assignedAfter(v);
-      if (new_assignedAfterFinally_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_assignedAfterFinally_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_assignedAfterFinally_Variable_value;
       }
@@ -872,27 +865,27 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   public boolean unassignedBefore(Variable v) {
     Object _parameters = v;
     if (unassignedBefore_Variable_values == null) unassignedBefore_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedBefore_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedBefore_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedBefore_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedBefore_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedBefore_Variable_value = super.unassignedBefore(v);
-        if (new_unassignedBefore_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedBefore_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedBefore_Variable_value;
         }
@@ -904,7 +897,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedBefore_Variable_value = super.unassignedBefore(v);
-      if (new_unassignedBefore_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedBefore_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedBefore_Variable_value;
       }
@@ -923,27 +916,27 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   public boolean unassignedAfter(Variable v) {
     Object _parameters = v;
     if (unassignedAfter_Variable_values == null) unassignedAfter_Variable_values = new java.util.HashMap(4);
-    ASTNode$State.CircularValue _value;
+    ASTState.CircularValue _value;
     if (unassignedAfter_Variable_values.containsKey(_parameters)) {
       Object _cache = unassignedAfter_Variable_values.get(_parameters);
-      if (!(_cache instanceof ASTNode$State.CircularValue)) {
+      if (!(_cache instanceof ASTState.CircularValue)) {
         return (Boolean) _cache;
       } else {
-        _value = (ASTNode$State.CircularValue) _cache;
+        _value = (ASTState.CircularValue) _cache;
       }
     } else {
-      _value = new ASTNode$State.CircularValue();
+      _value = new ASTState.CircularValue();
       unassignedAfter_Variable_values.put(_parameters, _value);
       _value.value = true;
     }
-    ASTNode$State state = state();
+    ASTState state = state();
     if (!state.inCircle() || state.calledByLazyAttribute()) {
       state.enterCircle();
       boolean new_unassignedAfter_Variable_value;
       do {
         _value.cycle = state.nextCycle();
         new_unassignedAfter_Variable_value = unassignedAfter_compute(v);
-        if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+        if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
           state.setChangeInCycle();
           _value.value = new_unassignedAfter_Variable_value;
         }
@@ -955,7 +948,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     } else if (_value.cycle != state.cycle()) {
       _value.cycle = state.cycle();
       boolean new_unassignedAfter_Variable_value = unassignedAfter_compute(v);
-      if (new_unassignedAfter_Variable_value != ((Boolean)_value.value)) {
+      if (((Boolean)_value.value) != new_unassignedAfter_Variable_value) {
         state.setChangeInCycle();
         _value.value = new_unassignedAfter_Variable_value;
       }
@@ -986,7 +979,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     hasNonEmptyFinally_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle hasNonEmptyFinally_computed = null;
+  protected ASTState.Cycle hasNonEmptyFinally_computed = null;
 
   /** @apilevel internal */
   protected boolean hasNonEmptyFinally_value;
@@ -1000,8 +993,8 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="ExceptionHandling", declaredAt="/home/olivier/projects/extendj/java4/frontend/ExceptionHandling.jrag:43")
   public boolean hasNonEmptyFinally() {
-    ASTNode$State state = state();
-    if (hasNonEmptyFinally_computed == ASTNode$State.NON_CYCLE || hasNonEmptyFinally_computed == state().cycle()) {
+    ASTState state = state();
+    if (hasNonEmptyFinally_computed == ASTState.NON_CYCLE || hasNonEmptyFinally_computed == state().cycle()) {
       return hasNonEmptyFinally_value;
     }
     hasNonEmptyFinally_value = hasFinally() && getFinally().getNumStmt() > 0;
@@ -1009,14 +1002,14 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       hasNonEmptyFinally_computed = state().cycle();
     
     } else {
-      hasNonEmptyFinally_computed = ASTNode$State.NON_CYCLE;
+      hasNonEmptyFinally_computed = ASTState.NON_CYCLE;
     
     }
     return hasNonEmptyFinally_value;
   }
   /** @apilevel internal */
   private void catchableException_TypeDecl_reset() {
-    catchableException_TypeDecl_computed = new java.util.HashMap(4);
+    catchableException_TypeDecl_computed = null;
     catchableException_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1036,10 +1029,10 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     Object _parameters = type;
     if (catchableException_TypeDecl_computed == null) catchableException_TypeDecl_computed = new java.util.HashMap(4);
     if (catchableException_TypeDecl_values == null) catchableException_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (catchableException_TypeDecl_values.containsKey(_parameters) && catchableException_TypeDecl_computed != null
+    ASTState state = state();
+    if (catchableException_TypeDecl_values.containsKey(_parameters)
         && catchableException_TypeDecl_computed.containsKey(_parameters)
-        && (catchableException_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || catchableException_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (catchableException_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || catchableException_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) catchableException_TypeDecl_values.get(_parameters);
     }
     boolean catchableException_TypeDecl_value = getBlock().reachedException(type);
@@ -1049,7 +1042,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     
     } else {
       catchableException_TypeDecl_values.put(_parameters, catchableException_TypeDecl_value);
-      catchableException_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      catchableException_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return catchableException_TypeDecl_value;
@@ -1074,7 +1067,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
   @ASTNodeAnnotation.Source(aspect="NTAFinally", declaredAt="/home/olivier/projects/extendj/java4/frontend/NTAFinally.jrag:59")
   public Block getExceptionHandler() {
-    ASTNode$State state = state();
+    ASTState state = state();
     if (getExceptionHandler_computed) {
       return (Block) getChild(getExceptionHandlerChildPosition());
     }
@@ -1101,7 +1094,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     canCompleteNormally_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle canCompleteNormally_computed = null;
+  protected ASTState.Cycle canCompleteNormally_computed = null;
 
   /** @apilevel internal */
   protected boolean canCompleteNormally_value;
@@ -1114,8 +1107,8 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="UnreachableStatements", declaredAt="/home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:50")
   public boolean canCompleteNormally() {
-    ASTNode$State state = state();
-    if (canCompleteNormally_computed == ASTNode$State.NON_CYCLE || canCompleteNormally_computed == state().cycle()) {
+    ASTState state = state();
+    if (canCompleteNormally_computed == ASTState.NON_CYCLE || canCompleteNormally_computed == state().cycle()) {
       return canCompleteNormally_value;
     }
     canCompleteNormally_value = canCompleteNormally_compute();
@@ -1123,7 +1116,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       canCompleteNormally_computed = state().cycle();
     
     } else {
-      canCompleteNormally_computed = ASTNode$State.NON_CYCLE;
+      canCompleteNormally_computed = ASTState.NON_CYCLE;
     
     }
     return canCompleteNormally_value;
@@ -1160,13 +1153,13 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   /**
    * @attribute syn
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:224
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:235
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:224")
-  public soot.jimple.Stmt break_label() {
-    soot.jimple.Stmt break_label_value = label_finally();
-    return break_label_value;
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:235")
+  public Body.Label break_label(Body b) {
+    Body.Label break_label_Body_value = label_finally(b);
+    return break_label_Body_value;
   }
   /**
    * @attribute syn
@@ -1175,284 +1168,129 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:250")
-  public soot.jimple.Stmt continue_label() {
-    soot.jimple.Stmt continue_label_value = label_finally();
-    return continue_label_value;
+  public Body.Label continue_label(Body b) {
+    Body.Label continue_label_Body_value = label_finally(b);
+    return continue_label_Body_value;
   }
   /** @apilevel internal */
-  private void label_begin_reset() {
-    label_begin_computed = null;
-    label_begin_value = null;
+  private void finally_info_Body_reset() {
+    finally_info_Body_computed = null;
+    finally_info_Body_values = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle label_begin_computed = null;
-
+  protected java.util.Map finally_info_Body_values;
   /** @apilevel internal */
-  protected soot.jimple.Stmt label_begin_value;
-
+  protected java.util.Map finally_info_Body_computed;
   /**
    * @attribute syn
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:363
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:300
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:363")
-  public soot.jimple.Stmt label_begin() {
-    ASTNode$State state = state();
-    if (label_begin_computed == ASTNode$State.NON_CYCLE || label_begin_computed == state().cycle()) {
-      return label_begin_value;
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:300")
+  public FinallyInfo finally_info(Body b) {
+    Object _parameters = b;
+    if (finally_info_Body_computed == null) finally_info_Body_computed = new java.util.HashMap(4);
+    if (finally_info_Body_values == null) finally_info_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (finally_info_Body_values.containsKey(_parameters)
+        && finally_info_Body_computed.containsKey(_parameters)
+        && (finally_info_Body_computed.get(_parameters) == ASTState.NON_CYCLE || finally_info_Body_computed.get(_parameters) == state().cycle())) {
+      return (FinallyInfo) finally_info_Body_values.get(_parameters);
     }
-    label_begin_value = newLabel();
+    FinallyInfo finally_info_Body_value = new FinallyInfo(b, typeThrowable(), this);
     if (state().inCircle()) {
-      label_begin_computed = state().cycle();
+      finally_info_Body_values.put(_parameters, finally_info_Body_value);
+      finally_info_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      label_begin_computed = ASTNode$State.NON_CYCLE;
+      finally_info_Body_values.put(_parameters, finally_info_Body_value);
+      finally_info_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return label_begin_value;
+    return finally_info_Body_value;
   }
-  /** @apilevel internal */
-  private void label_block_end_reset() {
-    label_block_end_computed = null;
-    label_block_end_value = null;
-  }
-  /** @apilevel internal */
-  protected ASTNode$State.Cycle label_block_end_computed = null;
-
-  /** @apilevel internal */
-  protected soot.jimple.Stmt label_block_end_value;
-
   /**
    * @attribute syn
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:364
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:302
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:364")
-  public soot.jimple.Stmt label_block_end() {
-    ASTNode$State state = state();
-    if (label_block_end_computed == ASTNode$State.NON_CYCLE || label_block_end_computed == state().cycle()) {
-      return label_block_end_value;
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:302")
+  public Body.CatchLabel label_finally_catch(Body b) {
+    Body.CatchLabel label_finally_catch_Body_value = finally_info(b).label_catch;
+    return label_finally_catch_Body_value;
+  }
+  /**
+   * @attribute syn
+   * @aspect Statements
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:303
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:303")
+  public Body.Label label_finally(Body b) {
+    Body.Label label_finally_Body_value = finally_info(b).label_finally;
+    return label_finally_Body_value;
+  }
+  /** @apilevel internal */
+  private void label_end_Body_reset() {
+    label_end_Body_computed = null;
+    label_end_Body_values = null;
+  }
+  /** @apilevel internal */
+  protected java.util.Map label_end_Body_values;
+  /** @apilevel internal */
+  protected java.util.Map label_end_Body_computed;
+  /**
+   * @attribute syn
+   * @aspect Statements
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:304
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:304")
+  public Body.Label label_end(Body b) {
+    Object _parameters = b;
+    if (label_end_Body_computed == null) label_end_Body_computed = new java.util.HashMap(4);
+    if (label_end_Body_values == null) label_end_Body_values = new java.util.HashMap(4);
+    ASTState state = state();
+    if (label_end_Body_values.containsKey(_parameters)
+        && label_end_Body_computed.containsKey(_parameters)
+        && (label_end_Body_computed.get(_parameters) == ASTState.NON_CYCLE || label_end_Body_computed.get(_parameters) == state().cycle())) {
+      return (Body.Label) label_end_Body_values.get(_parameters);
     }
-    label_block_end_value = newLabel();
+    Body.Label label_end_Body_value = newLabel(b);
     if (state().inCircle()) {
-      label_block_end_computed = state().cycle();
+      label_end_Body_values.put(_parameters, label_end_Body_value);
+      label_end_Body_computed.put(_parameters, state().cycle());
     
     } else {
-      label_block_end_computed = ASTNode$State.NON_CYCLE;
+      label_end_Body_values.put(_parameters, label_end_Body_value);
+      label_end_Body_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
-    return label_block_end_value;
-  }
-  /** @apilevel internal */
-  private void label_end_reset() {
-    label_end_computed = null;
-    label_end_value = null;
-  }
-  /** @apilevel internal */
-  protected ASTNode$State.Cycle label_end_computed = null;
-
-  /** @apilevel internal */
-  protected soot.jimple.Stmt label_end_value;
-
-  /**
-   * @attribute syn
-   * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:365
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:365")
-  public soot.jimple.Stmt label_end() {
-    ASTNode$State state = state();
-    if (label_end_computed == ASTNode$State.NON_CYCLE || label_end_computed == state().cycle()) {
-      return label_end_value;
-    }
-    label_end_value = newLabel();
-    if (state().inCircle()) {
-      label_end_computed = state().cycle();
-    
-    } else {
-      label_end_computed = ASTNode$State.NON_CYCLE;
-    
-    }
-    return label_end_value;
-  }
-  /** @apilevel internal */
-  private void label_finally_reset() {
-    label_finally_computed = null;
-    label_finally_value = null;
-  }
-  /** @apilevel internal */
-  protected ASTNode$State.Cycle label_finally_computed = null;
-
-  /** @apilevel internal */
-  protected soot.jimple.Stmt label_finally_value;
-
-  /**
-   * @attribute syn
-   * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:366
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:366")
-  public soot.jimple.Stmt label_finally() {
-    ASTNode$State state = state();
-    if (label_finally_computed == ASTNode$State.NON_CYCLE || label_finally_computed == state().cycle()) {
-      return label_finally_value;
-    }
-    label_finally_value = newLabel();
-    if (state().inCircle()) {
-      label_finally_computed = state().cycle();
-    
-    } else {
-      label_finally_computed = ASTNode$State.NON_CYCLE;
-    
-    }
-    return label_finally_value;
-  }
-  /** @apilevel internal */
-  private void label_finally_block_reset() {
-    label_finally_block_computed = null;
-    label_finally_block_value = null;
-  }
-  /** @apilevel internal */
-  protected ASTNode$State.Cycle label_finally_block_computed = null;
-
-  /** @apilevel internal */
-  protected soot.jimple.Stmt label_finally_block_value;
-
-  /**
-   * @attribute syn
-   * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:341
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:341")
-  public soot.jimple.Stmt label_finally_block() {
-    ASTNode$State state = state();
-    if (label_finally_block_computed == ASTNode$State.NON_CYCLE || label_finally_block_computed == state().cycle()) {
-      return label_finally_block_value;
-    }
-    label_finally_block_value = newLabel();
-    if (state().inCircle()) {
-      label_finally_block_computed = state().cycle();
-    
-    } else {
-      label_finally_block_computed = ASTNode$State.NON_CYCLE;
-    
-    }
-    return label_finally_block_value;
-  }
-  /** @apilevel internal */
-  private void label_exception_handler_reset() {
-    label_exception_handler_computed = null;
-    label_exception_handler_value = null;
-  }
-  /** @apilevel internal */
-  protected ASTNode$State.Cycle label_exception_handler_computed = null;
-
-  /** @apilevel internal */
-  protected soot.jimple.Stmt label_exception_handler_value;
-
-  /**
-   * @attribute syn
-   * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:368
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:368")
-  public soot.jimple.Stmt label_exception_handler() {
-    ASTNode$State state = state();
-    if (label_exception_handler_computed == ASTNode$State.NON_CYCLE || label_exception_handler_computed == state().cycle()) {
-      return label_exception_handler_value;
-    }
-    label_exception_handler_value = newLabel();
-    if (state().inCircle()) {
-      label_exception_handler_computed = state().cycle();
-    
-    } else {
-      label_exception_handler_computed = ASTNode$State.NON_CYCLE;
-    
-    }
-    return label_exception_handler_value;
-  }
-  /** @apilevel internal */
-  private void label_catch_end_reset() {
-    label_catch_end_computed = null;
-    label_catch_end_value = null;
-  }
-  /** @apilevel internal */
-  protected ASTNode$State.Cycle label_catch_end_computed = null;
-
-  /** @apilevel internal */
-  protected soot.jimple.Stmt label_catch_end_value;
-
-  /**
-   * @attribute syn
-   * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:369
-   */
-  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:369")
-  public soot.jimple.Stmt label_catch_end() {
-    ASTNode$State state = state();
-    if (label_catch_end_computed == ASTNode$State.NON_CYCLE || label_catch_end_computed == state().cycle()) {
-      return label_catch_end_value;
-    }
-    label_catch_end_value = newLabel();
-    if (state().inCircle()) {
-      label_catch_end_computed = state().cycle();
-    
-    } else {
-      label_catch_end_computed = ASTNode$State.NON_CYCLE;
-    
-    }
-    return label_catch_end_value;
+    return label_end_Body_value;
   }
   /**
    * @attribute syn
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:371
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:306
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:371")
-  public boolean needsFinallyTrap() {
-    boolean needsFinallyTrap_value = enclosedByExceptionHandler() || getNumCatchClause() != 0;
-    return needsFinallyTrap_value;
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:306")
+  public boolean hasCatches() {
+    boolean hasCatches_value = 0 < getNumCatchClause();
+    return hasCatches_value;
   }
-  /** @apilevel internal */
-  private void exceptionRanges_reset() {
-    exceptionRanges_computed = null;
-    exceptionRanges_value = null;
-  }
-  /** @apilevel internal */
-  protected ASTNode$State.Cycle exceptionRanges_computed = null;
-
-  /** @apilevel internal */
-  protected ArrayList<soot.jimple.Stmt> exceptionRanges_value;
-
   /**
    * @attribute syn
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:479
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:421
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:479")
-  public ArrayList<soot.jimple.Stmt> exceptionRanges() {
-    ASTNode$State state = state();
-    if (exceptionRanges_computed == ASTNode$State.NON_CYCLE || exceptionRanges_computed == state().cycle()) {
-      return exceptionRanges_value;
-    }
-    exceptionRanges_value = new ArrayList<>();
-    if (state().inCircle()) {
-      exceptionRanges_computed = state().cycle();
-    
-    } else {
-      exceptionRanges_computed = ASTNode$State.NON_CYCLE;
-    
-    }
-    return exceptionRanges_value;
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:421")
+  public ArrayList<soot.jimple.Stmt> exceptionRanges(Body b) {
+    ArrayList<soot.jimple.Stmt> exceptionRanges_Body_value = b.lazy_exceptionRanges(this);
+    return exceptionRanges_Body_value;
   }
   /**
    * @attribute inh
@@ -1465,10 +1303,10 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     Object _parameters = exceptionType;
     if (handlesException_TypeDecl_computed == null) handlesException_TypeDecl_computed = new java.util.HashMap(4);
     if (handlesException_TypeDecl_values == null) handlesException_TypeDecl_values = new java.util.HashMap(4);
-    ASTNode$State state = state();
-    if (handlesException_TypeDecl_values.containsKey(_parameters) && handlesException_TypeDecl_computed != null
+    ASTState state = state();
+    if (handlesException_TypeDecl_values.containsKey(_parameters)
         && handlesException_TypeDecl_computed.containsKey(_parameters)
-        && (handlesException_TypeDecl_computed.get(_parameters) == ASTNode$State.NON_CYCLE || handlesException_TypeDecl_computed.get(_parameters) == state().cycle())) {
+        && (handlesException_TypeDecl_computed.get(_parameters) == ASTState.NON_CYCLE || handlesException_TypeDecl_computed.get(_parameters) == state().cycle())) {
       return (Boolean) handlesException_TypeDecl_values.get(_parameters);
     }
     boolean handlesException_TypeDecl_value = getParent().Define_handlesException(this, null, exceptionType);
@@ -1478,14 +1316,14 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     
     } else {
       handlesException_TypeDecl_values.put(_parameters, handlesException_TypeDecl_value);
-      handlesException_TypeDecl_computed.put(_parameters, ASTNode$State.NON_CYCLE);
+      handlesException_TypeDecl_computed.put(_parameters, ASTState.NON_CYCLE);
     
     }
     return handlesException_TypeDecl_value;
   }
   /** @apilevel internal */
   private void handlesException_TypeDecl_reset() {
-    handlesException_TypeDecl_computed = new java.util.HashMap(4);
+    handlesException_TypeDecl_computed = null;
     handlesException_TypeDecl_values = null;
   }
   /** @apilevel internal */
@@ -1500,8 +1338,8 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="UnreachableStatements", declaredAt="/home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:197")
   public TypeDecl typeError() {
-    ASTNode$State state = state();
-    if (typeError_computed == ASTNode$State.NON_CYCLE || typeError_computed == state().cycle()) {
+    ASTState state = state();
+    if (typeError_computed == ASTState.NON_CYCLE || typeError_computed == state().cycle()) {
       return typeError_value;
     }
     typeError_value = getParent().Define_typeError(this, null);
@@ -1509,7 +1347,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       typeError_computed = state().cycle();
     
     } else {
-      typeError_computed = ASTNode$State.NON_CYCLE;
+      typeError_computed = ASTState.NON_CYCLE;
     
     }
     return typeError_value;
@@ -1520,7 +1358,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     typeError_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle typeError_computed = null;
+  protected ASTState.Cycle typeError_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl typeError_value;
@@ -1533,8 +1371,8 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="UnreachableStatements", declaredAt="/home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:198")
   public TypeDecl typeRuntimeException() {
-    ASTNode$State state = state();
-    if (typeRuntimeException_computed == ASTNode$State.NON_CYCLE || typeRuntimeException_computed == state().cycle()) {
+    ASTState state = state();
+    if (typeRuntimeException_computed == ASTState.NON_CYCLE || typeRuntimeException_computed == state().cycle()) {
       return typeRuntimeException_value;
     }
     typeRuntimeException_value = getParent().Define_typeRuntimeException(this, null);
@@ -1542,7 +1380,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       typeRuntimeException_computed = state().cycle();
     
     } else {
-      typeRuntimeException_computed = ASTNode$State.NON_CYCLE;
+      typeRuntimeException_computed = ASTState.NON_CYCLE;
     
     }
     return typeRuntimeException_value;
@@ -1553,7 +1391,7 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
     typeRuntimeException_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle typeRuntimeException_computed = null;
+  protected ASTState.Cycle typeRuntimeException_computed = null;
 
   /** @apilevel internal */
   protected TypeDecl typeRuntimeException_value;
@@ -1561,10 +1399,10 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   /**
    * @attribute inh
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:373
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:307
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:373")
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:307")
   public boolean enclosedByExceptionHandler() {
     boolean enclosedByExceptionHandler_value = getParent().Define_enclosedByExceptionHandler(this, null);
     return enclosedByExceptionHandler_value;
@@ -1572,10 +1410,10 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
   /**
    * @attribute inh
    * @aspect Statements
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:498
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:443
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:498")
+  @ASTNodeAnnotation.Source(aspect="Statements", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Statements.jrag:443")
   public TypeDecl typeThrowable() {
     TypeDecl typeThrowable_value = getParent().Define_typeThrowable(this, null);
     return typeThrowable_value;
@@ -1594,6 +1432,11 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       return hasNonEmptyFinally() ? this : enclosingFinally(branch);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/BranchTarget.jrag:273
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosingFinally
+   */
   protected boolean canDefine_enclosingFinally(ASTNode _callerNode, ASTNode _childNode, Stmt branch) {
     return true;
   }
@@ -1619,6 +1462,11 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       return getParent().Define_assignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:256
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute assignedBefore
+   */
   protected boolean canDefine_assignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
@@ -1662,11 +1510,16 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       return getParent().Define_unassignedBefore(this, _callerNode, v);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/DefiniteAssignment.jrag:887
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute unassignedBefore
+   */
   protected boolean canDefine_unassignedBefore(ASTNode _callerNode, ASTNode _childNode, Variable v) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:115
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
    * @apilevel internal
    */
   public boolean Define_handlesException(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
@@ -1698,6 +1551,11 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       return getParent().Define_handlesException(this, _callerNode, exceptionType);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:112
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute handlesException
+   */
   protected boolean canDefine_handlesException(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
     return true;
   }
@@ -1718,6 +1576,11 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       return getParent().Define_reachable(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:49
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reachable
+   */
   protected boolean canDefine_reachable(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1748,6 +1611,11 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       return getParent().Define_reachableCatchClause(this, _callerNode, exceptionType);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/UnreachableStatements.jrag:182
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reachableCatchClause
+   */
   protected boolean canDefine_reachableCatchClause(ASTNode _callerNode, ASTNode _childNode, TypeDecl exceptionType) {
     return true;
   }
@@ -1773,6 +1641,11 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       return getParent().Define_reportUnreachable(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/PreciseRethrow.jrag:280
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute reportUnreachable
+   */
   protected boolean canDefine_reportUnreachable(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
@@ -1812,44 +1685,59 @@ public class TryStmt extends Stmt implements Cloneable, FinallyHost {
       return getParent().Define_caughtExceptions(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/PreciseRethrow.jrag:217
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute caughtExceptions
+   */
   protected boolean canDefine_caughtExceptions(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:373
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:307
    * @apilevel internal
    */
   public boolean Define_enclosedByExceptionHandler(ASTNode _callerNode, ASTNode _childNode) {
     if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:379
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:313
       return true;
     }
     else {
       return getParent().Define_enclosedByExceptionHandler(this, _callerNode);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:307
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute enclosedByExceptionHandler
+   */
   protected boolean canDefine_enclosedByExceptionHandler(ASTNode _callerNode, ASTNode _childNode) {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:475
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:413
    * @apilevel internal
    */
-  public ArrayList Define_exceptionRanges(ASTNode _callerNode, ASTNode _childNode) {
+  public ArrayList<soot.jimple.Stmt> Define_exceptionRanges(ASTNode _callerNode, ASTNode _childNode, Body b) {
     if (_callerNode == getCatchClauseListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:483
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:427
       int childIndex = _callerNode.getIndexOfChild(_childNode);
-      return exceptionRanges();
+      return exceptionRanges(b);
     }
     else if (getBlockNoTransform() != null && _callerNode == getBlock()) {
-      // @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:482
-      return exceptionRanges();
+      // @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:426
+      return exceptionRanges(b);
     }
     else {
-      return getParent().Define_exceptionRanges(this, _callerNode);
+      return getParent().Define_exceptionRanges(this, _callerNode, b);
     }
   }
-  protected boolean canDefine_exceptionRanges(ASTNode _callerNode, ASTNode _childNode) {
+  /**
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Statements.jrag:413
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute exceptionRanges
+   */
+  protected boolean canDefine_exceptionRanges(ASTNode _callerNode, ASTNode _childNode, Body b) {
     return true;
   }
   /** @apilevel internal */

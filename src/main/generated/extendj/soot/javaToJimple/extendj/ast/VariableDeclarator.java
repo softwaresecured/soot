@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,37 +38,11 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java4/grammar/Java.ast:173
+ * @astdecl VariableDeclarator : Declarator;
  * @production VariableDeclarator : {@link Declarator};
 
  */
 public class VariableDeclarator extends Declarator implements Cloneable {
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:12
-   */
-  public soot.Value local;
-  /**
-   * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:13
-   */
-  public void jimplify2(Body b) {
-    //b.setLine(this);
-    local = b.newLocal(name(), type().getSootType(), this);
-    if(hasInit()) {
-      b.add(
-        b.newAssignStmt(
-          local,
-          asRValue(b,
-            getInit().type().emitCastTo(b, // Assign conversion
-              getInit(),
-              type()
-            )
-          ),
-          this
-        )
-      );
-    }
-  }
   /**
    * @declaredat ASTNode:1
    */
@@ -88,13 +64,18 @@ public class VariableDeclarator extends Declarator implements Cloneable {
   /**
    * @declaredat ASTNode:15
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"ID", "Dims", "Init"},
+    type = {"String", "List<Dims>", "Opt<Expr>"},
+    kind = {"Token", "List", "Opt"}
+  )
   public VariableDeclarator(String p0, List<Dims> p1, Opt<Expr> p2) {
     setID(p0);
     setChild(p1, 0);
     setChild(p2, 1);
   }
   /**
-   * @declaredat ASTNode:20
+   * @declaredat ASTNode:25
    */
   public VariableDeclarator(beaver.Symbol p0, List<Dims> p1, Opt<Expr> p2) {
     setID(p0);
@@ -102,20 +83,20 @@ public class VariableDeclarator extends Declarator implements Cloneable {
     setChild(p2, 1);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:26
+   * @declaredat ASTNode:31
    */
   protected int numChildren() {
     return 2;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:32
+   * @declaredat ASTNode:37
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:36
+   * @declaredat ASTNode:41
    */
   public void flushAttrCache() {
     super.flushAttrCache();
@@ -125,20 +106,20 @@ public class VariableDeclarator extends Declarator implements Cloneable {
     enclosingLambda_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:44
+   * @declaredat ASTNode:49
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:48
+   * @declaredat ASTNode:53
    */
   public VariableDeclarator clone() throws CloneNotSupportedException {
     VariableDeclarator node = (VariableDeclarator) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:53
+   * @declaredat ASTNode:58
    */
   public VariableDeclarator copy() {
     try {
@@ -158,7 +139,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:72
+   * @declaredat ASTNode:77
    */
   @Deprecated
   public VariableDeclarator fullCopy() {
@@ -169,7 +150,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:82
+   * @declaredat ASTNode:87
    */
   public VariableDeclarator treeCopyNoTransform() {
     VariableDeclarator tree = (VariableDeclarator) copy();
@@ -195,7 +176,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:107
+   * @declaredat ASTNode:112
    */
   public VariableDeclarator treeCopy() {
     VariableDeclarator tree = (VariableDeclarator) copy();
@@ -216,7 +197,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:126
+   * @declaredat ASTNode:131
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node) && (tokenString_ID == ((VariableDeclarator) node).tokenString_ID);    
@@ -626,7 +607,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
     constant_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle constant_computed = null;
+  protected ASTState.Cycle constant_computed = null;
 
   /** @apilevel internal */
   protected Constant constant_value;
@@ -639,8 +620,8 @@ public class VariableDeclarator extends Declarator implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="Variables", declaredAt="/home/olivier/projects/extendj/java4/frontend/VariableDeclaration.jrag:53")
   public Constant constant() {
-    ASTNode$State state = state();
-    if (constant_computed == ASTNode$State.NON_CYCLE || constant_computed == state().cycle()) {
+    ASTState state = state();
+    if (constant_computed == ASTState.NON_CYCLE || constant_computed == state().cycle()) {
       return constant_value;
     }
     constant_value = type().cast(getInit().constant());
@@ -648,7 +629,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
       constant_computed = state().cycle();
     
     } else {
-      constant_computed = ASTNode$State.NON_CYCLE;
+      constant_computed = ASTState.NON_CYCLE;
     
     }
     return constant_value;
@@ -669,7 +650,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
     isEffectivelyFinal_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isEffectivelyFinal_computed = null;
+  protected ASTState.Cycle isEffectivelyFinal_computed = null;
 
   /** @apilevel internal */
   protected boolean isEffectivelyFinal_value;
@@ -686,8 +667,8 @@ public class VariableDeclarator extends Declarator implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
   @ASTNodeAnnotation.Source(aspect="EffectivelyFinal", declaredAt="/home/olivier/projects/extendj/java8/frontend/EffectivelyFinal.jrag:152")
   public boolean isEffectivelyFinal() {
-    ASTNode$State state = state();
-    if (isEffectivelyFinal_computed == ASTNode$State.NON_CYCLE || isEffectivelyFinal_computed == state().cycle()) {
+    ASTState state = state();
+    if (isEffectivelyFinal_computed == ASTState.NON_CYCLE || isEffectivelyFinal_computed == state().cycle()) {
       return isEffectivelyFinal_value;
     }
     isEffectivelyFinal_value = isFinal() || !inhModifiedInScope(this);
@@ -695,7 +676,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
       isEffectivelyFinal_computed = state().cycle();
     
     } else {
-      isEffectivelyFinal_computed = ASTNode$State.NON_CYCLE;
+      isEffectivelyFinal_computed = ASTState.NON_CYCLE;
     
     }
     return isEffectivelyFinal_value;
@@ -708,8 +689,8 @@ public class VariableDeclarator extends Declarator implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="DeclareBeforeUse", declaredAt="/home/olivier/projects/extendj/java4/frontend/DeclareBeforeUse.jrag:35")
   public int blockIndex() {
-    ASTNode$State state = state();
-    if (blockIndex_computed == ASTNode$State.NON_CYCLE || blockIndex_computed == state().cycle()) {
+    ASTState state = state();
+    if (blockIndex_computed == ASTState.NON_CYCLE || blockIndex_computed == state().cycle()) {
       return blockIndex_value;
     }
     blockIndex_value = getParent().Define_blockIndex(this, null);
@@ -717,7 +698,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
       blockIndex_computed = state().cycle();
     
     } else {
-      blockIndex_computed = ASTNode$State.NON_CYCLE;
+      blockIndex_computed = ASTState.NON_CYCLE;
     
     }
     return blockIndex_value;
@@ -727,7 +708,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
     blockIndex_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle blockIndex_computed = null;
+  protected ASTState.Cycle blockIndex_computed = null;
 
   /** @apilevel internal */
   protected int blockIndex_value;
@@ -746,10 +727,10 @@ public class VariableDeclarator extends Declarator implements Cloneable {
   /**
    * @attribute inh
    * @aspect NestedTypes
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:574
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:570
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:574")
+  @ASTNodeAnnotation.Source(aspect="NestedTypes", declaredAt="/home/olivier/projects/extendj/java4/frontend/TypeAnalysis.jrag:570")
   public BodyDecl enclosingBodyDecl() {
     BodyDecl enclosingBodyDecl_value = getParent().Define_enclosingBodyDecl(this, null);
     return enclosingBodyDecl_value;
@@ -757,10 +738,10 @@ public class VariableDeclarator extends Declarator implements Cloneable {
   /**
    * @attribute inh
    * @aspect TryWithResources
-   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:196
+   * @declaredat /home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:176
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:196")
+  @ASTNodeAnnotation.Source(aspect="TryWithResources", declaredAt="/home/olivier/projects/extendj/java7/frontend/TryWithResources.jrag:176")
   public boolean resourcePreviouslyDeclared(String name) {
     boolean resourcePreviouslyDeclared_String_value = getParent().Define_resourcePreviouslyDeclared(this, null, name);
     return resourcePreviouslyDeclared_String_value;
@@ -784,8 +765,8 @@ public class VariableDeclarator extends Declarator implements Cloneable {
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
   @ASTNodeAnnotation.Source(aspect="EnclosingLambda", declaredAt="/home/olivier/projects/extendj/java8/frontend/EnclosingLambda.jrag:36")
   public LambdaExpr enclosingLambda() {
-    ASTNode$State state = state();
-    if (enclosingLambda_computed == ASTNode$State.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
+    ASTState state = state();
+    if (enclosingLambda_computed == ASTState.NON_CYCLE || enclosingLambda_computed == state().cycle()) {
       return enclosingLambda_value;
     }
     enclosingLambda_value = getParent().Define_enclosingLambda(this, null);
@@ -793,7 +774,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
       enclosingLambda_computed = state().cycle();
     
     } else {
-      enclosingLambda_computed = ASTNode$State.NON_CYCLE;
+      enclosingLambda_computed = ASTState.NON_CYCLE;
     
     }
     return enclosingLambda_value;
@@ -804,7 +785,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
     enclosingLambda_value = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle enclosingLambda_computed = null;
+  protected ASTState.Cycle enclosingLambda_computed = null;
 
   /** @apilevel internal */
   protected LambdaExpr enclosingLambda_value;
@@ -827,6 +808,11 @@ public class VariableDeclarator extends Declarator implements Cloneable {
       return getParent().Define_lookupVariable(this, _callerNode, name);
     }
   }
+  /**
+   * @declaredat /home/olivier/projects/extendj/java8/frontend/LookupVariable.jrag:30
+   * @apilevel internal
+   * @return {@code true} if this node has an equation for the inherited attribute lookupVariable
+   */
   protected boolean canDefine_lookupVariable(ASTNode _callerNode, ASTNode _childNode, String name) {
     return true;
   }
@@ -838,6 +824,7 @@ public class VariableDeclarator extends Declarator implements Cloneable {
   public boolean canRewrite() {
     return false;
   }
+  /** @apilevel internal */
   protected void collect_contributors_CompilationUnit_problems(CompilationUnit _root, java.util.Map<ASTNode, java.util.Set<ASTNode>> _map) {
     // @declaredat /home/olivier/projects/extendj/java4/frontend/NameCheck.jrag:457
     {
@@ -849,7 +836,9 @@ public class VariableDeclarator extends Declarator implements Cloneable {
       contributors.add(this);
     }
     // @declaredat /home/olivier/projects/extendj/java4/frontend/TypeCheck.jrag:40
-    if (hasInit() && !getInit().type().assignConversionTo(type(), getInit())) {
+    if (hasInit()
+              && !getInit().type().assignConversionTo(type(), getInit())
+              && !getInit().type().isUnknown()) {
       {
         java.util.Set<ASTNode> contributors = _map.get(_root);
         if (contributors == null) {
@@ -861,12 +850,15 @@ public class VariableDeclarator extends Declarator implements Cloneable {
     }
     super.collect_contributors_CompilationUnit_problems(_root, _map);
   }
+  /** @apilevel internal */
   protected void contributeTo_CompilationUnit_problems(LinkedList<Problem> collection) {
     super.contributeTo_CompilationUnit_problems(collection);
     for (Problem value : nameProblems()) {
       collection.add(value);
     }
-    if (hasInit() && !getInit().type().assignConversionTo(type(), getInit())) {
+    if (hasInit()
+              && !getInit().type().assignConversionTo(type(), getInit())
+              && !getInit().type().isUnknown()) {
       collection.add(errorf("can not assign variable %s of type %s a value of type %s",
                 name(), type().typeName(), getInit().type().typeName()));
     }

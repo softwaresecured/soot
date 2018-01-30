@@ -1,6 +1,7 @@
-/* This file was generated with JastAdd2 (http://jastadd.org) version 2.2.2 */
+/* This file was generated with JastAdd2 (http://jastadd.org) version 2.3.0-1-ge75f200 */
 package soot.javaToJimple.extendj.ast;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import soot.coffi.ClassFile;
 import soot.coffi.method_info;
 import soot.coffi.CONSTANT_Utf8_info;
 import soot.tagkit.SourceFileTag;
+import soot.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -39,6 +41,7 @@ import soot.coffi.CoffiMethodSource;
  * declarations implicitly final.
  * @ast node
  * @declaredat /home/olivier/projects/extendj/java7/grammar/TryWithResources.ast:16
+ * @astdecl ResourceModifiers : Modifiers;
  * @production ResourceModifiers : {@link Modifiers};
 
  */
@@ -63,44 +66,49 @@ public class ResourceModifiers extends Modifiers implements Cloneable {
   /**
    * @declaredat ASTNode:14
    */
+  @ASTNodeAnnotation.Constructor(
+    name = {"Modifier"},
+    type = {"List<Modifier>"},
+    kind = {"List"}
+  )
   public ResourceModifiers(List<Modifier> p0) {
     setChild(p0, 0);
   }
   /** @apilevel low-level 
-   * @declaredat ASTNode:18
+   * @declaredat ASTNode:23
    */
   protected int numChildren() {
     return 1;
   }
   /**
    * @apilevel internal
-   * @declaredat ASTNode:24
+   * @declaredat ASTNode:29
    */
   public boolean mayHaveRewrite() {
     return false;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:28
+   * @declaredat ASTNode:33
    */
   public void flushAttrCache() {
     super.flushAttrCache();
     isFinal_reset();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:33
+   * @declaredat ASTNode:38
    */
   public void flushCollectionCache() {
     super.flushCollectionCache();
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:37
+   * @declaredat ASTNode:42
    */
   public ResourceModifiers clone() throws CloneNotSupportedException {
     ResourceModifiers node = (ResourceModifiers) super.clone();
     return node;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:42
+   * @declaredat ASTNode:47
    */
   public ResourceModifiers copy() {
     try {
@@ -120,7 +128,7 @@ public class ResourceModifiers extends Modifiers implements Cloneable {
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
    * @deprecated Please use treeCopy or treeCopyNoTransform instead
-   * @declaredat ASTNode:61
+   * @declaredat ASTNode:66
    */
   @Deprecated
   public ResourceModifiers fullCopy() {
@@ -131,7 +139,7 @@ public class ResourceModifiers extends Modifiers implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:71
+   * @declaredat ASTNode:76
    */
   public ResourceModifiers treeCopyNoTransform() {
     ResourceModifiers tree = (ResourceModifiers) copy();
@@ -152,7 +160,7 @@ public class ResourceModifiers extends Modifiers implements Cloneable {
    * The copy is dangling, i.e. has no parent.
    * @return dangling copy of the subtree at this node
    * @apilevel low-level
-   * @declaredat ASTNode:91
+   * @declaredat ASTNode:96
    */
   public ResourceModifiers treeCopy() {
     ResourceModifiers tree = (ResourceModifiers) copy();
@@ -168,7 +176,7 @@ public class ResourceModifiers extends Modifiers implements Cloneable {
     return tree;
   }
   /** @apilevel internal 
-   * @declaredat ASTNode:105
+   * @declaredat ASTNode:110
    */
   protected boolean is$Equal(ASTNode node) {
     return super.is$Equal(node);    
@@ -288,7 +296,7 @@ public class ResourceModifiers extends Modifiers implements Cloneable {
     isFinal_computed = null;
   }
   /** @apilevel internal */
-  protected ASTNode$State.Cycle isFinal_computed = null;
+  protected ASTState.Cycle isFinal_computed = null;
 
   /** @apilevel internal */
   protected boolean isFinal_value;
@@ -296,13 +304,13 @@ public class ResourceModifiers extends Modifiers implements Cloneable {
   /**
    * @attribute syn
    * @aspect Modifiers
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:448
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:446
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:448")
+  @ASTNodeAnnotation.Source(aspect="Modifiers", declaredAt="/home/olivier/projects/extendj/java4/frontend/Modifiers.jrag:446")
   public boolean isFinal() {
-    ASTNode$State state = state();
-    if (isFinal_computed == ASTNode$State.NON_CYCLE || isFinal_computed == state().cycle()) {
+    ASTState state = state();
+    if (isFinal_computed == ASTState.NON_CYCLE || isFinal_computed == state().cycle()) {
       return isFinal_value;
     }
     isFinal_value = true;
@@ -310,7 +318,7 @@ public class ResourceModifiers extends Modifiers implements Cloneable {
       isFinal_computed = state().cycle();
     
     } else {
-      isFinal_computed = ASTNode$State.NON_CYCLE;
+      isFinal_computed = ASTState.NON_CYCLE;
     
     }
     return isFinal_value;
