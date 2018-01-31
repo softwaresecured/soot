@@ -56,13 +56,13 @@ public abstract class Binary extends Expr implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:733
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:724
    */
   protected Value emitShiftExpr(Body b)
   { return eval(b, type(), typeInt()); }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:736
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:727
    */
   protected Value eval(Body b, TypeDecl lhs, TypeDecl rhs) {
     return emitOperation(b,
@@ -500,10 +500,10 @@ protected ASTState.Cycle isConstant_cycle = null;
    * Test if an expression contains an unresolved parse name.
    * @attribute syn
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:423
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:423")
   public boolean containsParseName() {
     boolean containsParseName_value = getLeftOperand().containsParseName() || getRightOperand().containsParseName();
     return containsParseName_value;
@@ -533,10 +533,10 @@ protected ASTState.Cycle isConstant_cycle = null;
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:743
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:734
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:743")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:734")
   public Value emitOperation(Body b, Value l, Value r) {
     { throw new Error("emitOperation not implemented in " + getClass().getName()); }
   }

@@ -386,10 +386,10 @@ public class ThisAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:405
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:396
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:405")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:396")
   public Local eval(Body b) {
     Local eval_Body_value = emitThis(b, decl());
     return eval_Body_value;

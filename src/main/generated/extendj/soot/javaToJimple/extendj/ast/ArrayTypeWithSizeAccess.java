@@ -64,7 +64,7 @@ public class ArrayTypeWithSizeAccess extends ArrayTypeAccess implements Cloneabl
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:634
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:625
    */
   void evalArraySize(Body b, ArrayList<Value> list) {
     getAccess().evalArraySize(b, list);

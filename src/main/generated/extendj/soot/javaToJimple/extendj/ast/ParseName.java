@@ -88,26 +88,26 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:258
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:260
    */
   private ArrayList<NamePart> nameParts = new ArrayList<NamePart>();
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:260
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:262
    */
   public ParseName(ArrayList<NamePart> nameParts) {
     this.nameParts.addAll(nameParts);
   }
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:264
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:266
    */
   public ParseName(Symbol name) {
     nameParts.add(new NamePart(name));
   }
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:276
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:278
    */
   public Access buildMethodAccess(List<Expr> arguments) {
     if (nameParts.isEmpty()) {
@@ -128,7 +128,7 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:328
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:330
    */
   protected Access resolvePackageOrTypeName(Access qualifier, NamePart name) {
     if (qualifier == null)
@@ -143,7 +143,7 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:340
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:342
    */
   protected Access resolveAmbiguousName(Access qualifier, NamePart name) {
     if (qualifier == null) {
@@ -161,7 +161,7 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:355
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:357
    */
   private VarAccess mkVarName(NamePart varName) {
     VarAccess a = new VarAccess(varName.toString(), varName.start, varName.end);
@@ -170,7 +170,7 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:361
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:363
    */
   private TypeAccess mkTypeName(NamePart typeName) {
     TypeAccess a = new TypeAccess(typeName.toString(), typeName.start, typeName.end);
@@ -179,7 +179,7 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:367
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:369
    */
   private PackageAccess mkPkgName(NamePart pkgName) {
     PackageAccess a = new PackageAccess(pkgName.toString(), pkgName.start, pkgName.end);
@@ -188,13 +188,13 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:373
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:375
    */
   private Access mkVarName(Access qualifier, NamePart varName)
   { return mkDot(qualifier, mkVarName(varName)); }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:376
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:378
    */
   private Access mkTypeName(Access qualifier, NamePart typeName) {
     TypeAccess access = new TypeAccess(
@@ -209,7 +209,7 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:388
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:390
    */
   private PackageAccess mkPkgName(Access qualifier, NamePart pkgName) {
     assert qualifier.isPackageAccess();
@@ -220,7 +220,7 @@ public class ParseName extends Access implements Cloneable {
   }
   /**
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:396
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:398
    */
   private Dot mkDot(Expr lhs, Access rhs) {
     Dot a = new Dot(lhs, rhs);
@@ -374,10 +374,10 @@ public class ParseName extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:313
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:315
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:313")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:315")
   public boolean isParseName() {
     boolean isParseName_value = true;
     return isParseName_value;
@@ -385,10 +385,10 @@ public class ParseName extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:317
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:319
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:317")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:319")
   public String name() {
     {
         StringBuilder sb = new StringBuilder();
@@ -405,10 +405,10 @@ public class ParseName extends Access implements Cloneable {
    * Test if an expression contains an unresolved parse name.
    * @attribute syn
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:423
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:423")
   public boolean containsParseName() {
     boolean containsParseName_value = true;
     return containsParseName_value;
@@ -429,24 +429,24 @@ public class ParseName extends Access implements Cloneable {
    * expression containing another unresolved parse name.
    * @attribute inh
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:406
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:408
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:406")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:408")
   public boolean canResolve() {
     boolean canResolve_value = getParent().Define_canResolve(this, null);
     return canResolve_value;
   }
   /** @apilevel internal */
   public ASTNode rewriteTo() {
-    // Declared at /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:434
+    // Declared at /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:436
     if (canResolve()) {
       return rewriteRule0();
     }
     return super.rewriteTo();
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:434
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:436
    * @apilevel internal
    */
   private Access rewriteRule0() {
@@ -497,7 +497,7 @@ public class ParseName extends Access implements Cloneable {
     }  }
   /** @apilevel internal */
   public boolean canRewrite() {
-    // Declared at /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:434
+    // Declared at /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:436
     if (canResolve()) {
       return true;
     }

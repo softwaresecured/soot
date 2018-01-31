@@ -223,7 +223,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:535
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:526
    */
   private Local emitLocalEnclosing(Body b, TypeDecl local_class) {
     if (local_class.inStaticContext()) throw new Error("Not implemented");
@@ -232,7 +232,7 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:541
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:532
    */
   private Local emitInnerMemberEnclosing(Body b, TypeDecl innerClass) {
     if (hasPrevExpr()) {
@@ -1191,10 +1191,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
    * Test if an expression contains an unresolved parse name.
    * @attribute syn
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:423
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:421")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:423")
   public boolean containsParseName() {
     boolean containsParseName_value = getAccess().containsParseName();
     return containsParseName_value;
@@ -1697,10 +1697,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:564
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:555
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:564")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:555")
   public VarAccess enclosingVariableAccess(Variable v) {
     Object _parameters = v;
     if (enclosingVariableAccess_Variable_values == null) enclosingVariableAccess_Variable_values = new java.util.HashMap(4);
@@ -1728,10 +1728,10 @@ public class ClassInstanceExpr extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:566
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:557
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:566")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:557")
   public Local eval(Body b) {
     {
         if (transformed() != this) return transformed().eval(b);

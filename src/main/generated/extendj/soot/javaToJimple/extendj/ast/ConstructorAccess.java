@@ -918,17 +918,17 @@ public class ConstructorAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:447
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:438
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:447")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:438")
   public SpecialInvokeExpr eval(Body b) {
     {
         //b.setLine(this);
         Local                       base            = b.emitThis(hostType(), this); // this
         ConstructorDecl             currCtor        = hostingCtorHack();
         ConstructorDecl             delegatedCtor   = decl().erasedConstructor();
-        ArrayList<Immediate>        params_soot     = new ArrayList<>();
+        ArrayList<Value>            params_soot     = new ArrayList<>();
         List<ParameterDeclaration>  params          = currCtor.getExplicitisedParameters();
     
         if (delegatedCtor.needsEnclosing())
@@ -942,7 +942,7 @@ public class ConstructorAccess extends Access implements Cloneable {
         // args
         for (int i = 0; i < getNumArg(); i++) {
           TypeDecl erased = delegatedCtor.getParameter(i).type().erasure();
-          params_soot.add(b.asImmediate(getArg(i).evalAndCast(b, erased))); // MethodInvocationConversion
+          params_soot.add(getArg(i).evalAndCast(b, erased)); // MethodInvocationConversion
         }
     
         for (ParameterDeclaration p : currCtor.getExplicitisedCaptureParameters().values())

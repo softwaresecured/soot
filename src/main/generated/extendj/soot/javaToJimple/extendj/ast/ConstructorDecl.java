@@ -3126,7 +3126,7 @@ public class ConstructorDecl extends BodyDecl implements Cloneable, MethodLikeDe
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:475
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:466
    * @apilevel internal
    */
   public ConstructorDecl Define_hostingCtorHack(ASTNode _callerNode, ASTNode _childNode) {
@@ -3134,7 +3134,7 @@ public class ConstructorDecl extends BodyDecl implements Cloneable, MethodLikeDe
     return this;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:475
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:466
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute hostingCtorHack
    */

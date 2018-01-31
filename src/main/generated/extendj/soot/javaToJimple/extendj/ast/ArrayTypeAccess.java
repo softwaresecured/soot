@@ -79,7 +79,7 @@ public class ArrayTypeAccess extends TypeAccess implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:631
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:622
    */
   void evalArraySize(Body b, ArrayList<Value> list)
   { getAccess().evalArraySize(b, list); }

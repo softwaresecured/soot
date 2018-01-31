@@ -428,10 +428,10 @@ public class InstanceOfExpr extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:810
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:801
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:810")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:801")
   public soot.jimple.InstanceOfExpr eval(Body b) {
     {
         return b.newInstanceOfExpr(

@@ -272,10 +272,10 @@ public class PreDecExpr extends Unary implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:705
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:696
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:705")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:696")
   public Immediate eval(Body b) {
     { return emitPrefix (b, -1); }
   }

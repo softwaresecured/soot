@@ -596,10 +596,10 @@ public class ArrayInit extends Expr implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:639
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:630
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:639")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:630")
   public Local eval(Body b) {
     {
         Value size  = IntType.emitConstant(getNumInit(), b, this);

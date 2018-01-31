@@ -1010,10 +1010,10 @@ public class Dot extends Access implements Cloneable {
   /**
    * @attribute inh
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:407
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:409
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:407")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:409")
   public boolean canResolve() {
     boolean canResolve_value = getParent().Define_canResolve(this, null);
     return canResolve_value;
@@ -1345,12 +1345,12 @@ public class Dot extends Access implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:406
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:408
    * @apilevel internal
    */
   public boolean Define_canResolve(ASTNode _callerNode, ASTNode _childNode) {
     if (getRightNoTransform() != null && _callerNode == getRight()) {
-      // @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:416
+      // @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:418
       return !getLeft().containsParseName() && canResolve();
     }
     else {
@@ -1358,7 +1358,7 @@ public class Dot extends Access implements Cloneable {
     }
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:406
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:408
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute canResolve
    */

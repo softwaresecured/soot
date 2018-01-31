@@ -260,10 +260,10 @@ public class PostDecExpr extends PostfixExpr implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:704
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:695
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:704")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:695")
   public Immediate eval(Body b) {
     { return emitPostfix(b, -1); }
   }

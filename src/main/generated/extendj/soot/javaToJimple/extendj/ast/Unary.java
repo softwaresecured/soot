@@ -54,17 +54,17 @@ public abstract class Unary extends Expr implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:707
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:698
    */
   protected Immediate emitPrefix (Body b, int delta) { return emit_fix(b, delta).snd; }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:708
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:699
    */
   protected Immediate emitPostfix(Body b, int delta) { return emit_fix(b, delta).fst; }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:710
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:701
    */
   private Pair<Immediate, Immediate> emit_fix(Body b, int delta) {
     Value     dst     = getOperand().eval(b);

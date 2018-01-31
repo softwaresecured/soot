@@ -314,7 +314,9 @@ class Body {
   UnopExpr       newNegExpr   (Value a, ASTNode loc) { return mkUnOp(Jimple.v()::newNegExpr   , a, loc); }
   UnopExpr       newLengthExpr(Value a, ASTNode loc) { return mkUnOp(Jimple.v()::newLengthExpr, a, loc); }
 
-  CastExpr newCastExpr(Value op, Type t, ASTNode location) {
+  Value          newCastExpr(Value op, Type t, ASTNode location) {
+    if (op.getType() == t) return op; // HACK: last ditch attempt to ignore pointless casts
+
     CastExpr  expr  = Jimple.v().newCastExpr(asImmediate(op), t);
     setSrcLoc(expr.getOpBox(), op);
     return setSrcLoc(expr, location);

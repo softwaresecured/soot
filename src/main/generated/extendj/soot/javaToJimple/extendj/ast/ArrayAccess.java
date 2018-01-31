@@ -378,10 +378,10 @@ public class ArrayAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:395
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:386
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:395")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:386")
   public ArrayRef eval(Body b) {
     {
         Value arrayRef = b.newTemp(prevExpr().eval(b));

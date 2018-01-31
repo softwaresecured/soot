@@ -202,22 +202,17 @@ public class MethodAccess extends Access implements Cloneable {
    * @aspect Expressions
    * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:318
    */
-  private ArrayList<Immediate> buildArgList(Body b) {
-    MethodDecl                decl = decl().erasedMethod();
-    ArrayList<Immediate> list = new ArrayList<>();
-    for(int i = 0; i < getNumArg(); i++)
-      list.add(
-        b.asImmediate(
-          getArg(i).evalAndCast(b, // MethodInvocationConversion
-            decl.getParameter(i).type().erasure()
-          )
-        )
-      );
+  private ArrayList<Value> buildArgList(Body b) {
+    MethodDecl        decl = decl().erasedMethod();
+    ArrayList<Value>  list = new ArrayList<>();
+    for(int i = 0; i < getNumArg(); i++) // MethodInvocationConversion
+      list.add(getArg(i).evalAndCast(b, decl.getParameter(i).type().erasure()));
+
     return list;
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:368
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:359
    */
   private SootMethodRef sootRef() {
     MethodDecl        declErased  = decl().erasedMethod();
@@ -235,7 +230,7 @@ public class MethodAccess extends Access implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:383
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:374
    */
   private Local createLoadQualifier(Body b) {
     if (hasPrevExpr())
@@ -2127,26 +2122,22 @@ public class MethodAccess extends Access implements Cloneable {
     
         if (declErased.isStatic()) {
           if (isQualified() && !qualifier().isTypeAccess())
-            b.newTemp(qualifier().eval(b));
+            b.newTemp(qualifier().eval(b)); // eval possible side-effects
     
-          ArrayList<Immediate> list = buildArgList(b);
-          result = b.newStaticInvokeExpr(sootRef(), list, this);
+          result = b.newStaticInvokeExpr(sootRef(), buildArgList(b), this);
         } else {
-          Local                 left = b.asLocal(createLoadQualifier(b));
-          ArrayList<Immediate>  list = buildArgList(b);
-    
           if (isQualified() && prevExpr().isSuperAccess() || isSuperAccessor)
-            result = b.newSpecialInvokeExpr   (left, sootRef(), list, this);
+            result = b.newSpecialInvokeExpr   (b.asLocal(createLoadQualifier(b)), sootRef(), buildArgList(b), this);
           else if (methodQualifierType().isInterfaceDecl())
-            result = b.newInterfaceInvokeExpr (left, sootRef(), list, this);
+            result = b.newInterfaceInvokeExpr (b.asLocal(createLoadQualifier(b)), sootRef(), buildArgList(b), this);
           else
-            result = b.newVirtualInvokeExpr   (left, sootRef(), list, this);
+            result = b.newVirtualInvokeExpr   (b.asLocal(createLoadQualifier(b)), sootRef(), buildArgList(b), this);
         }
     
         if (declErased.type() != decl().type())
           result = declErased.type().emitCastTo(b, result, decl().type(), this);
     
-        return type().isVoid() ? result : b.asImmediate(result);
+        return result;
       }
   }
   /**

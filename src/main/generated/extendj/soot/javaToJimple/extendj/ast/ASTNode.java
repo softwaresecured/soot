@@ -1337,10 +1337,10 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:686
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:677
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:686")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:677")
   public soot.jimple.Constant emitConstant(Body b, Constant constant) {
     {
         soot.jimple.Constant v;
@@ -3508,7 +3508,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:476
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:467
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute hostingCtorHack
    */
@@ -3628,7 +3628,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:411
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:413
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute canResolve
    */

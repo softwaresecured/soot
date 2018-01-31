@@ -273,10 +273,10 @@ public class MinusExpr extends Unary implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:659
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:650
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:659")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:650")
   public UnopExpr eval(Body b) {
     UnopExpr eval_Body_value = b.newNegExpr(getOperand().eval(b), this);
     return eval_Body_value;

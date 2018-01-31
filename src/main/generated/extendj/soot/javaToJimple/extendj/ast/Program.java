@@ -3277,7 +3277,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:475
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:466
    * @apilevel internal
    */
   public ConstructorDecl Define_hostingCtorHack(ASTNode _callerNode, ASTNode _childNode) {
@@ -3287,7 +3287,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
       }
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:475
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:466
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute hostingCtorHack
    */

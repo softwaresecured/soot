@@ -510,10 +510,10 @@ public class SuperAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:406
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:397
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:406")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:397")
   public Local eval(Body b) {
     Local eval_Body_value = emitThis(b, decl().isInterfaceDecl() ? hostType() :decl());
     return eval_Body_value;

@@ -48,7 +48,7 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * Used by the parser to build a method access from a parsed, potentially qualified, name.
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:271
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:273
    */
   public Access buildMethodAccess(List<Expr> arguments) {
     throw new Error("Can not build method access from access of type "
@@ -56,7 +56,7 @@ public abstract class Access extends Expr implements Cloneable {
   }
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:294
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:296
    */
   public Access addArrayDims(List list) {
     Access a = this;
@@ -118,7 +118,7 @@ public abstract class Access extends Expr implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:410
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:401
    */
   protected Local emitThis(Body b, TypeDecl targetDecl) {
     //b.setLine(this);
@@ -158,7 +158,7 @@ public abstract class Access extends Expr implements Cloneable {
   }
   /**
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:630
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:621
    */
   void evalArraySize(Body b, ArrayList<Value> list) {}
   /**
@@ -536,10 +536,10 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute inh
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:475
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:466
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:475")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:466")
   public ConstructorDecl hostingCtorHack() {
     ConstructorDecl hostingCtorHack_value = getParent().Define_hostingCtorHack(this, null);
     return hostingCtorHack_value;

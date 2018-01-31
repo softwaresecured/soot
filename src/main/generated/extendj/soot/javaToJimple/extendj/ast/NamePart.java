@@ -42,13 +42,13 @@ import soot.coffi.CoffiMethodSource;
  */
  class NamePart extends java.lang.Object {
   
-    protected String name;
+    final String name;
 
   
-    protected int start;
+    final int start;
 
   
-    protected int end;
+    final int end;
 
   
 
@@ -57,6 +57,10 @@ import soot.coffi.CoffiMethodSource;
       start = sym.getStart();
       end = sym.getEnd();
     }
+
+  
+
+    public String toString() { return name; }
 
 
 }

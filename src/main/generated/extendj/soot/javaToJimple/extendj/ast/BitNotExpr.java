@@ -272,10 +272,10 @@ public class BitNotExpr extends Unary implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:660
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:651
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:660")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:651")
   public BinopExpr eval(Body b) {
     {
         Value v = IntType.emitConstant(-1, b, this);

@@ -254,10 +254,10 @@ public class OrBitwiseExpr extends BitwiseExpr implements Cloneable {
   /**
    * @attribute syn
    * @aspect Expressions
-   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:743
+   * @declaredat /home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:734
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:743")
+  @ASTNodeAnnotation.Source(aspect="Expressions", declaredAt="/home/olivier/projects/extendj/jimple8/backend/Expressions.jrag:734")
   public Value emitOperation(Body b, Value l, Value r) {
     Value emitOperation_Body_Value_Value_value = b.newOrExpr   (l, r, this);
     return emitOperation_Body_Value_Value_value;
