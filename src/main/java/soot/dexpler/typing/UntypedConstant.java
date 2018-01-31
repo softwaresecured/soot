@@ -21,4 +21,7 @@ public abstract class UntypedConstant extends Constant {
     }
 
 	public abstract Value defineType(Type type);
+
+    @Override
+    protected UntypedConstant weAreNumberOne() { throw new RuntimeException("not implemented"); }
 }

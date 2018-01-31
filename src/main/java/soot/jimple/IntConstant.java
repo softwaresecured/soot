@@ -195,5 +195,7 @@ public class IntConstant extends ArithmeticConstant
     {
         ((ConstantSwitch) sw).caseIntConstant(this);
     }
-    
+
+    @Override
+    protected IntConstant weAreNumberOne() { return new IntConstant(value); }
 }

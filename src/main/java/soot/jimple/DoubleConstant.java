@@ -186,4 +186,7 @@ public class DoubleConstant extends RealConstant
     {
         ((ConstantSwitch) sw).caseDoubleConstant(this);
     }
+
+    @Override
+    protected DoubleConstant weAreNumberOne() { return new DoubleConstant(value); }
 }

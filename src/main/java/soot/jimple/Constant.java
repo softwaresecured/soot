@@ -51,11 +51,11 @@ public abstract class Constant implements Value, ConvertToBaf, Immediate
         out.add(u);
     }
 
-    /** Clones the current constant.  Not implemented here. */
-    public Object clone() 
-    {
-        throw new RuntimeException();
-    }
+    // HACK: Declaring an overriding abstract method *doesn't actually count for access control*.
+    //       Only concrete overrides do. We therefore need to provide a concrete impl of `clone` to allow anyone
+    //       to call it.
+    protected abstract Constant weAreNumberOne(); // <- actually does the freakin' cloning.
+    public final Constant clone() { return weAreNumberOne(); }
 
     /** Returns true if this object is structurally equivalent to c. 
      * For Constants, equality is structural equality, so we just call equals(). */

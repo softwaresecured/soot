@@ -61,4 +61,8 @@ public class NullConstant extends Constant
     {
         ((ConstantSwitch) sw).caseNullConstant(this);
     }
+
+    @Override
+    protected NullConstant weAreNumberOne() { return new NullConstant(); }
+    private NullConstant() {}
 }

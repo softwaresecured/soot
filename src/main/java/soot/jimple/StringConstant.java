@@ -72,4 +72,7 @@ public class StringConstant extends Constant
     {
         ((ConstantSwitch) sw).caseStringConstant(this);
     }
+
+    @Override
+    protected StringConstant weAreNumberOne() { return new StringConstant(value); }
 }

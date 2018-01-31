@@ -162,4 +162,7 @@ public class ClassConstant extends Constant {
 	public void apply(Switch sw) {
 		((ConstantSwitch) sw).caseClassConstant(this);
 	}
+
+	@Override
+	protected ClassConstant weAreNumberOne() { return new ClassConstant(value); }
 }

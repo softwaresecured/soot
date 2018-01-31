@@ -208,6 +208,9 @@ public class LongConstant extends ArithmeticConstant
     {
         ((ConstantSwitch) sw).caseLongConstant(this);
     }
+
+    @Override
+    protected LongConstant weAreNumberOne() { return new LongConstant(value); }
 }
 
 

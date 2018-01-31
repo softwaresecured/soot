@@ -203,6 +203,8 @@ public class SEvaluator
      **/
     public static abstract class MetaConstant extends Constant
     {
+        @Override
+        protected MetaConstant weAreNumberOne() { throw new RuntimeException("Not implemented."); }
     }
     
     /**

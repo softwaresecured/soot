@@ -91,4 +91,7 @@ public class MethodHandle extends Constant
 			return false;
 		return true;
 	}
+
+	@Override
+	protected MethodHandle weAreNumberOne() { return new MethodHandle(methodRef, tag); }
 }

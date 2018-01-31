@@ -182,4 +182,7 @@ public class FloatConstant extends RealConstant
     {
         ((ConstantSwitch) sw).caseFloatConstant(this);
     }
+
+    @Override
+    protected FloatConstant weAreNumberOne() { return new FloatConstant(value); }
 }
