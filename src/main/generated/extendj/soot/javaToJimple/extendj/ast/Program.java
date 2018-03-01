@@ -302,7 +302,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:176
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:184
    */
   public void prettyPrint(PrettyPrinter out) {
     for (Iterator iter = compilationUnitIterator(); iter.hasNext(); ) {
@@ -1517,10 +1517,10 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1720
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1727
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1720")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1727")
   public WildcardsCompilationUnit wildcards() {
     ASTState state = state();
     if (wildcards_computed) {
@@ -1934,7 +1934,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1290
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1297
    * @apilevel internal
    */
   public TypeDecl Define_typeObject(ASTNode _callerNode, ASTNode _childNode) {
@@ -1942,7 +1942,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return typeObject();
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1290
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1297
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeObject
    */
@@ -2142,7 +2142,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1300
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1307
    * @apilevel internal
    */
   public TypeDecl Define_typeNull(ASTNode _callerNode, ASTNode _childNode) {
@@ -2150,7 +2150,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return typeNull();
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1300
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1307
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeNull
    */
@@ -2546,7 +2546,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:340
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:386
    * @apilevel internal
    */
   public Variable Define_unknownField(ASTNode _callerNode, ASTNode _childNode) {
@@ -2554,7 +2554,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return unknownType().findSingleVariable("unknown");
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:340
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:386
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute unknownField
    */
@@ -3003,7 +3003,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1391
    * @apilevel internal
    */
   public FieldDecl Define_fieldDecl(ASTNode _callerNode, ASTNode _childNode) {
@@ -3011,7 +3011,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return null;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1391
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute fieldDecl
    */
@@ -3019,7 +3019,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1734
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1741
    * @apilevel internal
    */
   public TypeDecl Define_typeWildcard(ASTNode _callerNode, ASTNode _childNode) {
@@ -3027,7 +3027,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return wildcards().typeWildcard();
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1734
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1741
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeWildcard
    */
@@ -3035,7 +3035,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1733
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1740
    * @apilevel internal
    */
   public TypeDecl Define_lookupWildcardExtends(ASTNode _callerNode, ASTNode _childNode, TypeDecl typeDecl) {
@@ -3043,7 +3043,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return wildcards().lookupWildcardExtends(typeDecl);
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1733
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1740
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupWildcardExtends
    */
@@ -3051,7 +3051,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1732
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1739
    * @apilevel internal
    */
   public TypeDecl Define_lookupWildcardSuper(ASTNode _callerNode, ASTNode _childNode, TypeDecl typeDecl) {
@@ -3059,7 +3059,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return wildcards().lookupWildcardSuper(typeDecl);
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1732
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1739
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupWildcardSuper
    */
@@ -3083,7 +3083,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1834
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1841
    * @apilevel internal
    */
   public GLBType Define_lookupGLBType(ASTNode _callerNode, ASTNode _childNode, Collection<TypeDecl> bounds) {
@@ -3091,7 +3091,7 @@ public class Program extends ASTNode<ASTNode> implements Cloneable {
     return wildcards().lookupGLBType(bounds);
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1834
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1841
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupGLBType
    */

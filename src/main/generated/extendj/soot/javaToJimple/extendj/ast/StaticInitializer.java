@@ -325,10 +325,10 @@ public class StaticInitializer extends BodyDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:288
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:296
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:288")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:296")
   public boolean blockIsEmpty() {
     boolean blockIsEmpty_value = getBlock().getNumStmt() == 0;
     return blockIsEmpty_value;

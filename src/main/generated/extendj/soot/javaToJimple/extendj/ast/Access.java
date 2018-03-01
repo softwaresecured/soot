@@ -48,7 +48,7 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * Used by the parser to build a method access from a parsed, potentially qualified, name.
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:273
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:451
    */
   public Access buildMethodAccess(List<Expr> arguments) {
     throw new Error("Can not build method access from access of type "
@@ -56,7 +56,7 @@ public abstract class Access extends Expr implements Cloneable {
   }
   /**
    * @aspect QualifiedNames
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:296
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:474
    */
   public Access addArrayDims(List list) {
     Access a = this;
@@ -404,10 +404,10 @@ public abstract class Access extends Expr implements Cloneable {
    * Creates a copy of this access where parameterized types have been erased.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1596
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1603
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1596")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1603")
   public Access erasedCopy() {
     Access erasedCopy_value = treeCopyNoTransform();
     return erasedCopy_value;
@@ -492,10 +492,10 @@ public abstract class Access extends Expr implements Cloneable {
   /**
    * @attribute inh
    * @aspect VariableScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:340
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:386
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:340")
+  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:386")
   public Variable unknownField() {
     Variable unknownField_value = getParent().Define_unknownField(this, null);
     return unknownField_value;

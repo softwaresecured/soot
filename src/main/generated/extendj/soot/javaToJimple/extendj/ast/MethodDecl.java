@@ -205,7 +205,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
     }
     Access access = new BoundMethodAccess(name(), argumentList, this);
     if (!isStatic()) {
-      access = new ThisAccess("this").qualifiesAccess(access);
+      access = new ThisAccess().qualifiesAccess(access);
     }
     return isVoid() ? (Stmt) new ExprStmt(access) : new ReturnStmt(new Opt(access));
   }
@@ -225,7 +225,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1421
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1428
    */
   public BodyDecl signatureCopy() {
     return new MethodDeclSubstituted(
@@ -239,7 +239,7 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1522
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1529
    */
   public BodyDecl erasedCopy() {
     return new MethodDeclSubstituted(
@@ -1675,10 +1675,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:318
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:326
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:318")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:326")
   public boolean hasModifiers() {
     boolean hasModifiers_value = getModifiers().getNumModifier() > 0;
     return hasModifiers_value;
@@ -1686,10 +1686,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:330
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:338
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:330")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:338")
   public boolean hasExceptions() {
     boolean hasExceptions_value = getNumException() > 0;
     return hasExceptions_value;
@@ -1923,10 +1923,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1311
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1318
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1311")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1318")
   public boolean usesTypeVariable() {
     ASTState state = state();
     if (usesTypeVariable_computed == ASTState.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {
@@ -1946,10 +1946,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1665
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1665")
   public MethodDecl erasedMethod() {
     MethodDecl erasedMethod_value = this;
     return erasedMethod_value;
@@ -1957,10 +1957,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1721
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1721")
   public boolean isSubstitutable() {
     boolean isSubstitutable_value = !isStatic();
     return isSubstitutable_value;
@@ -1979,10 +1979,10 @@ public class MethodDecl extends MemberDecl implements Cloneable, SimpleSet<Metho
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1893
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1893")
   public MethodDecl sourceMethodDecl() {
     ASTState state = state();
     if (sourceMethodDecl_computed == ASTState.NON_CYCLE || sourceMethodDecl_computed == state().cycle()) {

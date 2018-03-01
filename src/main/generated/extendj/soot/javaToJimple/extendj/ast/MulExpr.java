@@ -243,10 +243,10 @@ public class MulExpr extends MultiplicativeExpr implements Cloneable {
   /** The operator string used for pretty printing this expression. 
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:345
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:353
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:345")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:353")
   public String printOp() {
     String printOp_value = "*";
     return printOp_value;

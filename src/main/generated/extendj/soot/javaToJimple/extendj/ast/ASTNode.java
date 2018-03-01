@@ -374,7 +374,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
   /**
    * @aspect VariableScope
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:299
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:317
    */
   public SimpleSet<Variable> removeInstanceVariables(SimpleSet<Variable> vars) {
     SimpleSet<Variable> newSet = emptySet();
@@ -437,7 +437,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:159
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:167
    */
   public void prettyPrint(PrettyPrinter out) {
   }
@@ -528,7 +528,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * Create a copy of the access list where each access has been erased.
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1624
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1631
    */
   protected List<Access> erasedAccessList(List<Access> list) {
     List<Access> result = new List<Access>();
@@ -540,7 +540,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * Create a copy of the parameter list where each parameter has been erased.
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1635
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1642
    */
   protected List<ParameterDeclaration> erasedParameterList(List<ParameterDeclaration> list) {
     List<ParameterDeclaration> result = new List<ParameterDeclaration>();
@@ -1164,10 +1164,10 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1302
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1309
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1302")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1309")
   public boolean usesTypeVariable() {
     {
         for (int i = 0; i < getNumChild(); i++) {
@@ -3168,7 +3168,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1390
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1397
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute fieldDecl
    */
@@ -3188,7 +3188,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1744
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1751
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute typeWildcard
    */
@@ -3208,7 +3208,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1753
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1760
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupWildcardExtends
    */
@@ -3228,7 +3228,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1767
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1774
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupWildcardSuper
    */
@@ -3248,7 +3248,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1795
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1802
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupLUBType
    */
@@ -3268,7 +3268,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1836
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1843
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute lookupGLBType
    */
@@ -3628,7 +3628,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:413
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:545
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute canResolve
    */
@@ -4268,7 +4268,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
   }
 
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1647
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1654
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute erasedField
    */

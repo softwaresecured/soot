@@ -723,10 +723,10 @@ public class GenericClassDeclErased extends GenericClassDeclSubstituted implemen
   /**
    * @attribute syn nta
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1675
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1682
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1675")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1682")
   public List<BodyDecl> getBodyDeclList() {
     ASTState state = state();
     if (getBodyDeclList_computed) {

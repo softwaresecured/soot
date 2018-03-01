@@ -79,7 +79,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1432
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1439
    */
   public BodyDecl signatureCopy() {
     return new GenericMethodDeclSubstituted(
@@ -94,7 +94,7 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1533
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1540
    */
   public BodyDecl erasedCopy() {
     return new GenericMethodDeclErased(
@@ -888,10 +888,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1444
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1451
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1444")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1451")
   public GenericMethodDecl original() {
     GenericMethodDecl original_value = this;
     return original_value;
@@ -1128,10 +1128,10 @@ public class GenericMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1311
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1318
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1311")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1318")
   public boolean usesTypeVariable() {
     ASTState state = state();
     if (usesTypeVariable_computed == ASTState.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {

@@ -2809,7 +2809,7 @@ class Events extends Parser.Events {
 					final Symbol DOT = _symbols[offset + 2];
 					final Symbol _symbol_id = _symbols[offset + 3];
 					final Access id = (Access) _symbol_id.value;
-					 SuperAccess s = new SuperAccess("super");
+					 SuperAccess s = new SuperAccess();
        s.setStart(SUPER.getStart());
        s.setEnd(SUPER.getEnd());
        return s.qualifiesAccess(id);
@@ -2823,7 +2823,7 @@ class Events extends Parser.Events {
 					final Symbol DOT_ = _symbols[offset + 4];
 					final Symbol _symbol_id = _symbols[offset + 5];
 					final Access id = (Access) _symbol_id.value;
-					 SuperAccess s = new SuperAccess("super");
+					 SuperAccess s = new SuperAccess();
        s.setStart(SUPER.getStart());
        s.setEnd(SUPER.getEnd());
        return n.qualifiesAccess(s).qualifiesAccess(id);
@@ -2865,7 +2865,7 @@ class Events extends Parser.Events {
 					final Symbol _symbol_l = _symbols[offset + 5];
 					final List l = (List) _symbol_l.value;
 					final Symbol RPAREN = _symbols[offset + 6];
-					 SuperAccess s = new SuperAccess("super");
+					 SuperAccess s = new SuperAccess();
      s.setStart(SUPER.getStart());
      s.setEnd(SUPER.getEnd());
      MethodAccess m = new MethodAccess(IDENTIFIER, l);
@@ -2885,7 +2885,7 @@ class Events extends Parser.Events {
 					final Symbol _symbol_l = _symbols[offset + 7];
 					final List l = (List) _symbol_l.value;
 					final Symbol RPAREN = _symbols[offset + 8];
-					 SuperAccess s = new SuperAccess("super");
+					 SuperAccess s = new SuperAccess();
      s.setStart(SUPER.getStart());
      s.setEnd(SUPER.getEnd());
      MethodAccess m = new MethodAccess(IDENTIFIER, l);
@@ -4018,7 +4018,7 @@ class Events extends Parser.Events {
 					final Symbol _symbol_l = _symbols[offset + 6];
 					final List l = (List) _symbol_l.value;
 					final Symbol RPAREN = _symbols[offset + 7];
-					 return new SuperAccess("super").qualifiesAccess(
+					 return new SuperAccess().qualifiesAccess(
                         new ParMethodAccess(IDENTIFIER, l, a));
 			}
 			case 440: // method_invocation = name.n DOT.d1 SUPER.SUPER DOT.d2 type_arguments.a IDENTIFIER.IDENTIFIER LPAREN.LPAREN argument_list_opt.l RPAREN.RPAREN
@@ -4035,7 +4035,7 @@ class Events extends Parser.Events {
 					final Symbol _symbol_l = _symbols[offset + 8];
 					final List l = (List) _symbol_l.value;
 					final Symbol RPAREN = _symbols[offset + 9];
-					 return n.qualifiesAccess(new SuperAccess("super")).qualifiesAccess(
+					 return n.qualifiesAccess(new SuperAccess()).qualifiesAccess(
                             new ParMethodAccess(IDENTIFIER, l, a));
 			}
 			case 441: // method_header = LT.LT type_parameter_list_1.l type.t IDENTIFIER.IDENTIFIER LPAREN.LPAREN formal_parameter_list_opt.p RPAREN.RPAREN
@@ -5277,7 +5277,7 @@ class Events extends Parser.Events {
 			case 556: // primary_no_new_array = THIS.THIS
 			{
 					final Symbol THIS = _symbols[offset + 1];
-					 return new ThisAccess("this");
+					 return new ThisAccess();
 			}
 			case 557: // primary_no_new_array = name.n DOT.DOT THIS.THIS
 			{
@@ -5285,7 +5285,7 @@ class Events extends Parser.Events {
 					final Access n = (Access) _symbol_n.value;
 					final Symbol DOT = _symbols[offset + 2];
 					final Symbol THIS = _symbols[offset + 3];
-					 ThisAccess t = new ThisAccess("this");
+					 ThisAccess t = new ThisAccess();
        t.setStart(THIS.getStart()); t.setEnd(THIS.getEnd());
        return n.qualifiesAccess(t);
 			}
@@ -7488,7 +7488,7 @@ class Events extends Parser.Events {
 					final Symbol _symbol_a = _symbols[offset + 5];
 					final List a = (List) _symbol_a.value;
 					final Symbol i = _symbols[offset + 6];
-					 SuperAccess s = new SuperAccess("super");
+					 SuperAccess s = new SuperAccess();
            s.setStart(SUPER.getStart());
            s.setEnd(SUPER.getEnd()); 
 		   return new ExprMethodReference(a, ((String)i.value), n.qualifiesAccess(s));
@@ -7500,7 +7500,7 @@ class Events extends Parser.Events {
 					final Symbol _symbol_a = _symbols[offset + 3];
 					final List a = (List) _symbol_a.value;
 					final Symbol i = _symbols[offset + 4];
-					 SuperAccess s = new SuperAccess("super");
+					 SuperAccess s = new SuperAccess();
 		   s.setStart(SUPER.getStart());
 		   s.setEnd(SUPER.getEnd());
 		   return new ExprMethodReference(a, ((String)i.value), s);

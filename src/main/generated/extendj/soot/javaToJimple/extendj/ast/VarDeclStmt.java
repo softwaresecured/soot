@@ -793,12 +793,12 @@ public class VarDeclStmt extends Stmt implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1391
    * @apilevel internal
    */
   public FieldDecl Define_fieldDecl(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getDeclaratorListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1388
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1395
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       return null;
     }
@@ -807,7 +807,7 @@ public class VarDeclStmt extends Stmt implements Cloneable {
     }
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1391
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute fieldDecl
    */
@@ -815,12 +815,12 @@ public class VarDeclStmt extends Stmt implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1650
    * @apilevel internal
    */
   public FieldDeclarator Define_erasedField(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getDeclaratorListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1650
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1657
       int childIndex = _callerNode.getIndexOfChild(_childNode);
       {
           throw new Error("FieldDeclarator child of VarDeclStmt");
@@ -831,7 +831,7 @@ public class VarDeclStmt extends Stmt implements Cloneable {
     }
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1650
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute erasedField
    */

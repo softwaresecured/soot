@@ -215,10 +215,10 @@ public class Wildcard extends AbstractWildcard implements Cloneable {
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1734
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1741
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1734")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1741")
   public TypeDecl typeWildcard() {
     TypeDecl typeWildcard_value = getParent().Define_typeWildcard(this, null);
     return typeWildcard_value;

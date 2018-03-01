@@ -51,7 +51,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
     if (isStatic()) {
       return hostType().createQualifiedAccess().qualifiesAccess(new BoundFieldAccess(this));
     } else {
-      return new ThisAccess("this").qualifiesAccess(new BoundFieldAccess(this));
+      return new ThisAccess().qualifiesAccess(new BoundFieldAccess(this));
     }
   }
   /**
@@ -65,7 +65,7 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * Copies the declarator without initializer.
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1486
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1493
    */
   public FieldDeclarator signatureCopy() {
     return new FieldDeclarator(getID(), getDimsList().treeCopyNoTransform(), new Opt<Expr>());
@@ -1046,10 +1046,10 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1317
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1324
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1317")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1324")
   public boolean usesTypeVariable() {
     ASTState state = state();
     if (usesTypeVariable_computed == ASTState.NON_CYCLE || usesTypeVariable_computed == state().cycle()) {
@@ -1144,10 +1144,10 @@ public class FieldDeclarator extends Declarator implements Cloneable {
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1650
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1650")
   public FieldDeclarator erasedField() {
     FieldDeclarator erasedField_value = getParent().Define_erasedField(this, null);
     return erasedField_value;

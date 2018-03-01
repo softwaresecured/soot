@@ -810,10 +810,10 @@ public class EnumDecl extends ClassDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect Fields
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:375
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:421
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:375")
+  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:421")
   public Map<String, SimpleSet<Variable>> localFieldsMap() {
     ASTState state = state();
     if (localFieldsMap_computed == ASTState.NON_CYCLE || localFieldsMap_computed == state().cycle()) {

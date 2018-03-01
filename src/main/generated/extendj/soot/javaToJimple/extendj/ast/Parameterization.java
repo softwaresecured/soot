@@ -38,7 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast class
  * @aspect LookupParTypeDecl
- * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1055
+ * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1057
  */
 public class Parameterization extends java.lang.Object {
   
@@ -84,11 +84,16 @@ public class Parameterization extends java.lang.Object {
 
   
 
+    /**
+     * The original type parameters of the generic type or method.
+     */
     public final java.util.List<TypeVariable> params = new ArrayList<TypeVariable>();
 
   
 
-    /** Original type arguments (not wildcard expanded). */
+    /**
+     * The type arguments provided for the this parameterization (not wildcard expanded).
+     */
     public final java.util.List<TypeDecl> args = new ArrayList<TypeDecl>();
 
   

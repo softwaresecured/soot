@@ -46,7 +46,7 @@ public class ForStmt extends BranchTargetStmt implements Cloneable, VariableScop
   /**
    * Manually implemented because it is too complex for a template.
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:188
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:196
    */
   public void prettyPrint(PrettyPrinter out) {
     out.print("for (");

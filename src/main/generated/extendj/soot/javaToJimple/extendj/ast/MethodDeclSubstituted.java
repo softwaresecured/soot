@@ -573,10 +573,10 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1665
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1665")
   public MethodDecl erasedMethod() {
     MethodDecl erasedMethod_value = getOriginal().erasedMethod();
     return erasedMethod_value;
@@ -595,10 +595,10 @@ public class MethodDeclSubstituted extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1893
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1893")
   public MethodDecl sourceMethodDecl() {
     ASTState state = state();
     if (sourceMethodDecl_computed == ASTState.NON_CYCLE || sourceMethodDecl_computed == state().cycle()) {

@@ -273,7 +273,7 @@ public class LUBType extends ReferenceType implements Cloneable {
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1810
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1817
    */
   public Collection<InterfaceDecl> implementedInterfaces() {
     Collection<InterfaceDecl> ret = new HashSet<InterfaceDecl>();
@@ -775,10 +775,10 @@ public class LUBType extends ReferenceType implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1798
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1805
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1798")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1805")
   public String typeName() {
     {
         if (getNumTypeBound() == 0) {

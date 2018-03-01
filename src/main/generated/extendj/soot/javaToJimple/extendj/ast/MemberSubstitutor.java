@@ -38,7 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast interface
  * @aspect LookupParTypeDecl
- * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1237
+ * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1244
  */
  interface MemberSubstitutor {
 
@@ -50,25 +50,25 @@ import soot.coffi.CoffiMethodSource;
    * <p>Includes all non-substitutable original methods plus all substituted methods.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1348
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1355
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1348")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1355")
   public java.util.List<MethodDecl> localMethods();
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1363
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1370
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1363")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1370")
   public SimpleSet<Variable> localFields(String name);
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1394
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1401
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1394")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1401")
   public SimpleSet<TypeDecl> localTypeDecls(String name);
 }

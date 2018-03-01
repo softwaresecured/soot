@@ -44,7 +44,7 @@ import soot.coffi.CoffiMethodSource;
 public class Opt<T extends ASTNode> extends ASTNode<T> implements Cloneable {
   /** Pretty-print Opt nodes only if they are not empty. 
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:163
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:171
    */
   public void prettyPrint(PrettyPrinter out) {
     if (getNumChild() > 0) {

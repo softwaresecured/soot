@@ -81,7 +81,7 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1459
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1466
    */
   public BodyDecl signatureCopy() {
     return new GenericConstructorDeclSubstituted(
@@ -96,7 +96,7 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1556
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1563
    */
   public BodyDecl erasedCopy() {
     return new GenericConstructorDeclErased(
@@ -875,10 +875,10 @@ public class GenericConstructorDecl extends ConstructorDecl implements Cloneable
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1446
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1453
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1446")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1453")
   public GenericConstructorDecl original() {
     GenericConstructorDecl original_value = this;
     return original_value;

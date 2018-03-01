@@ -611,10 +611,10 @@ public class ConstructorDeclSubstituted extends ConstructorDecl implements Clone
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1890
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1897
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1890")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1897")
   public ConstructorDecl sourceConstructorDecl() {
     ASTState state = state();
     if (sourceConstructorDecl_computed == ASTState.NON_CYCLE || sourceConstructorDecl_computed == state().cycle()) {

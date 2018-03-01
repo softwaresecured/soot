@@ -805,10 +805,10 @@ public class RawInterfaceDecl extends ParInterfaceDecl implements Cloneable {
   /**
    * @attribute syn nta
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1673
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1680
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1673")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1680")
   public List<BodyDecl> getBodyDeclList() {
     ASTState state = state();
     if (getBodyDeclList_computed) {

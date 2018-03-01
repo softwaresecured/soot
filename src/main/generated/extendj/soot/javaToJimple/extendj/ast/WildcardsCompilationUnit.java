@@ -45,7 +45,7 @@ import soot.coffi.CoffiMethodSource;
 public class WildcardsCompilationUnit extends CompilationUnit implements Cloneable {
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1777
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1784
    */
   public static LUBType createLUBType(Collection<TypeDecl> bounds) {
     List<Access> boundList = new List<Access>();
@@ -476,10 +476,10 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1736
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1743
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1736")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1743")
   public TypeDecl typeWildcard() {
     ASTState state = state();
     if (typeWildcard_computed) {
@@ -508,10 +508,10 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1746
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1753
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1746")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1753")
   public TypeDecl lookupWildcardExtends(TypeDecl bound) {
     Object _parameters = bound;
     if (lookupWildcardExtends_TypeDecl_values == null) lookupWildcardExtends_TypeDecl_values = new java.util.HashMap(4);
@@ -553,10 +553,10 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1760
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1767
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1760")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1767")
   public TypeDecl lookupWildcardSuper(TypeDecl bound) {
     Object _parameters = bound;
     if (lookupWildcardSuper_TypeDecl_values == null) lookupWildcardSuper_TypeDecl_values = new java.util.HashMap(4);
@@ -598,10 +598,10 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1774
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1781
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1774")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1781")
   public LUBType lookupLUBType(Collection<TypeDecl> bounds) {
     Object _parameters = bounds;
     if (lookupLUBType_Collection_TypeDecl__values == null) lookupLUBType_Collection_TypeDecl__values = new java.util.HashMap(4);
@@ -639,10 +639,10 @@ public class WildcardsCompilationUnit extends CompilationUnit implements Cloneab
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1818
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1825
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isNTA=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1818")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1825")
   public GLBType lookupGLBType(Collection<TypeDecl> bounds) {
     Object _parameters = bounds;
     if (lookupGLBType_Collection_TypeDecl__values == null) lookupGLBType_Collection_TypeDecl__values = new java.util.HashMap(4);

@@ -144,7 +144,7 @@ public class ConstructorDecl extends BodyDecl implements Cloneable, MethodLikeDe
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1448
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1455
    */
   public BodyDecl signatureCopy() {
     return new ConstructorDeclSubstituted(
@@ -158,7 +158,7 @@ public class ConstructorDecl extends BodyDecl implements Cloneable, MethodLikeDe
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1545
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1552
    */
   public BodyDecl erasedCopy() {
     return new ConstructorDeclSubstituted(
@@ -1553,10 +1553,10 @@ public class ConstructorDecl extends BodyDecl implements Cloneable, MethodLikeDe
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:316
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:324
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:316")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:324")
   public boolean hasModifiers() {
     boolean hasModifiers_value = getModifiers().getNumModifier() > 0;
     return hasModifiers_value;
@@ -1564,10 +1564,10 @@ public class ConstructorDecl extends BodyDecl implements Cloneable, MethodLikeDe
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:326
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:334
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:326")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:334")
   public boolean hasExceptions() {
     boolean hasExceptions_value = getNumException() > 0;
     return hasExceptions_value;
@@ -1575,10 +1575,10 @@ public class ConstructorDecl extends BodyDecl implements Cloneable, MethodLikeDe
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:328
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:336
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:328")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:336")
   public List<Stmt> blockStmts() {
     List<Stmt> blockStmts_value = getBlock().getStmtList();
     return blockStmts_value;
@@ -1927,10 +1927,10 @@ public class ConstructorDecl extends BodyDecl implements Cloneable, MethodLikeDe
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1721
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1721")
   public boolean isSubstitutable() {
     boolean isSubstitutable_value = true;
     return isSubstitutable_value;
@@ -1949,10 +1949,10 @@ public class ConstructorDecl extends BodyDecl implements Cloneable, MethodLikeDe
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1890
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1897
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1890")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1897")
   public ConstructorDecl sourceConstructorDecl() {
     ASTState state = state();
     if (sourceConstructorDecl_computed == ASTState.NON_CYCLE || sourceConstructorDecl_computed == state().cycle()) {

@@ -453,10 +453,10 @@ public class WildcardType extends AbstractWildcardType implements Cloneable {
    * type bound of the corresponding type parameter.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1252
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1259
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1252")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1259")
   public TypeDecl expandWildcard(TypeVariable param) {
     {
         TypeDecl bound = param.erasure();

@@ -45,7 +45,7 @@ import soot.coffi.CoffiMethodSource;
 public class GenericClassDecl extends ClassDecl implements Cloneable, GenericTypeDecl {
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1503
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1510
    */
   public ClassDecl signatureCopy() {
     return new GenericClassDeclSubstituted(
@@ -913,7 +913,7 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /** @apilevel internal */
   protected boolean usesTypeVariable_initialized = false;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1321")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1328")
   public boolean usesTypeVariable() {
     if (usesTypeVariable_computed) {
       return usesTypeVariable_value;

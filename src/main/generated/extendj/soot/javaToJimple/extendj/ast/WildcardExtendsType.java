@@ -464,10 +464,10 @@ public class WildcardExtendsType extends AbstractWildcardType implements Cloneab
   /**
    * @attribute syn
    * @aspect Fields
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:456
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:502
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:456")
+  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:502")
   public SimpleSet<Variable> memberFields(String name) {
     Object _parameters = name;
     if (memberFields_String_computed == null) memberFields_String_computed = new java.util.HashMap(4);
@@ -554,7 +554,7 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /** @apilevel internal */
   protected boolean usesTypeVariable_initialized = false;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1321")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1328")
   public boolean usesTypeVariable() {
     if (usesTypeVariable_computed) {
       return usesTypeVariable_value;
@@ -591,10 +591,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1726
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1733
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1726")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1733")
   public TypeDecl extendsType() {
     TypeDecl extendsType_value = getAccess().type();
     return extendsType_value;

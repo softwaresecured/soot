@@ -52,14 +52,14 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1490
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1497
    */
   public BodyDecl signatureCopy() {
     return new MemberClassDecl(getClassDecl().signatureCopy());
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1580
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1587
    */
   public BodyDecl erasedCopy() {
     return new MemberClassDecl(getClassDecl().erasedCopy());
@@ -237,10 +237,10 @@ public class MemberClassDecl extends MemberTypeDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1721
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1721")
   public boolean isSubstitutable() {
     boolean isSubstitutable_value = !isStatic();
     return isSubstitutable_value;

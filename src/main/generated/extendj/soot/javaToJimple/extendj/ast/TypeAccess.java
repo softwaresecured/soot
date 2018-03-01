@@ -504,10 +504,10 @@ public class TypeAccess extends Access implements Cloneable {
    * Has package name (not @primitive)
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:284
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:292
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:284")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:292")
   public boolean hasPackage() {
     boolean hasPackage_value = !getPackage().isEmpty() && decl().isReferenceType();
     return hasPackage_value;
@@ -618,10 +618,10 @@ public class TypeAccess extends Access implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1302
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1309
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1302")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1309")
   public boolean usesTypeVariable() {
     boolean usesTypeVariable_value = decl().usesTypeVariable() || super.usesTypeVariable();
     return usesTypeVariable_value;

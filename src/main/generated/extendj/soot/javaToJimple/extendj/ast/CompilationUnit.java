@@ -823,10 +823,10 @@ protected java.util.Map<ASTNode, java.util.Set<ASTNode>> contributorMap_TypeDecl
   /**
    * @attribute syn
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:332
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:340
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:332")
+  @ASTNodeAnnotation.Source(aspect="PrettyPrintUtil", declaredAt="/home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:340")
   public boolean hasPackageDecl() {
     boolean hasPackageDecl_value = !getPackageDecl().isEmpty();
     return hasPackageDecl_value;
@@ -1221,7 +1221,7 @@ protected java.util.Map<ASTNode, java.util.Set<ASTNode>> contributorMap_TypeDecl
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:408
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:540
    * @apilevel internal
    */
   public boolean Define_canResolve(ASTNode _callerNode, ASTNode _childNode) {
@@ -1229,7 +1229,7 @@ protected java.util.Map<ASTNode, java.util.Set<ASTNode>> contributorMap_TypeDecl
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:408
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:540
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute canResolve
    */

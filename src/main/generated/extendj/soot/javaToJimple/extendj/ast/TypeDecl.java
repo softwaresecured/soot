@@ -233,8 +233,28 @@ public abstract class TypeDecl extends ASTNode<ASTNode> implements Cloneable, Si
     return false;
   }
   /**
+   * Remove fields that are not accessible when accessed by the given qualifier type
+   * from this type.
+   * 
+   * @param qualifier the qualifying expression type.
+   * @param fields the visible fields.
+   * @return a set containing the accessible fields.
+   * @aspect VariableScope
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:306
+   */
+  public SimpleSet<Variable> keepAccessibleFields(TypeDecl qualifier,
+      SimpleSet<Variable> fields) {
+    SimpleSet<Variable> newSet = emptySet();
+    for (Variable f : fields) {
+      if (mayAccess(qualifier, f)) {
+        newSet = newSet.add(f);
+      }
+    }
+    return newSet;
+  }
+  /**
    * @aspect Fields
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:430
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:476
    */
   public Iterator<Variable> fieldsIterator() {
     return new Iterator<Variable>() {
@@ -359,7 +379,7 @@ public abstract class TypeDecl extends ASTNode<ASTNode> implements Cloneable, Si
   /**
    * Builds a list of erased members in a raw type.
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1681
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1688
    */
   protected List<BodyDecl> erasedBodyDecls() {
     List<BodyDecl> list = new List<BodyDecl>();
@@ -375,7 +395,7 @@ public abstract class TypeDecl extends ASTNode<ASTNode> implements Cloneable, Si
    * 
    * <p>The bodies of methods are not copied to the substituted version.
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1704
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1711
    */
   protected List<BodyDecl> substitutedBodyDecls() {
     List<BodyDecl> list = new List<BodyDecl>();
@@ -2563,6 +2583,50 @@ protected java.util.Map<ASTNode, java.util.Set<ASTNode>> contributorMap_TypeDecl
     SimpleSet<TypeDecl> memberTypes_String_value = emptySet();
     return memberTypes_String_value;
   }
+  /**
+   * Test if a qualified field access in this type may access the given field.
+   * 
+   * @param qualifier the type of the qualifying expression.
+   * @param field the field being accessed.
+   * @see <a href="https://docs.oracle.com/javase/specs/jls/se6/html/names.html#6.6.1">JLS6 \u00a76.6.1</a>
+   * @return true if the expression may access the given field
+   * @attribute syn
+   * @aspect VariableScope
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:345
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="VariableScope", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:345")
+  public boolean mayAccess(TypeDecl qualifier, Variable field) {
+    {
+        if (field.isPublic()) {
+          return true;
+        }
+        if (field.isPrivate()) {
+          return field.hostType().topLevelType() == hostType().topLevelType();
+        }
+    
+        if (field.hostPackage().equals(hostPackage())) {
+          // Protected and package-private access is allowed from any type inside the same package
+          // (JLS6 \u00a76.6.1, bullet 4.2.1).
+          return true;
+        }
+    
+        TypeDecl C = field.hostType(); // C is the type in which the field is declared.
+        if (field.isProtected()) {
+          // Test protected field access according to JLS6 \u00a76.6.2.1.
+          // We need to iterate over enclosing types since each enclosing type is a
+          // candidate for accessing the field.
+          for (TypeDecl S = this; S != null; S = S.isNestedType() ? S.enclosingType() : null) {
+            if (S.instanceOf(C)) {
+              if (!field.isInstanceVariable() || qualifier.instanceOf(S)) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      }
+  }
   /** @apilevel internal */
   private void localFields_String_reset() {
     localFields_String_computed = null;
@@ -2575,10 +2639,10 @@ protected java.util.Map<ASTNode, java.util.Set<ASTNode>> contributorMap_TypeDecl
   /**
    * @attribute syn
    * @aspect Fields
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:370
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:416
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:370")
+  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:416")
   public SimpleSet<Variable> localFields(String name) {
     Object _parameters = name;
     if (localFields_String_computed == null) localFields_String_computed = new java.util.HashMap(4);
@@ -2617,10 +2681,10 @@ protected java.util.Map<ASTNode, java.util.Set<ASTNode>> contributorMap_TypeDecl
   /**
    * @attribute syn
    * @aspect Fields
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:375
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:421
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:375")
+  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:421")
   public Map<String, SimpleSet<Variable>> localFieldsMap() {
     ASTState state = state();
     if (localFieldsMap_computed == ASTState.NON_CYCLE || localFieldsMap_computed == state().cycle()) {
@@ -2662,10 +2726,10 @@ protected java.util.Map<ASTNode, java.util.Set<ASTNode>> contributorMap_TypeDecl
   /**
    * @attribute syn
    * @aspect Fields
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:387
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:433
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:387")
+  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:433")
   public Map<String, SimpleSet<Variable>> memberFieldsMap() {
     ASTState state = state();
     if (memberFieldsMap_computed == ASTState.NON_CYCLE || memberFieldsMap_computed == state().cycle()) {
@@ -2693,10 +2757,10 @@ protected java.util.Map<ASTNode, java.util.Set<ASTNode>> contributorMap_TypeDecl
   /**
    * @attribute syn
    * @aspect Fields
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:456
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:502
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:456")
+  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:502")
   public SimpleSet<Variable> memberFields(String name) {
     Object _parameters = name;
     if (memberFields_String_computed == null) memberFields_String_computed = new java.util.HashMap(4);
@@ -5476,10 +5540,10 @@ protected ASTState.Cycle isCircular_cycle = null;
    * type bound of the corresponding type parameter.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1252
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1259
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1252")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1259")
   public TypeDecl expandWildcard(TypeVariable param) {
     TypeDecl expandWildcard_TypeVariable_value = this;
     return expandWildcard_TypeVariable_value;
@@ -5500,7 +5564,7 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /** @apilevel internal */
   protected boolean usesTypeVariable_initialized = false;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1321")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1328")
   public boolean usesTypeVariable() {
     if (usesTypeVariable_computed) {
       return usesTypeVariable_value;
@@ -5537,10 +5601,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1664
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1671
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1664")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1671")
   public TypeDecl original() {
     TypeDecl original_value = this;
     return original_value;
@@ -5548,10 +5612,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1758
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1765
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1758")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1765")
   public TypeDecl asWildcardExtends() {
     TypeDecl asWildcardExtends_value = lookupWildcardExtends(this);
     return asWildcardExtends_value;
@@ -5559,10 +5623,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1772
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1779
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1772")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1779")
   public TypeDecl asWildcardSuper() {
     TypeDecl asWildcardSuper_value = lookupWildcardSuper(this);
     return asWildcardSuper_value;
@@ -5581,10 +5645,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1879
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1879")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886")
   public TypeDecl sourceTypeDecl() {
     ASTState state = state();
     if (sourceTypeDecl_computed == ASTState.NON_CYCLE || sourceTypeDecl_computed == state().cycle()) {
@@ -8354,10 +8418,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1742
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1749
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1742")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1749")
   public TypeDecl typeWildcard() {
     TypeDecl typeWildcard_value = getParent().Define_typeWildcard(this, null);
     return typeWildcard_value;
@@ -8365,10 +8429,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1756
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1763
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1756")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1763")
   public TypeDecl lookupWildcardExtends(TypeDecl typeDecl) {
     TypeDecl lookupWildcardExtends_TypeDecl_value = getParent().Define_lookupWildcardExtends(this, null, typeDecl);
     return lookupWildcardExtends_TypeDecl_value;
@@ -8376,10 +8440,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1770
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1777
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1770")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1777")
   public TypeDecl lookupWildcardSuper(TypeDecl typeDecl) {
     TypeDecl lookupWildcardSuper_TypeDecl_value = getParent().Define_lookupWildcardSuper(this, null, typeDecl);
     return lookupWildcardSuper_TypeDecl_value;
@@ -8387,10 +8451,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1793
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1800
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1793")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1800")
   public LUBType lookupLUBType(Collection<TypeDecl> bounds) {
     LUBType lookupLUBType_Collection_TypeDecl__value = getParent().Define_lookupLUBType(this, null, bounds);
     return lookupLUBType_Collection_TypeDecl__value;
@@ -8398,10 +8462,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1834
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1841
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1834")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1841")
   public GLBType lookupGLBType(Collection<TypeDecl> bounds) {
     GLBType lookupGLBType_Collection_TypeDecl__value = getParent().Define_lookupGLBType(this, null, bounds);
     return lookupGLBType_Collection_TypeDecl__value;
@@ -9077,7 +9141,7 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:408
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:540
    * @apilevel internal
    */
   public boolean Define_canResolve(ASTNode _callerNode, ASTNode _childNode) {
@@ -9085,7 +9149,7 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:408
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:540
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute canResolve
    */

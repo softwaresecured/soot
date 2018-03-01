@@ -45,21 +45,21 @@ import soot.coffi.CoffiMethodSource;
 public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1262
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1269
    */
   public boolean isRawType() {
     return false;
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1278
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1285
    */
   public int numTypeParameter() {
     return genericConstructorDecl().original().getNumTypeParameter();
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1286
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1293
    */
   public TypeVariable typeParameter(int index) {
     return genericConstructorDecl().original().getTypeParameter(index);
@@ -914,10 +914,10 @@ public class ParConstructorDecl extends ConstructorDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1890
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1897
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1890")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1897")
   public ConstructorDecl sourceConstructorDecl() {
     ASTState state = state();
     if (sourceConstructorDecl_computed == ASTState.NON_CYCLE || sourceConstructorDecl_computed == state().cycle()) {

@@ -261,10 +261,10 @@ public class BoundFieldAccess extends VarAccess implements Cloneable {
   /**
    * @attribute syn
    * @aspect VariableScopePropagation
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:359
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:405
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:359")
+  @ASTNodeAnnotation.Source(aspect="VariableScopePropagation", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:405")
   public Variable decl() {
     ASTState state = state();
     if (decl_computed == ASTState.NON_CYCLE || decl_computed == state().cycle()) {

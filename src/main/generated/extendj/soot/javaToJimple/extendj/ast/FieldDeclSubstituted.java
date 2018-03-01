@@ -363,12 +363,12 @@ public class FieldDeclSubstituted extends FieldDecl implements Cloneable {
     return tokenFieldDecl_Original;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1650
    * @apilevel internal
    */
   public FieldDeclarator Define_erasedField(ASTNode _callerNode, ASTNode _childNode) {
     if (_callerNode == getDeclaratorListNoTransform()) {
-      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1647
+      // @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1654
       int index = _callerNode.getIndexOfChild(_childNode);
       return getOriginal().getDeclarator(index);
     }
@@ -377,7 +377,7 @@ public class FieldDeclSubstituted extends FieldDecl implements Cloneable {
     }
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1643
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1650
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute erasedField
    */

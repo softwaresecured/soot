@@ -131,7 +131,7 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
     if (isStatic()) {
       return hostType().createQualifiedAccess().qualifiesAccess(new BoundEnumConstant(this));
     } else {
-      return new ThisAccess("this").qualifiesAccess(new BoundEnumConstant(this));
+      return new ThisAccess().qualifiesAccess(new BoundEnumConstant(this));
     }
   }
   /**
@@ -1114,10 +1114,10 @@ public class EnumConstant extends BodyDecl implements Cloneable, Variable {
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1391
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1384")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1391")
   public FieldDecl fieldDecl() {
     FieldDecl fieldDecl_value = getParent().Define_fieldDecl(this, null);
     return fieldDecl_value;

@@ -303,10 +303,10 @@ public class VariableArityParameterDeclaration extends ParameterDeclaration impl
    * Creates a copy of this parameter declaration where parameterized types have been erased.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1609
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1616
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1609")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1616")
   public ParameterDeclaration erasedCopy() {
     ParameterDeclaration erasedCopy_value = new VariableArityParameterDeclaration(
               getModifiers().treeCopyNoTransform(),

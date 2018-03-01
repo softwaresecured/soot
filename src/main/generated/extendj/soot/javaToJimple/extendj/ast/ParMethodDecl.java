@@ -45,14 +45,14 @@ import soot.coffi.CoffiMethodSource;
 public class ParMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1274
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1281
    */
   public int numTypeParameter() {
     return genericMethodDecl().original().getNumTypeParameter();
   }
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1282
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1289
    */
   public TypeVariable typeParameter(int index) {
     return genericMethodDecl().original().getTypeParameter(index);
@@ -884,10 +884,10 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1665
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1658")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1665")
   public MethodDecl erasedMethod() {
     MethodDecl erasedMethod_value = genericMethodDecl().erasedMethod();
     return erasedMethod_value;
@@ -906,10 +906,10 @@ public class ParMethodDecl extends MethodDecl implements Cloneable {
   /**
    * @attribute syn
    * @aspect SourceDeclarations
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1893
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1886")
+  @ASTNodeAnnotation.Source(aspect="SourceDeclarations", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1893")
   public MethodDecl sourceMethodDecl() {
     ASTState state = state();
     if (sourceMethodDecl_computed == ASTState.NON_CYCLE || sourceMethodDecl_computed == state().cycle()) {

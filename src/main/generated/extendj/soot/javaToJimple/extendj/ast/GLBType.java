@@ -45,7 +45,7 @@ import soot.coffi.CoffiMethodSource;
 public class GLBType extends ReferenceType implements Cloneable {
   /**
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1851
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1858
    */
   public Collection<InterfaceDecl> implementedInterfaces() {
     Collection<InterfaceDecl> ret = new HashSet<InterfaceDecl>();
@@ -480,10 +480,10 @@ public class GLBType extends ReferenceType implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1839
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1846
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1839")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1846")
   public String typeName() {
     {
         if (getNumTypeBound() == 0) {

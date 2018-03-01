@@ -529,10 +529,10 @@ public class ParTypeAccess extends Access implements Cloneable {
    * Creates a copy of this access where parameterized types have been erased.
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1596
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1603
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1596")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1603")
   public Access erasedCopy() {
     Access erasedCopy_value = getTypeAccess().erasedCopy();
     return erasedCopy_value;

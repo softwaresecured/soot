@@ -59,7 +59,7 @@ public class IfStmt extends Stmt implements Cloneable {
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:235
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:243
    */
   public void prettyPrint(PrettyPrinter out) {
     out.print("if (");

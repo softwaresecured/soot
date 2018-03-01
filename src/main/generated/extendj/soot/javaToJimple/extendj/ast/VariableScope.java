@@ -38,7 +38,7 @@ import soot.coffi.CoffiMethodSource;
 /**
  * @ast interface
  * @aspect VariableScopePropagation
- * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:331
+ * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:377
  */
  interface VariableScope {
 

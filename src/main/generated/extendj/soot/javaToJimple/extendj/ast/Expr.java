@@ -59,40 +59,14 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
     return result;
   }
   /**
-   * Remove fields that are not accessible when using this Expr as qualifier
+   * Remove fields that are not accessible when using this Expr as qualifier.
+   * 
    * @return a set containing the accessible fields
    * @aspect VariableScope
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:289
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:290
    */
   public SimpleSet<Variable> keepAccessibleFields(SimpleSet<Variable> fields) {
-    SimpleSet<Variable> newSet = emptySet();
-    for (Variable f : fields) {
-      if (mayAccess(f)) {
-        newSet = newSet.add(f);
-      }
-    }
-    return newSet;
-  }
-  /**
-   * @see "JLS $6.6.2.1"
-   * @return true if the expression may access the given field
-   * @aspect VariableScope
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:313
-   */
-  public boolean mayAccess(Variable f) {
-    if (f.isPublic  ()) return true;
-    if (f.isPrivate ()) return f.hostType().topLevelType() == hostType().topLevelType();
-
-    // protected & package-private can be accessed by anyone in the same pkg
-    if (f.hostPackage().equals(hostPackage())) return true;
-
-    if (f.isProtected()) {
-      for (TypeDecl t = hostType(); t != null; t = t.isNestedType() ? t.enclosingType() : null) {
-        if (t.instanceOf(f.hostType())) return true;
-      }
-    }
-
-    return false;
+    return hostType().keepAccessibleFields(type(), fields);
   }
   /**
    * Creates a qualified expression. This will not be subject to rewriting.
@@ -918,6 +892,21 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
       }
   }
   /**
+   * Test if this expression may access the given field.
+   * 
+   * @see <a href="https://docs.oracle.com/javase/specs/jls/se6/html/names.html#6.6.1">JLS6 \u00a76.6.1</a>
+   * @return true if the expression may access the given field
+   * @attribute syn
+   * @aspect VariableScope
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:333
+   */
+  @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
+  @ASTNodeAnnotation.Source(aspect="VariableScope", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:333")
+  public boolean mayAccess(Variable f) {
+    boolean mayAccess_Variable_value = hostType().mayAccess(type(), f);
+    return mayAccess_Variable_value;
+  }
+  /**
    * @attribute syn
    * @aspect PositiveLiterals
    * @declaredat /home/olivier/projects/extendj/java4/frontend/PositiveLiterals.jrag:36
@@ -1099,10 +1088,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:315
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:493
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:315")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:493")
   public boolean isParseName() {
     boolean isParseName_value = false;
     return isParseName_value;
@@ -1111,10 +1100,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
    * Test if an expression contains an unresolved parse name.
    * @attribute syn
    * @aspect NameResolution
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:423
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:555
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:423")
+  @ASTNodeAnnotation.Source(aspect="NameResolution", declaredAt="/home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:555")
   public boolean containsParseName() {
     boolean containsParseName_value = false;
     return containsParseName_value;
@@ -1182,10 +1171,10 @@ public abstract class Expr extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1604
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1611
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1604")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1611")
   public Expr erasedCopy() {
     Expr erasedCopy_value = treeCopyNoTransform();
     return erasedCopy_value;

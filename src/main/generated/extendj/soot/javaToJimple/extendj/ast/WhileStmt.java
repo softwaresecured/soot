@@ -45,7 +45,7 @@ import soot.coffi.CoffiMethodSource;
 public class WhileStmt extends BranchTargetStmt implements Cloneable {
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:265
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:273
    */
   public void prettyPrint(PrettyPrinter out) {
     out.print("while (");

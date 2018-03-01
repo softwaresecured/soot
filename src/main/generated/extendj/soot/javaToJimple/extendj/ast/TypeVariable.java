@@ -52,7 +52,7 @@ public class TypeVariable extends ReferenceType implements Cloneable {
   }
   /**
    * @aspect NewGenerics
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1863
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1870
    */
   public Access createQualifiedAccess() {
     return createBoundAccess();
@@ -858,10 +858,10 @@ public class TypeVariable extends ReferenceType implements Cloneable {
   /**
    * @attribute syn
    * @aspect Fields
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:456
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:502
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:456")
+  @ASTNodeAnnotation.Source(aspect="Fields", declaredAt="/home/olivier/projects/extendj/java4/frontend/LookupVariable.jrag:502")
   public SimpleSet<Variable> memberFields(String name) {
     Object _parameters = name;
     if (memberFields_String_computed == null) memberFields_String_computed = new java.util.HashMap(4);
@@ -1105,10 +1105,10 @@ public class TypeVariable extends ReferenceType implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1292
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1299
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1292")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1299")
   public TypeDecl lubType() {
     ASTState state = state();
     if (lubType_computed == ASTState.NON_CYCLE || lubType_computed == state().cycle()) {
@@ -1148,7 +1148,7 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /** @apilevel internal */
   protected boolean usesTypeVariable_initialized = false;
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN, isCircular=true)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1321")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1328")
   public boolean usesTypeVariable() {
     if (usesTypeVariable_computed) {
       return usesTypeVariable_value;
@@ -1933,10 +1933,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1290
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1297
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1290")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1297")
   public TypeDecl typeObject() {
     TypeDecl typeObject_value = getParent().Define_typeObject(this, null);
     return typeObject_value;
@@ -1944,10 +1944,10 @@ protected ASTState.Cycle usesTypeVariable_cycle = null;
   /**
    * @attribute inh
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1300
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1307
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.INH)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1300")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1307")
   public TypeDecl typeNull() {
     TypeDecl typeNull_value = getParent().Define_typeNull(this, null);
     return typeNull_value;

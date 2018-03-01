@@ -77,7 +77,7 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
    * @param s string to escape
    * @return escaped string literal
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:398
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:406
    */
   protected static String escape(String s) {
     StringBuilder result = new StringBuilder();
@@ -120,7 +120,7 @@ public abstract class Literal extends PrimaryExpr implements Cloneable {
   }
   /**
    * @aspect PrettyPrintUtil
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:438
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/PrettyPrintUtil.jrag:446
    */
   protected static String asEscape(int value) {
     StringBuilder s = new StringBuilder("\\u");

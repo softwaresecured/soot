@@ -52,7 +52,7 @@ public abstract class BodyDecl extends ASTNode<ASTNode> implements Cloneable {
    * Copies the signature of this body decl. The type and name and parameters
    * are copied where applicable, but the body or initializer is not copied.
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1416
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1423
    */
   public BodyDecl signatureCopy() {
     throw new Error("Can not susbtitute type parameters in body decl of type "
@@ -63,7 +63,7 @@ public abstract class BodyDecl extends ASTNode<ASTNode> implements Cloneable {
    * 
    * <p>Occurrences of type variables are replaced by their type bound.
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1518
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1525
    */
   public BodyDecl erasedCopy() {
     throw new Error("Can not erase types in body decl of type " + getClass().getSimpleName());
@@ -429,10 +429,10 @@ public abstract class BodyDecl extends ASTNode<ASTNode> implements Cloneable {
   /**
    * @attribute syn
    * @aspect LookupParTypeDecl
-   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714
+   * @declaredat /home/olivier/projects/extendj/java5/frontend/Generics.jrag:1721
    */
   @ASTNodeAnnotation.Attribute(kind=ASTNodeAnnotation.Kind.SYN)
-  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1714")
+  @ASTNodeAnnotation.Source(aspect="LookupParTypeDecl", declaredAt="/home/olivier/projects/extendj/java5/frontend/Generics.jrag:1721")
   public boolean isSubstitutable() {
     boolean isSubstitutable_value = false;
     return isSubstitutable_value;
@@ -892,7 +892,7 @@ public abstract class BodyDecl extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:408
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:540
    * @apilevel internal
    */
   public boolean Define_canResolve(ASTNode _callerNode, ASTNode _childNode) {
@@ -900,7 +900,7 @@ public abstract class BodyDecl extends ASTNode<ASTNode> implements Cloneable {
     return true;
   }
   /**
-   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:408
+   * @declaredat /home/olivier/projects/extendj/java4/frontend/ResolveAmbiguousNames.jrag:540
    * @apilevel internal
    * @return {@code true} if this node has an equation for the inherited attribute canResolve
    */
