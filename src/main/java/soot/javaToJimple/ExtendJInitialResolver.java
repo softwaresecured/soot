@@ -20,17 +20,11 @@
 package soot.javaToJimple;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import soot.*;
 import soot.javaToJimple.extendj.ast.*;
-import soot.javaToJimple.extendj.ast.ClassSource;
 import soot.options.Options;
 
 
@@ -52,7 +46,7 @@ public class ExtendJInitialResolver implements IInitialResolver {
 
     @Override
     public Dependencies resolveFromJavaFile(List<String> locations, File src, String className, SootClass sc) {
-        if (!loadAST(src, className).hasValue())
+        if (!loadAST(className).hasValue())
             throw new RuntimeException("Error: couldn't find class: " + className + " are the packages set properly?");
 
         return resolveFromCache(className, sc);
@@ -82,75 +76,15 @@ public class ExtendJInitialResolver implements IInitialResolver {
         return deps;
     }
 
-    protected Option<CompilationUnit> loadAST(File src, String className) {
-        Option<CompilationUnit> optCU = parseAST(src, className);
-        if (!optCU.hasValue() ) return Option.none();
-        // if resolved -> all the dependencies for this CU have already been added to the worklist
-        CompilationUnit u = optCU.get();
-        if (u.isResolved      ) return Option.some(u);
-        u.isResolved = true;
+    protected Option<CompilationUnit> loadAST(String className) {
+        { Option<CompilationUnit> optCU = cuForClass(className);
+          if (optCU.hasValue()) return optCU; }
 
-        u.jimpleDeclare();
-
-        HashSet<TypeDecl> types = new HashSet<>();
-        for (TypeDecl   t : u.getTypeDecls())
-            collectTypeDecl(t, types);
-
-        for (final TypeDecl t : types) {
-            final Map<SootMethod, MethodLikeDecl<?>> method2body = new HashMap<>();
-            for (BodyDecl d : t.methodsAndConstructors()) {
-                MethodLikeDecl<?> m = null;
-                if (d instanceof      MethodDecl) m = (MethodDecl     )d;
-                if (d instanceof ConstructorDecl) m = (ConstructorDecl)d;
-
-                if (m != null) method2body.put(m.sootMethod(), m);
-            }
-            if (t.needsClinit()) {
-                MethodLikeDecl<?> body = t.clinitHelper();
-                method2body.put(body.sootMethod(), body);
-            }
-
-            // HACK: FIXME: Extendj isn't yet thread-safe. Serialise at program granularity.
-            final Object  lock  = u.program();
-            // FIXME: Do we just need to honour the signature? If so then we need to generalise
-            //        body-production to be reentrant/pure and change the lookup key.
-            MethodSource  ms    = new MethodSource() {
-                @Override
-                public Body getBody(SootMethod m, String phaseName) { synchronized(lock) {
-                if (m.getDeclaringClass() != t.sootClass())
-                    throw new RuntimeException("Attempted to load a method from some other class: " +
-                            m.getDeclaringClass().getName());
-
-                if (!method2body.containsKey(m))
-                    throw new RuntimeException("Could not find body for " + m.getSignature() + " in " +
-                            m.getDeclaringClass().getName() + " during " + phaseName);
-
-                final Body b = method2body.get(m).jimpleBody();
-                // must set the method before, otherwise `setActiveBody` tries to access the previous method owning the
-                // body & panics when there isn't one
-                b.setMethod(m);
-                m.setActiveBody(b);
-                return m.getActiveBody();
-            } } };
-
-            for (SootMethod m : t.sootClass().getMethods())
-                m.setSource(ms);
-        }
-
-
-        return Option.some(u);
-    }
-
-    // parses the file(s) for the given class-name. result is cached.
-    protected Option<CompilationUnit> parseAST(File src, String className) {
         // extendj is finicky about how it loads its sources, so we need to work around some ugly behaviour:
         //  If we're attempting to load a (possibly) class, try to load the (possible) outer-class(es) first.
         //  If that succeeds, then we check to see if the class was loaded into our known-classes map.
         //  If it was, we're golden; if not, we need to try loading the file literally.
         //  We don't want to try loading the file literally first, because that seems to upset extendj.
-        { Option<CompilationUnit> optCU = cuForClass(className);
-          if (optCU.hasValue()) return optCU; }
-
         int outerClassSepIdx = className.lastIndexOf("$");
         if (outerClassSepIdx != -1) {
             // attempt to load the class as an inner class of some compilation unit
@@ -228,14 +162,67 @@ public class ExtendJInitialResolver implements IInitialResolver {
     }
 
     public Option<CompilationUnit> cuForClass(String jvmName) {
-        TypeDecl t = getProgram().lookupTypeByJvmName(jvmName);
-        if ( t.isUnknown()  ) return Option.none();
+        TypeDecl typ = getProgram().lookupTypeByJvmName(jvmName);
+        if ( typ.isUnknown()) return Option.none();
 
-        CompilationUnit u = t.compilationUnit();
+        CompilationUnit u = typ.compilationUnit();
+
         // Don't provide CUs for things which were parsed from byte-code.
         // If we try to handle it via extendj, we might get a byte-code class with constructs
         // that our current version of extendj cannot handle.
         if (!u.fromSource() ) return Option.none();
+
+        // if resolved -> the types have been fully declared
+        if ( u.isResolved   ) return Option.some(u);
+        u.isResolved = true;
+
+        u.jimpleDeclare();
+
+        HashSet<TypeDecl> types = new HashSet<>();
+        for (TypeDecl   t : u.getTypeDecls())
+            collectTypeDecl(t, types);
+
+        for (final TypeDecl t : types) {
+            final Map<SootMethod, MethodLikeDecl<?>> method2body = new HashMap<>();
+            for (BodyDecl d : t.methodsAndConstructors()) {
+                MethodLikeDecl<?> m = null;
+                if (d instanceof      MethodDecl) m = (MethodDecl     )d;
+                if (d instanceof ConstructorDecl) m = (ConstructorDecl)d;
+
+                if (m != null) method2body.put(m.sootMethod(), m);
+            }
+            if (t.needsClinit()) {
+                MethodLikeDecl<?> body = t.clinitHelper();
+                method2body.put(body.sootMethod(), body);
+            }
+
+            // HACK: FIXME: Extendj isn't yet thread-safe. Serialise at program granularity.
+            final Object  lock  = u.program();
+            // FIXME: Do we just need to honour the signature? If so then we need to generalise
+            //        body-production to be reentrant/pure and change the lookup key.
+            MethodSource  ms    = new MethodSource() {
+                @Override
+                public Body getBody(SootMethod m, String phaseName) { synchronized(lock) {
+                    if (m.getDeclaringClass() != t.sootClass())
+                        throw new RuntimeException("Attempted to load a method from some other class: " +
+                                m.getDeclaringClass().getName());
+
+                    if (!method2body.containsKey(m))
+                        throw new RuntimeException("Could not find body for " + m.getSignature() + " in " +
+                                m.getDeclaringClass().getName() + " during " + phaseName);
+
+                    final Body b = method2body.get(m).jimpleBody();
+                    // must set the method before, otherwise `setActiveBody` tries to access the previous method owning the
+                    // body & panics when there isn't one
+                    b.setMethod(m);
+                    m.setActiveBody(b);
+                    return m.getActiveBody();
+                } } };
+
+            for (SootMethod m : t.sootClass().getMethods())
+                m.setSource(ms);
+        }
+
 
         return Option.some(u);
     }
