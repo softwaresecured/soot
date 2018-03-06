@@ -243,7 +243,7 @@ public class ClassPath extends java.lang.Object {
         // check if unit's declared pkg matches `typeName`'s pkg
         // if it doesn't then fail and return the default compilation unit
         int     pkgPartIdx    = typeName.lastIndexOf('.');
-        if (pkgPartIdx != -1                        ) return u;
+        if (pkgPartIdx == -1                        ) return u;
 
         String  pkgRequested  = typeName.substring(0, pkgPartIdx);
         if (pkgRequested.equals(u.getPackageDecl()) ) return u;
