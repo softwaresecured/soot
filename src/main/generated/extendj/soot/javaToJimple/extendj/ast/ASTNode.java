@@ -1329,7 +1329,7 @@ public class ASTNode<T extends ASTNode> extends beaver.Symbol implements Cloneab
         int     column    = getColumn(srcStart);
         int     endColumn = getColumn(srcEnd);
         String  s         = sourceFile();
-        s = s != null ? s.substring(s.lastIndexOf(java.io.File.separatorChar)+1) : "Unknown";
+        s = s != null ? s : "Unknown";
     
         return new soot.tagkit.SourceLnNamePosTag(s, line, endLine, column, endColumn);
       }
